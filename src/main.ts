@@ -4,6 +4,7 @@ import {consoleLog} from '@/common/consoleLog'
 import {SSRepository} from '@/gas/spreadsheetDB'
 import {initVue} from '@/vue/initVue'
 import {GasClient} from '@/vue/gasClient'
+import {Controller} from '@/gas/controller'
 
 export default {
     common: {
@@ -12,7 +13,8 @@ export default {
     },
     gas: {
         initGas,
-        SSRepository
+        SSRepository,
+        Controller
     },
     vue: {
         initVue,

@@ -34,7 +34,7 @@ export abstract class SSRepository<E extends SSEntity> {
         if (this.sheet.getDataRange().getValues().length > 1) {
             const oldVersion = this.sheet.getRange(1, 1, 1, 1).getValue()
             const oldSheet = this.sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId))
-            const oldName = this.sheet.getName() + ' old' + oldVersion
+            const oldName = this.sheet.getName() + ' webpack' + oldVersion
             oldSheet.setName(oldName)
             this.sheet.clear()
         }

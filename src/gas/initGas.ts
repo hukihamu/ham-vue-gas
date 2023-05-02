@@ -1,7 +1,7 @@
 import {consoleLog} from '@/common/consoleLog'
 import {Config} from '@/common/config'
 import {SSRepository} from '@/gas/spreadsheetDB'
-import {Controller} from '@/@types/controller'
+import {Controller} from '@/gas/controller'
 
 export function initGas<C extends string, G extends string, V extends string>(
     htmlFileName: string,
@@ -19,16 +19,16 @@ export function initGas<C extends string, G extends string, V extends string>(
     return initGasOption
 }
 type WrapperController = (args: any) => Promise<any>
-function initController(controller: Controller<any, any>): WrapperController {
+function initController(controller: Controller<any>): WrapperController {
     return async (args: any) => {
         try {
             let returnValue
             if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
                 console.log('arg: ', args)
-                returnValue = await controller(args)
+                returnValue = await controller.run(args)
                 console.log('return: ', returnValue)
             } else {
-                returnValue = await controller(args)
+                returnValue = await controller.run(args)
             }
             return JSON.stringify(returnValue)
         } catch (e) {
@@ -38,9 +38,9 @@ function initController(controller: Controller<any, any>): WrapperController {
     }
 }
 const initGasOption: InitGasOptions = {
-    useController<K extends string>(initGlobal: (
+    useController<K extends BaseControllerType>(initGlobal: (
         global: {[key in keyof K]: WrapperController},
-        wrapperController: (controller: Controller<any, any>)=> WrapperController)=>void): InitGasOptions {
+        wrapperController: (controller: Controller<any>)=> WrapperController)=>void): InitGasOptions {
         initGlobal(global as any, initController)
         return initGasOption
     },
@@ -57,8 +57,8 @@ const initGasOption: InitGasOptions = {
 }
 
 interface InitGasOptions {
-    useController<K extends string>(initGlobal: (
+    useController<K extends { [name: string]: any }>(initGlobal: (
         global: {[key in keyof K]: WrapperController},
-        wrapperController: (controller: Controller<any, any>)=> WrapperController)=>void): InitGasOptions
+        wrapperController: (controller: Controller<any>)=> WrapperController)=>void): InitGasOptions
     useSpreadsheetDB (...repositoryList: { new (): SSRepository<any> }[]): InitGasOptions,
 }
