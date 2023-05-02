@@ -1,0 +1,38 @@
+{
+  "name": "@blowham/vue-gas",
+  "version": "0.1.0",
+  "description": "google apps script + vue.js web system template",
+  "main": "dist/bundle.js",
+  "types": "dist/bundle.d.ts",
+  "scripts": {
+    "test": "TODO",
+    "build": "TODO",
+    "watch": "TODO"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TODO.git"
+  },
+  "author": {
+    "name": "blowham"
+  },
+  "bugs": {
+    "url": "TODO"
+  },
+  "files": [
+    "dist/bundle.js",
+    "dist/bundle.d.ts"
+  ],
+  "dependencies": {
+    "@types/google-apps-script": "^1.0.62",
+
+    "vue": "^3.2.47",
+    "vue-router": "^4.1.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.4",
+
+    "rollup": "^3.21.2",
+    "@rollup/plugin-typescript": "^11.1.0"
+  }
+}
