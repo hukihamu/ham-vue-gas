@@ -1,2 +1,5 @@
 # プロジェクトの除外パス
 /node_modules/
+/.idea/
+/package-lock.json
+/dist/

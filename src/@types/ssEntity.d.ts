@@ -1,0 +1,3 @@
+interface SSEntity {
+    row: number
+}

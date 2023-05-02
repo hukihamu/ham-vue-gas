@@ -1,0 +1,1 @@
+export type Controller<C extends BaseControllerType, K extends keyof C> = (args?: C[K]['aType']) => Promise<C[K]['rType']>

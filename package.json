@@ -5,9 +5,10 @@
   "main": "dist/bundle.js",
   "types": "dist/bundle.d.ts",
   "scripts": {
-    "test": "TODO",
-    "build": "TODO",
-    "watch": "TODO"
+    "test": "echo TODO",
+    "build": "rollup -c rollup.config.mjs && npm run build-dts",
+    "watch": "rollup -c rollup.config.mjs -w",
+    "build-dts": "node bundle-dts.js && rd /q/s dist\\dts\\"
   },
   "repository": {
     "type": "git",
@@ -33,6 +34,11 @@
     "typescript": "^5.0.4",
 
     "rollup": "^3.21.2",
-    "@rollup/plugin-typescript": "^11.1.0"
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-commonjs": "^24.1.0",
+    "@rollup/plugin-babel": "^6.0.3",
+    "@babel/preset-env": "^7.21.5",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "tslib": "^2.5.0"
   }
 }
