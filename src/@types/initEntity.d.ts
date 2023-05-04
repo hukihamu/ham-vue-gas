@@ -1,1 +1,1 @@
-export type InitEntity<E extends SSEntity> = Omit<E, 'row'>
+type InitEntity<E extends SSEntity> = Omit<E, 'row'>

@@ -1,7 +1,6 @@
 import {consoleLog} from '@/common/consoleLog'
 import {Config} from '@/common/config'
 import {SSRepository} from '@/gas/spreadsheetDB'
-import {Controller} from '@/gas/controller'
 
 export function initGas<C extends string, G extends string, V extends string>(
     htmlFileName: string,
@@ -18,30 +17,30 @@ export function initGas<C extends string, G extends string, V extends string>(
     }
     return initGasOption
 }
-type WrapperController = (args: any) => Promise<any>
-function initController(controller: Controller<any>): WrapperController {
+type WrapperController<C extends BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>
+function wrapperController<C extends BaseControllerInterface, K extends keyof C>(controller: ControllerType<C>, name: K): WrapperController<C, K> {
     return async (args: any) => {
         try {
             let returnValue
             if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
                 console.log('arg: ', args)
-                returnValue = await controller.run(args)
+                returnValue = await controller[name](args)
                 console.log('return: ', returnValue)
             } else {
-                returnValue = await controller.run(args)
+                returnValue = await controller[name](args)
             }
             return JSON.stringify(returnValue)
         } catch (e) {
-            consoleLog.error('Controllerエラー:', e)
+            consoleLog.error('Controller error:', e)
             throw e
         }
     }
 }
 const initGasOption: InitGasOptions = {
-    useController<K extends BaseControllerType>(initGlobal: (
-        global: {[key in keyof K]: WrapperController},
-        wrapperController: (controller: Controller<any>)=> WrapperController)=>void): InitGasOptions {
-        initGlobal(global as any, initController)
+    useController<C extends BaseControllerInterface>(initGlobal: (
+        global: {[K in keyof C]: WrapperController<C, K>},
+        wrapperController: <C extends BaseControllerInterface, K extends keyof C>(controller: ControllerType<C>, name: K)=> WrapperController<C,K>)=>void): InitGasOptions {
+        initGlobal(global as any, wrapperController)
         return initGasOption
     },
     useSpreadsheetDB(...repositoryList): InitGasOptions {
@@ -57,8 +56,8 @@ const initGasOption: InitGasOptions = {
 }
 
 interface InitGasOptions {
-    useController<K extends { [name: string]: any }>(initGlobal: (
-        global: {[key in keyof K]: WrapperController},
-        wrapperController: (controller: Controller<any>)=> WrapperController)=>void): InitGasOptions
+    useController<C extends { [name: string]: any }>(initGlobal: (
+        global: {[K in keyof C]: WrapperController<C, K>},
+        wrapperController: <C extends BaseControllerInterface, K extends keyof C>(controller: ControllerType<C>, name: K)=> WrapperController<C,K>)=>void): InitGasOptions
     useSpreadsheetDB (...repositoryList: { new (): SSRepository<any> }[]): InitGasOptions,
 }

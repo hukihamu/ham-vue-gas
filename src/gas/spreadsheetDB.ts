@@ -1,29 +1,25 @@
-import {InitEntity} from '@/@types/initEntity'
-
 type LockType = 'user' | 'script' | 'none'
 
 export abstract class SSRepository<E extends SSEntity> {
-    private sheet: GoogleAppsScript.Spreadsheet.Sheet
+    private _sheet: GoogleAppsScript.Spreadsheet.Sheet | undefined
+    private get sheet(): GoogleAppsScript.Spreadsheet.Sheet{
+        const throwText = () => {
+            throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
+        }
+        return this._sheet ?? throwText()
+    }
     private static readonly TABLE_VERSION_LABEL = 'ver:'
     private static readonly DELETE_LABEL = 'DELETE'
     private static readonly ROW_FUNCTION = '=row()'
-    private readonly spreadsheetId: string
 
     protected abstract readonly tableVersion: number
     protected abstract readonly columnList: (keyof InitEntity<E>)[]
     protected readonly initData: InitEntity<E>[] = []
+    protected abstract readonly spreadsheetId: string
+    protected abstract readonly tableName: string
     // デフォルト: user
     lockType: LockType = 'user'
     lockWaitMSec: number = 10000
-
-    protected constructor(spreadsheetId: string, tableName: string) {
-        this.spreadsheetId = spreadsheetId
-        // シートの取得(作成)
-
-        const spreadsheet = SpreadsheetApp.openById(spreadsheetId)
-        const sheet = spreadsheet.getSheetByName(tableName)
-        this.sheet = sheet ? sheet : spreadsheet.insertSheet().setName(tableName)
-    }
 
     private checkVersionUpdated(): boolean {
         return this.sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
@@ -88,6 +84,10 @@ export abstract class SSRepository<E extends SSEntity> {
     }
 
     initTable(): void {
+        const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
+        const sheet = spreadsheet.getSheetByName(this.tableName)
+        this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName)
+
         if (this.checkVersionUpdated()) {
             this.createTable()
         }

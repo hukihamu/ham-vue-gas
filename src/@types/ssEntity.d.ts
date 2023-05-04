@@ -1,3 +1,3 @@
-interface SSEntity {
+type SSEntity = {
     row: number
 }

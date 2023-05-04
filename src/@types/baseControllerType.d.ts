@@ -1,6 +1,6 @@
-interface BaseControllerType {
+type BaseControllerInterface = {
     [name: string]: {
-        aType: unknown
-        rType: unknown
+        at: unknown
+        rt: unknown
     }
 }

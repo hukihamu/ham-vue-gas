@@ -5,30 +5,37 @@
   "main": "dist/bundle.js",
   "types": "dist/bundle.d.ts",
   "scripts": {
-    "test": "echo TODO",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c rollup.config.mjs && npm run build-dts",
     "watch": "rollup -c rollup.config.mjs -w",
     "build-dts": "node bundle-dts.js && rd /q/s dist\\dts\\"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/TODO.git"
+    "url": "https://github.com/hukihamu/vue-gas"
   },
   "author": {
     "name": "blowham"
   },
   "bugs": {
-    "url": "TODO"
+    "url": "https://github.com/hukihamu/vue-gas/issues"
+  },
+  "bin": {
+    "vue-gas": "bin/index.js"
   },
   "files": [
+    "bin/index.js",
     "dist/bundle.js",
     "dist/bundle.d.ts"
   ],
   "dependencies": {
     "@types/google-apps-script": "^1.0.62",
+    "@google/clasp": "^2.4.2",
 
     "vue": "^3.2.47",
-    "vue-router": "^4.1.6"
+    "vue-router": "^4.1.6",
+
+    "commander": "^10.0.1"
   },
   "devDependencies": {
     "typescript": "^5.0.4",

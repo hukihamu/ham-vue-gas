@@ -1,5 +1,5 @@
-export class GasClient <C extends BaseControllerType>{
-    send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['aType']){
+export class GasClient <C extends BaseControllerInterface>{
+    send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']){
         return new Promise((resolve, reject) => {
             const run = google.script.run
                 .withSuccessHandler(it => resolve(JSON.parse(it)))
