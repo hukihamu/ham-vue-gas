@@ -1,5 +1,5 @@
 {
-  "name": "@blowham/vue-gas",
+  "name": "ham-vue-gas",
   "version": "0.1.0",
   "description": "google apps script + vue.js web system template",
   "main": "dist/bundle.js",
@@ -12,16 +12,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/hukihamu/vue-gas"
+    "url": "https://github.com/hukihamu/ham-vue-gas"
   },
   "author": {
     "name": "blowham"
   },
   "bugs": {
-    "url": "https://github.com/hukihamu/vue-gas/issues"
+    "url": "https://github.com/hukihamu/ham-vue-gas/issues"
   },
   "bin": {
-    "vue-gas": "bin/index.js"
+    "ham-vue-gas": "bin/index.js"
   },
   "files": [
     "bin/index.js",

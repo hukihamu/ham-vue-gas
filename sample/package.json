@@ -1,0 +1,7 @@
+{
+  "name": "sample",
+  "version": "1.0.0",
+  "dependencies": {
+    "ham-vue-gas": "git+https://github.com/hukihamu/ham-vue-gas.git"
+  }
+}
