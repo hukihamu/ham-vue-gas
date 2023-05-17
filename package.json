@@ -2,8 +2,8 @@
   "name": "ham-vue-gas",
   "version": "0.1.2",
   "description": "google apps script + vue.js web system template",
-  "main": "dist/bundle.js",
-  "types": "dist/bundle.d.ts",
+  "main": "./dist/bundle.js",
+  "types": "./dist/bundle.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c rollup.config.mjs && npm run build-dts",
@@ -24,15 +24,12 @@
     "node": ">=16.0.0"
   },
   "bin": {
-    "ham-vue-gas": "node bin/index.js"
+    "ham-vue-gas": "./bin/index.js"
   },
-  "bundleDependencies": false,
-  "deprecated": false,
-  "exports": "./bin/index.js",
   "files": [
-    "bin/index.js",
-    "dist/bundle.js",
-    "dist/bundle.d.ts"
+    "./bin/index.js",
+    "./dist/bundle.js",
+    "./dist/bundle.d.ts"
   ],
   "dependencies": {
     "@types/google-apps-script": "^1.0.62",
@@ -55,6 +52,7 @@
     "@rollup/plugin-babel": "^6.0.3",
     "@babel/preset-env": "^7.21.5",
     "@rollup/plugin-typescript": "^11.1.0",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.0",
+    "@babel/core": "^7.21.8"
   }
 }
