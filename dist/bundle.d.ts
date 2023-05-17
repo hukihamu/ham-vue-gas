@@ -163,6 +163,9 @@ type InitEntity<E extends SSEntity> = Omit<E, 'row'>
 type SSEntity = {
     row: number
 }
+import {RouteRecordRaw} from 'vue-router'
+import {App} from 'vue'
+
 declare module '*.vue' {
   import type { DefineComponent } from 'vue'
   const component: DefineComponent<{}, {}, any>

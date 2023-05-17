@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+
 import { program } from 'commander'
 import loudRejection from 'loud-rejection'
 import { dirname } from 'path'

@@ -24,10 +24,10 @@
     "node": ">=16.0.0"
   },
   "bin": {
-    "ham-vue-gas": "./bin/index.js"
+    "ham-vue-gas": "bin/index.mjs"
   },
   "files": [
-    "./bin/index.js",
+    "bin/index.mjs",
     "./dist/bundle.js",
     "./dist/bundle.d.ts"
   ],
