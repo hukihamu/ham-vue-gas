@@ -1,9 +1,9 @@
 {
   "name": "ham-vue-gas",
-  "version": "0.1.2",
+  "version": "0.1.0",
   "description": "google apps script + vue.js web system template",
-  "main": "./dist/bundle.js",
-  "types": "./dist/bundle.d.ts",
+  "main": "dist/bundle.js",
+  "types": "dist/bundle.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "rollup -c rollup.config.mjs && npm run build-dts",
@@ -27,11 +27,13 @@
     "ham-vue-gas": "bin/index.mjs"
   },
   "files": [
-    "bin/index.mjs",
-    "./dist/bundle.js",
-    "./dist/bundle.d.ts"
+    "bin",
+    "dist/bundle.js",
+    "dist/bundle.d.ts"
   ],
   "dependencies": {
+    "typescript": "^5.0.4",
+
     "@types/google-apps-script": "^1.0.62",
     "@google/clasp": "^2.4.2",
 
@@ -61,7 +63,6 @@
     "css-minimizer-webpack-plugin": "^5.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.0.4",
 
     "rollup": "^3.21.2",
     "@rollup/plugin-node-resolve": "^15.0.2",

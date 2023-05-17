@@ -3,7 +3,7 @@ import { createApp, App , defineComponent} from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory, Router } from 'vue-router'
 
 let router: Router
-export function initVue(routes: RouteRecordRaw[], mountName: string, useApp: (app: App<Element>) => App<Element> = (app) => app) {
+export function initVue(routes: RouteRecordRaw[], mountContainer: string, useApp: (app: App<Element>) => App<Element> = (app) => app) {
     router = createRouter({
         history: createWebHistory(),
         routes,
@@ -12,7 +12,7 @@ export function initVue(routes: RouteRecordRaw[], mountName: string, useApp: (ap
         const content = document.getElementById('vue-config')?.textContent ?? ''
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
-    useApp(createApp(app).use(router)).mount(mountName)
+    useApp(createApp(app).use(router)).mount(mountContainer)
 }
 
 const app = defineComponent({

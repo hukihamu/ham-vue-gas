@@ -4,7 +4,7 @@
 - [ ] gas側のwebpackも
 - [ ] binが使えるように
 
-
+- npm-watchを使ってもらう
 ```json:.clasp.json
 {
   "scriptId": "TODO",
