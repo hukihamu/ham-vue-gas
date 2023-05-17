@@ -6,7 +6,7 @@ import path, {dirname} from 'path'
 import {readPackageUpSync} from 'read-pkg-up'
 import {fileURLToPath} from 'url'
 import ora from 'ora'
-import {spawn} from 'child_process'
+import {exec} from 'child_process'
 import fs from 'fs'
 
 const __dirname = dirname(fileURLToPath(import.meta.url)) // /bin
@@ -55,15 +55,17 @@ program.command('build')
       const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
       const { CleanWebpackPlugin } = require('clean-webpack-plugin')
       const { VuetifyPlugin } = require('webpack-plugin-vuetify')
-      module.exports = {mode: 'production',entry: {vue: '${v}'},output: {filename: 'vue.js',path: Path.join(__dirname, 'dist')},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt']})]}`
+      module.exports = {mode: 'production',entry: {vue: '${v}'},output: {filename: 'vue.js',path: Path.join(__dirname, 'dist')},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt']})]}`
     // ファイル作成
-    const vueConfigPath = path.join(__dirname, 'temp/webpack.config.vue.js')
-    const gasConfigPath = path.join(__dirname, 'temp/webpack.config.gas.js')
+    const tempDirPath = path.join(__dirname, 'temp')
+    if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
+    const vueConfigPath = path.join(tempDirPath, 'webpack.config.vue.js')
+    const gasConfigPath = path.join(tempDirPath, 'webpack.config.gas.js')
     fs.writeFileSync(vueConfigPath, vueWebpackConfig)
     fs.writeFileSync(gasConfigPath, gasWebpackConfig)
     // webpack 実行
-    spawn('npx', ['webpack', '--config', `"${vueConfigPath}"`])
-    spawn('npx', ['webpack', '--config', `"${gasConfigPath}"`])
+    exec(`npx webpack --config ${vueConfigPath}`)
+    exec(`npx webpack --config ${gasConfigPath}`)
   })
 
 const [_bin, _sourcePath, ...args] = process.argv
