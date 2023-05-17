@@ -24,7 +24,7 @@
     "node": ">=16.0.0"
   },
   "bin": {
-    "ham-vue-gas": "bin/index.js"
+    "ham-vue-gas": "node bin/index.js"
   },
   "bundleDependencies": false,
   "deprecated": false,
