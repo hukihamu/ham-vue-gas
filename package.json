@@ -26,6 +26,9 @@
   "bin": {
     "ham-vue-gas": "bin/index.js"
   },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "exports": "./bin/index.js",
   "files": [
     "bin/index.js",
     "dist/bundle.js",
