@@ -3,8 +3,8 @@ import {Config} from '@/common/config'
 import {SSRepository} from '@/gas/spreadsheetDB'
 
 export function initGas<C extends string, G extends string, V extends string>(
-    htmlFileName: string,
     config: Config<C, G, V>,
+    htmlFileName: string = 'index',
     editHtmlOutput: (output:  GoogleAppsScript.HTML.HtmlOutput) =>  GoogleAppsScript.HTML.HtmlOutput
         = (output) => output): InitGasOptions{
     consoleLog.debug = (label: string, data: any)=> {

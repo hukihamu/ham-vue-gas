@@ -34,8 +34,8 @@ program.command('build')
     const a = options.appsscript ?? `${__dirname}/appsscript.json`
     const h = options.html ?? `${__dirname}/index.html`
     const t = options.tsconfig ?? './tsconfig.json'
-    const g = options.gas ?? 'src/gas/index.ts'
-    const v = options.vue ?? 'src/vue/index.ts'
+    const g = options.gas ?? './src/gas/index.ts'
+    const v = options.vue ?? './src/vue/index.ts'
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = `
       const Path = require('path')
