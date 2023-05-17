@@ -25,8 +25,8 @@ const stopSpinner = () => {
 
 program.command('build')
   .description('build vue-gas')
-  .option('-a, --appsscript <file>', `appsscript.json file. default: ${__dirname}/appsscript.json`)
-  .option('-h, --html <file>', `html file. default: ${__dirname}/index.html`)
+  .option('-a, --appsscript <file>', `appsscript.json file. default: ${path.join(__dirname, 'appsscript.json')}`)
+  .option('-h, --html <file>', `html file. default: ${path.join(__dirname, 'index.html')}`)
   .option('-t, --tsconfig <file>', 'tsconfig.json file. default: ./tsconfig.json')
   .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts')
   .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts')
