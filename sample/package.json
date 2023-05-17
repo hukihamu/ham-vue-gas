@@ -5,6 +5,6 @@
     "ham-vue-gas": "git+https://github.com/hukihamu/ham-vue-gas.git"
   },
   "scripts":  {
-    "build": "ham-vue-gas build"
+    "sample-build": "ham-vue-gas build"
   }
 }
