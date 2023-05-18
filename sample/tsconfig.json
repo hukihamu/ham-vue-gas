@@ -2,9 +2,22 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es5",
-    "sourceMap": true
+    "moduleResolution": "Node"
   },
   "exclude": [
     "node_modules"
+  ],
+  "lib": [
+    "dom",
+    "esnext"
+  ],
+  "baseUrl": ".",
+  "paths": {
+    "@c/*": ["src/common/*"],
+    "@g/*": ["src/gas/*"],
+    "@v/*": ["src/vue/*"],
+  },
+  "types": [
+    "google-apps-script"
   ]
 }

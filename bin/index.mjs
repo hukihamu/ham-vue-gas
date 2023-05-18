@@ -66,28 +66,19 @@ program.command('build')
     fs.writeFileSync(vueConfigPath, vueWebpackConfig)
     fs.writeFileSync(gasConfigPath, gasWebpackConfig)
     // webpack 実行
-    exec(`npx webpack --config ${vueConfigPath}`, (error, stdout, stderr) => {
-      if(stdout){
+    const execResult = (error, stdout, stderr) => {
+      if (stdout) {
         console.log('stdout: ', stdout);
       }
-      if(stderr){
-        console.log('stderr: ', stderr);
+      if (stderr) {
+        console.warn('stderr: ', stderr);
       }
       if (error !== null) {
-        console.log('Exec error: ', error);
+        console.error('Exec error: ', error);
       }
-    })
-    exec(`npx webpack --config ${gasConfigPath}`, (error, stdout, stderr) => {
-      if(stdout){
-        console.log('stdout: ', stdout);
-      }
-      if(stderr){
-        console.log('stderr: ', stderr);
-      }
-      if (error !== null) {
-        console.log('Exec error: ', error);
-      }
-    })
+    }
+    exec(`npx webpack --config ${vueConfigPath}`, execResult)
+    exec(`npx webpack --config ${gasConfigPath}`, execResult)
   })
 
 const [_bin, _sourcePath, ...args] = process.argv

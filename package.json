@@ -47,11 +47,14 @@
 
     "webpack": "^5.82.1",
     "webpack-cli": "^5.1.1",
-    "sass": "^1.62.1",
+    "ts-loader": "^9.4.2",
 
     "gas-webpack-plugin": "^2.5.0",
     "tsconfig-paths": "^4.2.0",
 
+    "sass": "^1.62.1",
+    "sass-loader": "^13.2.2",
+    "css-loader": "^6.7.3",
     "vue-loader":  "^17.1.1",
     "clean-webpack-plugin":  "^4.0.0",
     "webpack-plugin-vuetify":  "^2.0.1",
