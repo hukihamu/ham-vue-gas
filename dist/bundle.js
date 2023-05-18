@@ -11962,10 +11962,11 @@
     return [leavingRecords, updatingRecords, enteringRecords];
   }
 
-  function initVue(routes, useApp, mountContainer) {
-      if (useApp === void 0) { useApp = function (app) { return app; }; }
+  var router;
+  function initVue(routes, useFunc, mountContainer) {
+      if (useFunc === void 0) { useFunc = function (app) { return app; }; }
       if (mountContainer === void 0) { mountContainer = '#app'; }
-      createRouter({
+      router = createRouter({
           history: createWebHistory(),
           routes: routes,
       });
@@ -11975,15 +11976,25 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
-      useApp(createApp(app)).mount(mountContainer);
+      var vueApp = createApp({
+          name: 'App',
+          components: { RouterView: RouterView },
+          setup: function () {
+              router.afterEach(function (route) {
+                  window.google.script.history.replace(undefined, route.query, route.path);
+              });
+              window.google.script.url.getLocation(function (location) {
+                  var path = location.hash ? location.hash : '/';
+                  var query = location.parameter;
+                  router.replace({ path: path, query: query });
+              });
+          },
+          template: '<RouterView></RouterView>'
+      });
+      vueApp.use(router);
+      useFunc(vueApp);
+      vueApp.mount(mountContainer);
   }
-  var app = defineComponent({
-      name: 'App',
-      setup: function () {
-          console.log('app');
-      },
-      template: '<h2>app</h2>'
-  });
 
   var GasClient = (function () {
       function GasClient() {

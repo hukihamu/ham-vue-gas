@@ -3,6 +3,7 @@
 - [ ] bundleの分類わけ
 - バグ修正
   - [ ] vue routerが機能しない問題
+    - マウントはうまく言っており、setupまで進んでいるが、templateだけが反映されない
 
 - npm-watchを使ってもらう
 ```json:.clasp.json

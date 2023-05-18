@@ -6,6 +6,6 @@
   },
   "scripts":  {
     "sample-build": "ham-vue-gas build && clasp push",
-    "clasp-push": ""
+    "clasp-push": "clasp push"
   }
 }
