@@ -2,22 +2,22 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es5",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
+    "baseUrl": ".",
+    "paths": {
+      "@c/*": ["src/common/*"],
+      "@g/*": ["src/gas/*"],
+      "@v/*": ["src/vue/*"],
+    },
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "types": [
+      "google-apps-script"
+    ]
   },
   "exclude": [
     "node_modules"
   ],
-  "lib": [
-    "dom",
-    "esnext"
-  ],
-  "baseUrl": ".",
-  "paths": {
-    "@c/*": ["src/common/*"],
-    "@g/*": ["src/gas/*"],
-    "@v/*": ["src/vue/*"],
-  },
-  "types": [
-    "google-apps-script"
-  ]
 }
