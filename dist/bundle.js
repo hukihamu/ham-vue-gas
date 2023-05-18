@@ -723,36 +723,38 @@
           return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
       };
       Config.prototype.getAllVueConfig = function () {
-          var _a, _b;
+          var _a, _b, _c;
           var config = {};
-          for (var _i = 0, _c = this.commonConfigKeys; _i < _c.length; _i++) {
-              var key = _c[_i];
-              if (key === '')
-                  continue;
-              config[key] = (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
-          }
-          for (var _d = 0, _e = this.vueConfigKeys; _d < _e.length; _d++) {
-              var key = _e[_d];
+          config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
+          for (var _i = 0, _d = this.commonConfigKeys; _i < _d.length; _i++) {
+              var key = _d[_i];
               if (key === '')
                   continue;
               config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
+          }
+          for (var _e = 0, _f = this.vueConfigKeys; _e < _f.length; _e++) {
+              var key = _f[_e];
+              if (key === '')
+                  continue;
+              config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
           }
           return config;
       };
       Config.prototype.getAllGasConfig = function () {
-          var _a, _b;
+          var _a, _b, _c;
           var config = {};
-          for (var _i = 0, _c = this.commonConfigKeys; _i < _c.length; _i++) {
-              var key = _c[_i];
-              if (key === '')
-                  continue;
-              config[key] = (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
-          }
-          for (var _d = 0, _e = this.gasConfigKeys; _d < _e.length; _d++) {
-              var key = _e[_d];
+          config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
+          for (var _i = 0, _d = this.commonConfigKeys; _i < _d.length; _i++) {
+              var key = _d[_i];
               if (key === '')
                   continue;
               config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
+          }
+          for (var _e = 0, _f = this.gasConfigKeys; _e < _f.length; _e++) {
+              var key = _f[_e];
+              if (key === '')
+                  continue;
+              config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
           }
           return config;
       };
@@ -11974,13 +11976,15 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
-      var app = defineComponent({
-          name: 'App',
-          setup: function () {
-          },
-          template: "<div><router-view></router-view></div>",
+      useApp(createApp({}).use(router)).mount(mountContainer);
+      router.afterEach(function (route) {
+          window.google.script.history.replace(undefined, route.query, route.path);
       });
-      useApp(createApp(app).use(router)).mount(mountContainer);
+      window.google.script.url.getLocation(function (location) {
+          var path = location.hash ? location.hash : '/';
+          var query = location.parameter;
+          router.replace({ path: path, query: query });
+      });
   }
 
   var GasClient = (function () {

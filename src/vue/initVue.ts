@@ -1,5 +1,5 @@
 import {consoleLog} from '@/common/consoleLog'
-import { createApp, App , defineComponent} from 'vue'
+import { createApp, App } from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory, Router } from 'vue-router'
 
 export let router: Router
@@ -12,20 +12,17 @@ export function initVue(routes: RouteRecordRaw[], useApp: (app: App<Element>) =>
         const content = document.getElementById('vue-config')?.textContent ?? ''
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
-    // router.afterEach(route => {
-    //     window.google.script.history.replace(undefined, route.query, route.path)
-    // })
-    // window.google.script.url.getLocation(location => {
-    //     const path = location.hash ? location.hash : '/'
-    //     const query = location.parameter
-    //     router.replace({ path, query })
-    // })
-    const app = defineComponent({
-        name: 'App',
-        setup(){
 
-        },
-        template: `<div><router-view></router-view></div>`,
+
+    useApp(createApp({}).use(router)).mount(mountContainer)
+
+    router.afterEach(route => {
+        window.google.script.history.replace(undefined, route.query, route.path)
     })
-    useApp(createApp(app).use(router)).mount(mountContainer)
+    window.google.script.url.getLocation(location => {
+        const path = location.hash ? location.hash : '/'
+        const query = location.parameter
+        router.replace({ path, query })
+    })
+
 }

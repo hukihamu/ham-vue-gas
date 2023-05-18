@@ -111,7 +111,6 @@ type ControllerType<C extends BaseControllerInterface> = {
 
 
 
-// declare let global: { [name: string]: unknown }
 declare namespace google {
   namespace script {
     interface Run {
