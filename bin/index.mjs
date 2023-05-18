@@ -25,17 +25,20 @@ const stopSpinner = () => {
 
 program.command('build')
   .description('build vue-gas')
-  .option('-a, --appsscript <file>', `appsscript.json file. default: ${path.join(__dirname, 'appsscript.json')}`)
-  .option('-h, --html <file>', `html file. default: ${path.join(__dirname, 'index.html')}`)
+  .option('-a, --appsscript <file>', `appsscript.json file. default: ./node_modules/ham-vue-gas/bin/appsscript.json`)
+  .option('-h, --html <file>', `html file. default: ./node_modules/ham-vue-gas/bin/index.html`)
   .option('-t, --tsconfig <file>', 'tsconfig.json file. default: ./tsconfig.json')
   .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts')
   .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts')
   .action((_, options) => {
-    const a = options.appsscript ?? path.join(__dirname, 'appsscript.json')
-    const h = options.html ?? path.join(__dirname, 'index.html')
-    const t = options.tsconfig ?? './tsconfig.json'
-    const g = options.gas ?? './src/gas/index.ts'
-    const v = options.vue ?? './src/vue/index.ts'
+    const rootPath = path.join(__dirname, '../../../')
+    console.log(rootPath)
+
+    const a = path.join(rootPath, options.appsscript ?? './node_modules/ham-vue-gas/bin/appsscript.json')
+    const h = path.join(rootPath, options.html ?? './node_modules/ham-vue-gas/bin/index.html')
+    const t = path.join(rootPath, options.tsconfig ?? './tsconfig.json')
+    const g = path.join(rootPath, options.gas ?? './src/gas/index.ts')
+    const v = path.join(rootPath, options.vue ?? './src/vue/index.ts')
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = `
       const Path = require('path')
@@ -64,8 +67,8 @@ program.command('build')
     fs.writeFileSync(vueConfigPath, vueWebpackConfig)
     fs.writeFileSync(gasConfigPath, gasWebpackConfig)
     // webpack 実行
-    exec(`npx webpack --config ${vueConfigPath}`)
-    exec(`npx webpack --config ${gasConfigPath}`)
+    // exec(`npx webpack --config ${vueConfigPath}`)
+    // exec(`npx webpack --config ${gasConfigPath}`)
   })
 
 const [_bin, _sourcePath, ...args] = process.argv
