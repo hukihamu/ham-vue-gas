@@ -11962,11 +11962,10 @@
     return [leavingRecords, updatingRecords, enteringRecords];
   }
 
-  var router;
   function initVue(routes, useApp, mountContainer) {
       if (useApp === void 0) { useApp = function (app) { return app; }; }
       if (mountContainer === void 0) { mountContainer = '#app'; }
-      router = createRouter({
+      createRouter({
           history: createWebHistory(),
           routes: routes,
       });
@@ -11976,16 +11975,15 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
-      useApp(createApp({}).use(router)).mount(mountContainer);
-      router.afterEach(function (route) {
-          window.google.script.history.replace(undefined, route.query, route.path);
-      });
-      window.google.script.url.getLocation(function (location) {
-          var path = location.hash ? location.hash : '/';
-          var query = location.parameter;
-          router.replace({ path: path, query: query });
-      });
+      useApp(createApp(app)).mount(mountContainer);
   }
+  var app = defineComponent({
+      name: 'App',
+      setup: function () {
+          console.log('app');
+      },
+      template: '<h2>app</h2>'
+  });
 
   var GasClient = (function () {
       function GasClient() {
