@@ -7,4 +7,4 @@ initVue([
         path: '/',
         component: Index
     }
-], `#app`)
+])

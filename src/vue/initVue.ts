@@ -12,20 +12,18 @@ export function initVue(routes: RouteRecordRaw[], useApp: (app: App<Element>) =>
         const content = document.getElementById('vue-config')?.textContent ?? ''
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
+    const app = defineComponent({
+        template: `<div><router-view></router-view></div>`,
+        setup(){
+            router.afterEach(route => {
+                window.google.script.history.replace(undefined, route.query, route.path)
+            })
+            window.google.script.url.getLocation(location => {
+                const path = location.hash ? location.hash : '/'
+                const query = location.parameter
+                router.replace({ path, query })
+            })
+        }
+    })
     useApp(createApp(app).use(router)).mount(mountContainer)
 }
-
-const app = defineComponent({
-    name: 'App',
-    template: `<router-view />`,
-    setup(){
-        router.afterEach(route => {
-            window.google.script.history.replace(undefined, route.query, route.path)
-        })
-        window.google.script.url.getLocation(location => {
-            const path = location.hash ? location.hash : '/'
-            const query = location.parameter
-            router.replace({ path, query })
-        })
-    }
-})

@@ -11974,22 +11974,21 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
+      var app = defineComponent({
+          template: "<div><router-view></router-view></div>",
+          setup: function () {
+              router.afterEach(function (route) {
+                  window.google.script.history.replace(undefined, route.query, route.path);
+              });
+              window.google.script.url.getLocation(function (location) {
+                  var path = location.hash ? location.hash : '/';
+                  var query = location.parameter;
+                  router.replace({ path: path, query: query });
+              });
+          }
+      });
       useApp(createApp(app).use(router)).mount(mountContainer);
   }
-  var app = defineComponent({
-      name: 'App',
-      template: "<router-view />",
-      setup: function () {
-          router.afterEach(function (route) {
-              window.google.script.history.replace(undefined, route.query, route.path);
-          });
-          window.google.script.url.getLocation(function (location) {
-              var path = location.hash ? location.hash : '/';
-              var query = location.parameter;
-              router.replace({ path: path, query: query });
-          });
-      }
-  });
 
   var GasClient = (function () {
       function GasClient() {

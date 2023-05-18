@@ -31,7 +31,7 @@ program.command('build')
   .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts')
   .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts')
   .option('-o, --output <directory>', 'build file output directory. default: ./dist')
-  .option('-w, --watch <boolean>', 'build watch')
+  .option('-w, --watch', 'build watch')
   .action((_, options) => {
     const rootPath = path.join(__dirname, '../../../')
 
