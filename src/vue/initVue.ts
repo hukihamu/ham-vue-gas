@@ -13,7 +13,8 @@ export function initVue(routes: RouteRecordRaw[], useApp: (app: App<Element>) =>
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
     const app = defineComponent({
-        template: `<div><router-view></router-view></div>`,
+        // <router-view></router-view>
+        name: 'App',
         setup(){
             router.afterEach(route => {
                 window.google.script.history.replace(undefined, route.query, route.path)
@@ -23,7 +24,9 @@ export function initVue(routes: RouteRecordRaw[], useApp: (app: App<Element>) =>
                 const query = location.parameter
                 router.replace({ path, query })
             })
-        }
+            return { 'router-view': '<router-view />'}
+        },
+        template: `<div>appマウント</div>`,
     })
     useApp(createApp(app).use(router)).mount(mountContainer)
 }

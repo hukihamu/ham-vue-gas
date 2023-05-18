@@ -11975,7 +11975,8 @@
               console.log(label, data);
       };
       var app = defineComponent({
-          template: "<div><router-view></router-view></div>",
+          name: 'App',
+          template: "<div>app\u30DE\u30A6\u30F3\u30C8</div>",
           setup: function () {
               router.afterEach(function (route) {
                   window.google.script.history.replace(undefined, route.query, route.path);
@@ -11985,6 +11986,7 @@
                   var query = location.parameter;
                   router.replace({ path: path, query: query });
               });
+              return { 'router-view': '<router-view />' };
           }
       });
       useApp(createApp(app).use(router)).mount(mountContainer);
