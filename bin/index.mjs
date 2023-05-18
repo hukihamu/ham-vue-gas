@@ -32,13 +32,12 @@ program.command('build')
   .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts')
   .action((_, options) => {
     const rootPath = path.join(__dirname, '../../../')
-    console.log(rootPath)
 
-    const a = path.join(rootPath, options.appsscript ?? './node_modules/ham-vue-gas/bin/appsscript.json')
-    const h = path.join(rootPath, options.html ?? './node_modules/ham-vue-gas/bin/index.html')
-    const t = path.join(rootPath, options.tsconfig ?? './tsconfig.json')
-    const g = path.join(rootPath, options.gas ?? './src/gas/index.ts')
-    const v = path.join(rootPath, options.vue ?? './src/vue/index.ts')
+    const a = path.join(rootPath, options.appsscript ?? './node_modules/ham-vue-gas/bin/appsscript.json').replaceAll('\\', '\\\\')
+    const h = path.join(rootPath, options.html ?? './node_modules/ham-vue-gas/bin/index.html').replaceAll('\\', '\\\\')
+    const t = path.join(rootPath, options.tsconfig ?? './tsconfig.json').replaceAll('\\', '\\\\')
+    const g = path.join(rootPath, options.gas ?? './src/gas/index.ts').replaceAll('\\', '\\\\')
+    const v = path.join(rootPath, options.vue ?? './src/vue/index.ts').replaceAll('\\', '\\\\')
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = `
       const Path = require('path')
@@ -67,8 +66,28 @@ program.command('build')
     fs.writeFileSync(vueConfigPath, vueWebpackConfig)
     fs.writeFileSync(gasConfigPath, gasWebpackConfig)
     // webpack 実行
-    // exec(`npx webpack --config ${vueConfigPath}`)
-    // exec(`npx webpack --config ${gasConfigPath}`)
+    exec(`npx webpack --config ${vueConfigPath}`, (error, stdout, stderr) => {
+      if(stdout){
+        console.log('stdout: ', stdout);
+      }
+      if(stderr){
+        console.log('stderr: ', stderr);
+      }
+      if (error !== null) {
+        console.log('Exec error: ', error);
+      }
+    })
+    exec(`npx webpack --config ${gasConfigPath}`, (error, stdout, stderr) => {
+      if(stdout){
+        console.log('stdout: ', stdout);
+      }
+      if(stderr){
+        console.log('stderr: ', stderr);
+      }
+      if (error !== null) {
+        console.log('Exec error: ', error);
+      }
+    })
   })
 
 const [_bin, _sourcePath, ...args] = process.argv
