@@ -638,7 +638,8 @@
       },
   };
 
-  function initGas(htmlFileName, config, editHtmlOutput) {
+  function initGas(config, htmlFileName, editHtmlOutput) {
+      if (htmlFileName === void 0) { htmlFileName = 'index'; }
       if (editHtmlOutput === void 0) { editHtmlOutput = function (output) { return output; }; }
       consoleLog.debug = function (label, data) {
           if (config.getGasConfig('debug') === 'true')
@@ -11960,8 +11961,9 @@
   }
 
   var router;
-  function initVue(routes, mountName, useApp) {
+  function initVue(routes, useApp, mountContainer) {
       if (useApp === void 0) { useApp = function (app) { return app; }; }
+      if (mountContainer === void 0) { mountContainer = '#app'; }
       router = createRouter({
           history: createWebHistory(),
           routes: routes,
@@ -11972,7 +11974,7 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
-      useApp(createApp(app).use(router)).mount(mountName);
+      useApp(createApp(app).use(router)).mount(mountContainer);
   }
   var app = defineComponent({
       name: 'App',

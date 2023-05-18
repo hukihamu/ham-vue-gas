@@ -22,7 +22,7 @@ processDir("./src/@types/");
 if (output.length) {
   fs.writeFileSync("./dist/bundle.d.ts",output.join("\n")
       .replace(/export (default|\{).+;/g,"")
-      .replace(/import .+?;/g,"")
+      .replace(/import .+? '@.+?;/g,"")
       .replace(/\/\/# sourceMappingURL=.+\.d\.ts\.map/g,"")
     // + "\nexport default VueGas;"
   );

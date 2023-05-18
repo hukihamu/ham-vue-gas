@@ -9,8 +9,8 @@ export function initGas<C extends string, G extends string, V extends string>(
         = (output) => output): InitGasOptions{
     consoleLog.debug = (label: string, data: any)=> {
         if (config.getGasConfig('debug') === 'true') console.log(label, data)
-    }
-    global.doGet = () => {
+    };
+    (global as any).doGet = () => {
         const gasHtml = HtmlService.createHtmlOutputFromFile(htmlFileName)
         gasHtml.setContent(gasHtml.getContent().replace('<body>', `<body><script type='application/json' id="vue-config">${JSON.stringify(config.getAllVueConfig())}</script>`))
         return editHtmlOutput(gasHtml)

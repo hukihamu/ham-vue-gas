@@ -1,1 +1,1 @@
-declare let global: { [name: string]: unknown }
+// declare let global: { [name: string]: unknown }

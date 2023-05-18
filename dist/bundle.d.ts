@@ -25,7 +25,7 @@ export declare const consoleLog: {
 /// <reference types="google-apps-script" />
 
 
-export declare function initGas<C extends string, G extends string, V extends string>(htmlFileName: string, config: Config<C, G, V>, editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput): InitGasOptions;
+export declare function initGas<C extends string, G extends string, V extends string>(config: Config<C, G, V>, htmlFileName?: string, editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput): InitGasOptions;
 type WrapperController<C extends BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
 interface InitGasOptions {
     useController<C extends {
@@ -92,9 +92,10 @@ export declare class GasClient<C extends BaseControllerInterface> {
     send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<unknown>;
 }
 
-
-
-export declare function initVue(routes: RouteRecordRaw[], mountName: string, useApp?: (app: App<Element>) => App<Element>): void;
+import { App } from 'vue';
+import { RouteRecordRaw, Router } from 'vue-router';
+export declare let router: Router;
+export declare function initVue(routes: RouteRecordRaw[], useApp?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
 
 type BaseControllerInterface = {
     [name: string]: {
@@ -110,7 +111,7 @@ type ControllerType<C extends BaseControllerInterface> = {
 
 
 
-declare let global: { [name: string]: unknown }
+// declare let global: { [name: string]: unknown }
 declare namespace google {
   namespace script {
     interface Run {
@@ -162,12 +163,4 @@ declare namespace google {
 type InitEntity<E extends SSEntity> = Omit<E, 'row'>
 type SSEntity = {
     row: number
-}
-import {RouteRecordRaw} from 'vue-router'
-import {App} from 'vue'
-
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue'
-  const component: DefineComponent<{}, {}, any>
-  export default component
 }

@@ -2,7 +2,7 @@ import {consoleLog} from '@/common/consoleLog'
 import { createApp, App , defineComponent} from 'vue'
 import { RouteRecordRaw, createRouter, createWebHistory, Router } from 'vue-router'
 
-let router: Router
+export let router: Router
 export function initVue(routes: RouteRecordRaw[], useApp: (app: App<Element>) => App<Element> = (app) => app, mountContainer: string = '#app') {
     router = createRouter({
         history: createWebHistory(),

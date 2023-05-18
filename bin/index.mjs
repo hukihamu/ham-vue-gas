@@ -31,6 +31,7 @@ program.command('build')
   .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts')
   .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts')
   .option('-o, --output <directory>', 'build file output directory. default: ./dist')
+  .option('-w, --watch <boolean>', 'build watch')
   .action((_, options) => {
     const rootPath = path.join(__dirname, '../../../')
 
@@ -40,6 +41,14 @@ program.command('build')
     const g = path.join(rootPath, options.gas ?? './src/gas/index.ts').replaceAll('\\', '\\\\')
     const v = path.join(rootPath, options.vue ?? './src/vue/index.ts').replaceAll('\\', '\\\\')
     const o = path.join(rootPath, options.output ?? './dist').replaceAll('\\', '\\\\')
+    const w = options.watch ?? false
+    // 設定値存在確認
+    if (!fs.existsSync(a)) throw `nou found appsscript.json. path:${a}`
+    if (!fs.existsSync(h)) throw `nou found html. path:${h}`
+    if (!fs.existsSync(t)) throw `nou found tsconfig.json. path:${t}`
+    if (!fs.existsSync(g)) throw `nou found gas main file. path:${g}`
+    if (!fs.existsSync(v)) throw `nou found vue main file. path:${v}`
+
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = `
       const Path = require('path')
@@ -79,8 +88,8 @@ program.command('build')
         console.error('Exec error: ', error);
       }
     }
-    exec(`npx webpack --config ${vueConfigPath}`, execResult)
-    exec(`npx webpack --config ${gasConfigPath}`, execResult)
+    exec(`npx webpack --config ${vueConfigPath} ${w ? '-w': ''}`, execResult)
+    exec(`npx webpack --config ${gasConfigPath} ${w ? '-w': ''}`, execResult)
   })
 
 const [_bin, _sourcePath, ...args] = process.argv

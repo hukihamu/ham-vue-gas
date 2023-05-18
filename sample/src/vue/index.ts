@@ -1,4 +1,10 @@
 import {initVue} from 'ham-vue-gas'
+import Index from '@v/layout/Index.vue'
 
 
-initVue([], `#app`)
+initVue([
+    {
+        path: '/',
+        component: Index
+    }
+], `#app`)
