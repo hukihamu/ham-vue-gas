@@ -85,6 +85,7 @@ declare const _default: {
     SSRepository: typeof SSRepository;
     initVue: typeof initVue;
     GasClient: typeof GasClient;
+    initRouter: typeof initRouter;
 };
 
 
@@ -92,9 +93,10 @@ export declare class GasClient<C extends BaseControllerInterface> {
     send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<unknown>;
 }
 
-import { App } from 'vue';
+import { App, Component } from 'vue';
 import { RouteRecordRaw } from 'vue-router';
-export declare function initVue(routes: RouteRecordRaw[], useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
+export declare function initVue(routes: RouteRecordRaw[], app: Component, useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
+export declare function initRouter(): void;
 
 type BaseControllerInterface = {
     [name: string]: {

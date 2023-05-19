@@ -11970,7 +11970,7 @@
     return inject(routerKey);
   }
 
-  function initVue(routes, useFunc, mountContainer) {
+  function initVue(routes, app, useFunc, mountContainer) {
       if (useFunc === void 0) { useFunc = function (app) { return app; }; }
       if (mountContainer === void 0) { mountContainer = '#root'; }
       var router = createRouter({
@@ -11983,27 +11983,21 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
-      var vueApp = createApp(createRoot());
+      var vueApp = createApp(app);
       vueApp.use(router);
       useFunc(vueApp);
       vueApp.mount(mountContainer);
   }
-  function createRoot() {
-      return {
-          name: "Root",
-          setup: function () {
-              var router = useRouter();
-              router.afterEach(function (route) {
-                  window.google.script.history.replace(undefined, route.query, route.path);
-              });
-              window.google.script.url.getLocation(function (location) {
-                  var path = location.hash ? location.hash : '/';
-                  var query = location.parameter;
-                  router.replace({ path: path, query: query });
-              });
-          },
-          template: '<router-view></router-view>'
-      };
+  function initRouter() {
+      var router = useRouter();
+      router.afterEach(function (route) {
+          window.google.script.history.replace(undefined, route.query, route.path);
+      });
+      window.google.script.url.getLocation(function (location) {
+          var path = location.hash ? location.hash : '/';
+          var query = location.parameter;
+          router.replace({ path: path, query: query });
+      });
   }
 
   var GasClient = (function () {
@@ -12031,7 +12025,8 @@
       initGas: initGas,
       SSRepository: SSRepository,
       initVue: initVue,
-      GasClient: GasClient
+      GasClient: GasClient,
+      initRouter: initRouter
   };
 
   return main;
