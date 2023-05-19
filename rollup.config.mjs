@@ -3,7 +3,6 @@ import typescript from '@rollup/plugin-typescript'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
-import vue from 'rollup-plugin-vue'
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,7 +20,6 @@ export default {
       babelHelpers: 'bundled',
       configFile: path.resolve(__dirname, ".babelrc.js"),
     }),
-    nodeResolve(),
-    vue()
+    // nodeResolve()
   ]
 }

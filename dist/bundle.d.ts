@@ -85,7 +85,6 @@ declare const _default: {
     SSRepository: typeof SSRepository;
     initVue: typeof initVue;
     GasClient: typeof GasClient;
-    initRouter: typeof initRouter;
 };
 
 
@@ -94,8 +93,8 @@ export declare class GasClient<C extends BaseControllerInterface> {
 }
 
 import { App, Component } from 'vue';
-export declare function initVue(app: Component, useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
-export declare function initRouter(): void;
+import { RouteRecordRaw } from 'vue-router';
+export declare function initVue(app: Component | RouteRecordRaw[], useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
 
 type BaseControllerInterface = {
     [name: string]: {
