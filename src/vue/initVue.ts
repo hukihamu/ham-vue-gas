@@ -1,23 +1,19 @@
 import {consoleLog} from '@/common/consoleLog'
 import { createApp , App, Component } from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 
-export function initVue(routes: RouteRecordRaw[], app: Component, useFunc: (app: App<Element>) => App<Element> = (app) => app, mountContainer: string = '#root') {
-    const router = createRouter({
-        history: createWebHistory(),
-        routes,
-    })
+export function initVue(app: Component, useFunc: (app: App<Element>) => App<Element> = (app) => app, mountContainer: string = '#root') {
     consoleLog.debug = (label: string, data: any) => {
         const content = document.getElementById('vue-config')?.textContent ?? ''
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
-    const vueApp = createApp(app)
-    vueApp.use(router)
-    useFunc(vueApp)
-    vueApp.mount(mountContainer)
+    useFunc(createApp(app)).mount(mountContainer)
 }
 
+/**
+ * RouterとGasのURLを紐づけします
+ */
 export function initRouter() {
     const router = useRouter()
     router.afterEach(route => {
