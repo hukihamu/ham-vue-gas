@@ -93,8 +93,7 @@ export declare class GasClient<C extends BaseControllerInterface> {
 }
 
 import { App } from 'vue';
-import { RouteRecordRaw, Router } from 'vue-router';
-export declare let router: Router;
+import { RouteRecordRaw } from 'vue-router';
 export declare function initVue(routes: RouteRecordRaw[], useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
 
 type BaseControllerInterface = {

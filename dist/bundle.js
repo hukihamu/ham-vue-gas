@@ -11962,11 +11962,18 @@
     return [leavingRecords, updatingRecords, enteringRecords];
   }
 
-  var router;
+  /**
+   * Returns the router instance. Equivalent to using `$router` inside
+   * templates.
+   */
+  function useRouter() {
+    return inject(routerKey);
+  }
+
   function initVue(routes, useFunc, mountContainer) {
       if (useFunc === void 0) { useFunc = function (app) { return app; }; }
-      if (mountContainer === void 0) { mountContainer = '#app'; }
-      router = createRouter({
+      if (mountContainer === void 0) { mountContainer = '#root'; }
+      var router = createRouter({
           history: createWebHistory(),
           routes: routes,
       });
@@ -11976,10 +11983,16 @@
           if (JSON.parse(content)['debug'] === 'true')
               console.log(label, data);
       };
-      var vueApp = createApp({
-          name: 'App',
-          components: { RouterView: RouterView },
+      var vueApp = createApp(createRoot());
+      vueApp.use(router);
+      useFunc(vueApp);
+      vueApp.mount(mountContainer);
+  }
+  function createRoot() {
+      return {
+          name: "Root",
           setup: function () {
+              var router = useRouter();
               router.afterEach(function (route) {
                   window.google.script.history.replace(undefined, route.query, route.path);
               });
@@ -11989,11 +12002,8 @@
                   router.replace({ path: path, query: query });
               });
           },
-          template: '<RouterView></RouterView>'
-      });
-      vueApp.use(router);
-      useFunc(vueApp);
-      vueApp.mount(mountContainer);
+          template: '<router-view></router-view>'
+      };
   }
 
   var GasClient = (function () {

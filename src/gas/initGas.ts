@@ -2,6 +2,7 @@ import {consoleLog} from '@/common/consoleLog'
 import {Config} from '@/common/config'
 import {SSRepository} from '@/gas/spreadsheetDB'
 
+declare let global: { [name: string]: unknown }
 export function initGas<C extends string, G extends string, V extends string>(
     config: Config<C, G, V>,
     htmlFileName: string = 'index',
@@ -10,7 +11,7 @@ export function initGas<C extends string, G extends string, V extends string>(
     consoleLog.debug = (label: string, data: any)=> {
         if (config.getGasConfig('debug') === 'true') console.log(label, data)
     };
-    (global as any).doGet = () => {
+    global.doGet = () => {
         const gasHtml = HtmlService.createHtmlOutputFromFile(htmlFileName)
         gasHtml.setContent(gasHtml.getContent().replace('<body>', `<body><script type='application/json' id="vue-config">${JSON.stringify(config.getAllVueConfig())}</script>`))
         return editHtmlOutput(gasHtml)

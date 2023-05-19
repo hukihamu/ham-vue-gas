@@ -1,10 +1,10 @@
 import {consoleLog} from '@/common/consoleLog'
-import { createApp , App} from 'vue'
-import { RouteRecordRaw, createRouter, createWebHistory, Router , RouterView} from 'vue-router'
+import { createApp , App, Component } from 'vue'
+import { RouteRecordRaw, createRouter, createWebHistory, useRouter } from 'vue-router'
 
-export let router: Router
-export function initVue(routes: RouteRecordRaw[], useFunc: (app: App<Element>) => App<Element> = (app) => app, mountContainer: string = '#app') {
-    router = createRouter({
+
+export function initVue(routes: RouteRecordRaw[],  useFunc: (app: App<Element>) => App<Element> = (app) => app, mountContainer: string = '#root') {
+    const router = createRouter({
         history: createWebHistory(),
         routes,
     })
@@ -12,11 +12,17 @@ export function initVue(routes: RouteRecordRaw[], useFunc: (app: App<Element>) =
         const content = document.getElementById('vue-config')?.textContent ?? ''
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
+    const vueApp = createApp(createRoot())
+    vueApp.use(router)
+    useFunc(vueApp)
+    vueApp.mount(mountContainer)
+}
 
-    const vueApp = createApp({
-        name: 'App',
-        components: {RouterView},
+function createRoot(): Component {
+    return {
+        name: "Root",
         setup() {
+            const router = useRouter()
             router.afterEach(route => {
                 window.google.script.history.replace(undefined, route.query, route.path)
             })
@@ -26,9 +32,6 @@ export function initVue(routes: RouteRecordRaw[], useFunc: (app: App<Element>) =
                 router.replace({ path, query })
             })
         },
-        template: '<RouterView></RouterView>'
-    })
-    vueApp.use(router)
-    useFunc(vueApp)
-    vueApp.mount(mountContainer)
+        template: '<router-view></router-view>'
+    }
 }

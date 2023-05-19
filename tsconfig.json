@@ -35,9 +35,15 @@
     },
 
     "forceConsistentCasingInFileNames": true /* Disallow inconsistently-cased references to the same file. */,
-    "noImplicitOverride": true
+    "noImplicitOverride": true,
+
+    "types": [
+      "google-apps-script"
+    ]
   },
-  "include": ["src/**/*.ts"],
+  "include": [
+    "src/**/*.ts"
+  ],
   "exclude": [
     "node_modules",
     "dist",
