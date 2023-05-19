@@ -416,18 +416,18 @@
             if (JSON.parse(content)['debug'] === 'true')
                 console.log(label, data);
         };
-        var appComponent;
+        var appElement;
         if ('length' in app) {
             var router = vueRouter.createRouter({
                 history: vueRouter.createWebHistory(),
                 routes: app
             });
-            appComponent = rootComponent(router);
+            appElement = vue.createApp(rootComponent(router)).use(router);
         }
         else {
-            appComponent = app;
+            appElement = vue.createApp(app);
         }
-        useFunc(vue.createApp(appComponent)).mount(mountContainer);
+        useFunc(appElement).mount(mountContainer);
     }
     function rootComponent(router) {
         return {
@@ -439,6 +439,9 @@
                     var path = location.hash ? location.hash : '/';
                     var query = location.parameter;
                     router.replace({ path: path, query: query });
+                });
+                window.google.script.history.setChangeHandler(function (event) {
+                    console.log(event);
                 });
             },
             template: '<router-view />'

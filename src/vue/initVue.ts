@@ -8,18 +8,18 @@ export function initVue(app: Component | RouteRecordRaw[], useFunc: (app: App<El
         const content = document.getElementById('vue-config')?.textContent ?? ''
         if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
     }
-    let appComponent: Component
+    let appElement: App<Element>
     if ('length' in app) {
         // router
         const router = createRouter({
             history: createWebHistory(),
             routes: app as RouteRecordRaw[]
         })
-        appComponent = rootComponent(router)
+        appElement = createApp(rootComponent(router)).use(router)
     } else {
-        appComponent = app
+        appElement = createApp(app)
     }
-    useFunc(createApp(appComponent)).mount(mountContainer)
+    useFunc(appElement).mount(mountContainer)
 }
 
 function rootComponent(router: Router): Component{
