@@ -13,16 +13,14 @@
 - gasのURL`?`がquery、`#/`がパス
 
 ## TODO
-- [ ] bundleの分類わけ
-- [ ] コメント・使い方
+- [x] bundleの分類わけ
+- [x] コメント
+- [ ] 使い方
 - [ ] build時のvueをCDN化
 - [ ] テスト
 - [ ] サンプル作成
+- [ ] テンプレを作成するコマンド
 - [ ] ローカルで実行できるようなgasMock
-- [ ]
-- バグ修正
-  - [x] vue routerが機能しない問題
-    - マウントはうまく言っており、setupまで進んでいるが、templateだけが反映されない
 
 - npm-watchを使ってもらう
 ```json:.clasp.json

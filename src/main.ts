@@ -1,15 +1,8 @@
-import {initGas} from '@/gas/initGas'
-import {Config} from '@/common/config'
-import {consoleLog} from '@/common/consoleLog'
-import {SSRepository} from '@/gas/spreadsheetDB'
-import {initVue} from '@/vue/initVue'
-import {GasClient} from '@/vue/gasClient'
+import {hVue} from '@/vue'
+import {hCommon} from '@/common'
 
 export default {
-    Config,
-    consoleLog,
-    initGas,
-    SSRepository,
-    initVue,
-    GasClient
+    hVue,
+    hCommon
+
 }
