@@ -1,7 +1,6 @@
 import {hCommon} from '@/common'
 
 export namespace hGas {
-    import consoleLog = hCommon.consoleLog
     /**
      * Controller実装に利用する
      */
@@ -60,10 +59,8 @@ export namespace hGas {
                 throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
             }
             if (!this._sheet) {
-                consoleLog.debug('sheet not found')
                 this._sheet = this.importSheet()
             }
-            consoleLog.debug('sheet', this._sheet)
             return this._sheet ?? throwText()
         }
         private static readonly TABLE_VERSION_LABEL = 'ver:'

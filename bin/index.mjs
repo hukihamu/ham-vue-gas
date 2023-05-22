@@ -190,6 +190,7 @@ const dateList = ref<string[]>([])
 function onClickInput(){
   gasClient.send('insertData', inputText.value).then(it => {
     dateList.value = it
+    inputText.value = ''
   })
 }
 </script>

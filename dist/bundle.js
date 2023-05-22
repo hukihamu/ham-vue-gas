@@ -295,7 +295,6 @@
 
     var hGas;
     (function (hGas) {
-        var consoleLog = hCommon.consoleLog;
         /**
          * Gas側entryファイルで実行する関数<br>
          * @param config インスタンス化したhCommon.Configを入力
@@ -351,10 +350,8 @@
                         throw 'not found GoogleAppsScript.Spreadsheet.Sheet';
                     };
                     if (!this._sheet) {
-                        consoleLog.debug('sheet not found');
                         this._sheet = this.importSheet();
                     }
-                    consoleLog.debug('sheet', this._sheet);
                     return (_a = this._sheet) !== null && _a !== void 0 ? _a : throwText();
                 },
                 enumerable: false,

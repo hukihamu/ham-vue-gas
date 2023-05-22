@@ -13,8 +13,6 @@
 - gasのURL`?`がquery、`#/`がパス
 
 ## TODO
-- [x] bundleの分類わけ
-- [x] コメント
 - [ ] 使い方
 - [ ] build時のvueをCDN化
 - [ ] テスト
