@@ -22,16 +22,22 @@
             Config.prototype.getVueConfig = function (key) {
                 var _a;
                 var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
-                if (!content)
+                if (!content) {
+                    hCommon.consoleLog.debug('vue config', "key: ".concat(key, ", content undefined"));
                     return undefined;
-                return JSON.parse(content)[key];
+                }
+                var value = JSON.parse(content)[key];
+                hCommon.consoleLog.debug('vue config', "key: ".concat(key, ", value: ").concat(value));
+                return value;
             };
             /**
              * gasサイドでのみ利用可能
              */
             Config.prototype.getGasConfig = function (key) {
                 var _a;
-                return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
+                var value = (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
+                hCommon.consoleLog.debug('gas config', "key: ".concat(key, ", value: ").concat(value));
+                return value;
             };
             /**
              * すべてのVueConfigを取得(gasサイドでのみ利用可能)
@@ -52,6 +58,7 @@
                         continue;
                     config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
                 }
+                hCommon.consoleLog.debug('vue config all', config);
                 return config;
             };
             /**
@@ -336,15 +343,20 @@
                  * トランザクションロック開放を待つ時間(ミリ秒)
                  */
                 this.lockWaitMSec = 10000;
-                this.startRepository();
             }
             Object.defineProperty(SSRepository.prototype, "sheet", {
                 get: function () {
+                    var _this = this;
                     var _a;
-                    var throwText = function () {
-                        throw 'not found GoogleAppsScript.Spreadsheet.Sheet';
+                    var getSheet = function () {
+                        var spreadsheet = SpreadsheetApp.openById(_this.spreadsheetId);
+                        var sheet = spreadsheet.getSheetByName(_this.tableName);
+                        _this._sheet = sheet !== null && sheet !== void 0 ? sheet : (function () {
+                            throw 'not found GoogleAppsScript.Spreadsheet.Sheet';
+                        })();
+                        return sheet;
                     };
-                    return (_a = this._sheet) !== null && _a !== void 0 ? _a : throwText();
+                    return (_a = this._sheet) !== null && _a !== void 0 ? _a : getSheet();
                 },
                 enumerable: false,
                 configurable: true
@@ -409,11 +421,6 @@
                 finally {
                     lock.releaseLock();
                 }
-            };
-            SSRepository.prototype.startRepository = function () {
-                var spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
-                var sheet = spreadsheet.getSheetByName(this.tableName);
-                this._sheet = sheet !== null && sheet !== void 0 ? sheet : undefined;
             };
             /**
              * gasInit().useSpreadsheetDBで利用される

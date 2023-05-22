@@ -132,8 +132,6 @@ export declare namespace hGas {
         private toEntity;
         private getRowRange;
         private onLock;
-        private startRepository;
-        constructor();
         /**
          * gasInit().useSpreadsheetDBで利用される
          */

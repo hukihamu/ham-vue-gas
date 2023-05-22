@@ -51,10 +51,15 @@ export namespace hGas {
         private _sheet: GoogleAppsScript.Spreadsheet.Sheet | undefined
 
         private get sheet(): GoogleAppsScript.Spreadsheet.Sheet{
-            const throwText = () => {
-                throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
+            const getSheet = () => {
+                const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
+                const sheet = spreadsheet.getSheetByName(this.tableName)
+                this._sheet = sheet ?? (() => {
+                    throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
+                })()
+                return sheet
             }
-            return this._sheet ?? throwText()
+            return this._sheet ?? getSheet()
         }
         private static readonly TABLE_VERSION_LABEL = 'ver:'
         private static readonly DELETE_LABEL = 'DELETE'
@@ -158,14 +163,6 @@ export namespace hGas {
             } finally {
                 lock.releaseLock()
             }
-        }
-        private startRepository(){
-            const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
-            const sheet = spreadsheet.getSheetByName(this.tableName)
-            this._sheet = sheet ?? undefined
-        }
-        constructor() {
-            this.startRepository()
         }
 
         /**
