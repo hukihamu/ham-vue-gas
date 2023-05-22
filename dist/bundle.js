@@ -295,6 +295,7 @@
 
     var hGas;
     (function (hGas) {
+        var consoleLog = hCommon.consoleLog;
         /**
          * Gas側entryファイルで実行する関数<br>
          * @param config インスタンス化したhCommon.Configを入力
@@ -338,19 +339,23 @@
                  */
                 this.lockWaitMSec = 10000;
             }
+            SSRepository.prototype.importSheet = function () {
+                var _a;
+                var spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
+                return (_a = spreadsheet.getSheetByName(this.tableName)) !== null && _a !== void 0 ? _a : undefined;
+            };
             Object.defineProperty(SSRepository.prototype, "sheet", {
                 get: function () {
-                    var _this = this;
                     var _a;
-                    var getSheet = function () {
-                        var spreadsheet = SpreadsheetApp.openById(_this.spreadsheetId);
-                        var sheet = spreadsheet.getSheetByName(_this.tableName);
-                        _this._sheet = sheet !== null && sheet !== void 0 ? sheet : (function () {
-                            throw 'not found GoogleAppsScript.Spreadsheet.Sheet';
-                        })();
-                        return sheet;
+                    var throwText = function () {
+                        throw 'not found GoogleAppsScript.Spreadsheet.Sheet';
                     };
-                    return (_a = this._sheet) !== null && _a !== void 0 ? _a : getSheet();
+                    if (!this._sheet) {
+                        consoleLog.debug('sheet not found');
+                        this._sheet = this.importSheet();
+                    }
+                    consoleLog.debug('sheet', this._sheet);
+                    return (_a = this._sheet) !== null && _a !== void 0 ? _a : throwText();
                 },
                 enumerable: false,
                 configurable: true

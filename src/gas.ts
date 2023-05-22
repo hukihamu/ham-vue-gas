@@ -1,6 +1,7 @@
 import {hCommon} from '@/common'
 
 export namespace hGas {
+    import consoleLog = hCommon.consoleLog
     /**
      * Controller実装に利用する
      */
@@ -49,17 +50,21 @@ export namespace hGas {
     export abstract class SSRepository<E extends SSEntity> {
 
         private _sheet: GoogleAppsScript.Spreadsheet.Sheet | undefined
+        private importSheet(): GoogleAppsScript.Spreadsheet.Sheet | undefined{
+            const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
+            return spreadsheet.getSheetByName(this.tableName) ?? undefined
+        }
 
         private get sheet(): GoogleAppsScript.Spreadsheet.Sheet{
-            const getSheet = () => {
-                const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
-                const sheet = spreadsheet.getSheetByName(this.tableName)
-                this._sheet = sheet ?? (() => {
-                    throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
-                })()
-                return sheet
+            const throwText = () => {
+                throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
             }
-            return this._sheet ?? getSheet()
+            if (!this._sheet) {
+                consoleLog.debug('sheet not found')
+                this._sheet = this.importSheet()
+            }
+            consoleLog.debug('sheet', this._sheet)
+            return this._sheet ?? throwText()
         }
         private static readonly TABLE_VERSION_LABEL = 'ver:'
         private static readonly DELETE_LABEL = 'DELETE'

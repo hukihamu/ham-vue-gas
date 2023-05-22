@@ -33,10 +33,10 @@ export declare namespace hCommon {
      * Vue・Gas共に利用可能なLog出力
      */
     const consoleLog: {
-        info(label: string, data: any): void;
-        debug(label: string, data: any): void;
-        warn(label: string, data: any): void;
-        error(label: string, data: any): void;
+        info(label: string, data?: any): void;
+        debug(label: string, data?: any): void;
+        warn(label: string, data?: any): void;
+        error(label: string, data?: any): void;
     };
     /**
      * Controllerの定義に利用<br>
@@ -87,6 +87,7 @@ export declare namespace hGas {
      */
     abstract class SSRepository<E extends SSEntity> {
         private _sheet;
+        private importSheet;
         private get sheet();
         private static readonly TABLE_VERSION_LABEL;
         private static readonly DELETE_LABEL;
