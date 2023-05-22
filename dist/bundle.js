@@ -23,21 +23,16 @@
                 var _a;
                 var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
                 if (!content) {
-                    hCommon.consoleLog.debug('vue config', "key: ".concat(key, ", content undefined"));
                     return undefined;
                 }
-                var value = JSON.parse(content)[key];
-                hCommon.consoleLog.debug('vue config', "key: ".concat(key, ", value: ").concat(value));
-                return value;
+                return JSON.parse(content)[key];
             };
             /**
              * gasサイドでのみ利用可能
              */
             Config.prototype.getGasConfig = function (key) {
                 var _a;
-                var value = (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
-                hCommon.consoleLog.debug('gas config', "key: ".concat(key, ", value: ").concat(value));
-                return value;
+                return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
             };
             /**
              * すべてのVueConfigを取得(gasサイドでのみ利用可能)
@@ -58,7 +53,6 @@
                         continue;
                     config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
                 }
-                hCommon.consoleLog.debug('vue config all', config);
                 return config;
             };
             /**

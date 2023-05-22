@@ -13,20 +13,15 @@ export namespace hCommon {
         getVueConfig(key: Exclude<(V | C | 'debug'), ''>): string | undefined {
             const content = document.getElementById('vue-config')?.textContent
             if (!content) {
-                consoleLog.debug('vue config', `key: ${key}, content undefined`)
                 return undefined
             }
-            const value = JSON.parse(content)[key]
-            consoleLog.debug('vue config', `key: ${key}, value: ${value}`)
-            return value
+            return JSON.parse(content)[key]
         }
         /**
          * gasサイドでのみ利用可能
          */
         getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined {
-            const value = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
-            consoleLog.debug('gas config', `key: ${key}, value: ${value}`)
-            return value
+            return PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
         }
 
         /**
@@ -43,7 +38,6 @@ export namespace hCommon {
                 if (key === '') continue
                 config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
             }
-            consoleLog.debug('vue config all', config)
             return config as {[key in (V | C)]: string | undefined}
         }
         /**
