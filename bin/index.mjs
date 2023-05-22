@@ -213,7 +213,7 @@ import {ControllerInterface} from '@C/controllerInterface'
 import sampleController from '@G/controller/sampleController'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
-initGas(config, 'HamVueGasSample')
+initGas(config, )
     .useController<ControllerInterface>((global, wrapperController) => {
     global.insertData = wrapperController(sampleController, 'insertData')
     })

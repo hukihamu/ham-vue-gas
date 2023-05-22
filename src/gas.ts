@@ -47,7 +47,9 @@ export namespace hGas {
      * extendsしたクラスをインスタンス化して利用する
      */
     export abstract class SSRepository<E extends SSEntity> {
+
         private _sheet: GoogleAppsScript.Spreadsheet.Sheet | undefined
+
         private get sheet(): GoogleAppsScript.Spreadsheet.Sheet{
             const throwText = () => {
                 throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
@@ -93,6 +95,8 @@ export namespace hGas {
          * トランザクションロック開放を待つ時間(ミリ秒)
          */
         lockWaitMSec: number = 10000
+
+
 
         private checkVersionUpdated(): boolean {
             return this.sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
@@ -154,6 +158,14 @@ export namespace hGas {
             } finally {
                 lock.releaseLock()
             }
+        }
+        private startRepository(){
+            const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
+            const sheet = spreadsheet.getSheetByName(this.tableName)
+            this._sheet = sheet ?? undefined
+        }
+        protected constructor() {
+            this.startRepository()
         }
 
         /**

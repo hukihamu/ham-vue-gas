@@ -336,6 +336,7 @@
                  * トランザクションロック開放を待つ時間(ミリ秒)
                  */
                 this.lockWaitMSec = 10000;
+                this.startRepository();
             }
             Object.defineProperty(SSRepository.prototype, "sheet", {
                 get: function () {
@@ -408,6 +409,11 @@
                 finally {
                     lock.releaseLock();
                 }
+            };
+            SSRepository.prototype.startRepository = function () {
+                var spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
+                var sheet = spreadsheet.getSheetByName(this.tableName);
+                this._sheet = sheet !== null && sheet !== void 0 ? sheet : undefined;
             };
             /**
              * gasInit().useSpreadsheetDBで利用される
