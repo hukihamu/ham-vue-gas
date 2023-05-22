@@ -255,7 +255,8 @@ interface InitGasOptions {
     /**
      * Controllerを登録する<br>
      * 変数"global[{Controller名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
-     * globalへ代入前に"wrapperController"を利用する
+     * globalへ代入前に"wrapperController"を利用する<br>
+     * ControllerInterfaceをGenerics宣言すると、コード補完される
      */
     useController<C extends { [name: string]: any }>(initGlobal: (
         global: {[K in keyof C]: WrapperController<C, K>},

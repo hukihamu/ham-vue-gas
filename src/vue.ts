@@ -1,4 +1,4 @@
-import {App, Component, createApp} from 'vue/dist/vue'
+import {App, Component, createApp} from 'vue'
 import {createRouter, createWebHistory, Router, RouteRecordRaw} from 'vue-router'
 import {hCommon} from '@/common'
 
@@ -40,7 +40,7 @@ export namespace hVue{
          * @param name Controller名
          * @param args Controller引数
          */
-        send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']){
+        send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>{
             return new Promise((resolve, reject) => {
                 const run = google.script.run
                     .withSuccessHandler(it => resolve(JSON.parse(it)))

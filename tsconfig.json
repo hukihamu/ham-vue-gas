@@ -9,7 +9,7 @@
     "declarationMap": true,
     "outDir": "./dist/",
     "rootDir": "./src",
-    "removeComments": true,
+    "removeComments": false,
     "isolatedModules": true,
 
     "strict": true /* Enable all strict type-checking options. */,

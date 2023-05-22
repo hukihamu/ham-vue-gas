@@ -1,6 +1,5 @@
 import babel from '@rollup/plugin-babel'
 import typescript from '@rollup/plugin-typescript'
-import { nodeResolve } from '@rollup/plugin-node-resolve'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -20,6 +19,5 @@ export default {
       babelHelpers: 'bundled',
       configFile: path.resolve(__dirname, ".babelrc.js"),
     }),
-    // nodeResolve()
   ]
 }

@@ -1,17 +1,24 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue/dist/vue'), require('vue-router')) :
-    typeof define === 'function' && define.amd ? define(['vue/dist/vue', 'vue-router'], factory) :
+    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('vue'), require('vue-router')) :
+    typeof define === 'function' && define.amd ? define(['vue', 'vue-router'], factory) :
     (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.VueGas = factory(global.vue, global.vueRouter));
 })(this, (function (vue, vueRouter) { 'use strict';
 
     var hCommon;
     (function (hCommon) {
-        var Config = (function () {
+        /**
+         * Gasの機能「スクリプトプロパティ」をConfigとして利用する<br>
+         * gasInit実行時に必須
+         */
+        var Config = /** @class */ (function () {
             function Config(commonConfigKeys, gasConfigKeys, vueConfigKeys) {
                 this.commonConfigKeys = commonConfigKeys;
                 this.gasConfigKeys = gasConfigKeys;
                 this.vueConfigKeys = vueConfigKeys;
             }
+            /**
+             * vueサイドでのみ利用可能
+             */
             Config.prototype.getVueConfig = function (key) {
                 var _a;
                 var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
@@ -19,10 +26,16 @@
                     return undefined;
                 return JSON.parse(content)[key];
             };
+            /**
+             * gasサイドでのみ利用可能
+             */
             Config.prototype.getGasConfig = function (key) {
                 var _a;
                 return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
             };
+            /**
+             * すべてのVueConfigを取得(gasサイドでのみ利用可能)
+             */
             Config.prototype.getAllVueConfig = function () {
                 var _a, _b, _c;
                 var config = {};
@@ -41,6 +54,9 @@
                 }
                 return config;
             };
+            /**
+             * すべてのGasConfigを取得(gasサイドでのみ利用可能)
+             */
             Config.prototype.getAllGasConfig = function () {
                 var _a, _b, _c;
                 var config = {};
@@ -62,6 +78,9 @@
             return Config;
         }());
         hCommon.Config = Config;
+        /**
+         * Vue・Gas共に利用可能なLog出力
+         */
         hCommon.consoleLog = {
             info: function (label, data) {
                 console.info(label, data);
@@ -80,6 +99,13 @@
 
     var hVue;
     (function (hVue) {
+        /**
+         * Vue側entryファイルで実行する関数<br>
+         *
+         * @param app Componentか、Routingを設定可能
+         * @param useFunc Vueに追加するプラグインを登録するFunction. example: app => app.use(vuetify). default: app => app
+         * @param mountContainer マウントするエレメント default: #app
+         */
         function initVue(app, useFunc, mountContainer) {
             if (useFunc === void 0) { useFunc = function (app) { return app; }; }
             if (mountContainer === void 0) { mountContainer = '#app'; }
@@ -91,6 +117,7 @@
             };
             var appElement;
             if ('length' in app) {
+                // router
                 var router = vueRouter.createRouter({
                     history: vueRouter.createWebHistory(),
                     routes: app
@@ -103,9 +130,19 @@
             useFunc(appElement).mount(mountContainer);
         }
         hVue.initVue = initVue;
-        var GasClient = (function () {
+        /**
+         * Vue側からGasで作成したコントローラを呼び出すクラス<br>
+         * Gas側で作成したControllerInterfaceをgenerics宣言する
+         */
+        var GasClient = /** @class */ (function () {
             function GasClient() {
             }
+            /**
+             * Controllerの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+             * ControllerInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+             * @param name Controller名
+             * @param args Controller引数
+             */
             GasClient.prototype.send = function (name, args) {
                 return new Promise(function (resolve, reject) {
                     var run = google.script.run
@@ -257,6 +294,12 @@
 
     var hGas;
     (function (hGas) {
+        /**
+         * Gas側entryファイルで実行する関数<br>
+         * @param config インスタンス化したhCommon.Configを入力
+         * @param htmlFileName htmlファイル名を設定 default: index
+         * @param editHtmlOutput gasの機能で、htmlオブジェクトを編集したい際に利用(title変更など)
+         */
         function initGas(config, htmlFileName, editHtmlOutput) {
             if (htmlFileName === void 0) { htmlFileName = 'index'; }
             if (editHtmlOutput === void 0) { editHtmlOutput = function (output) { return output; }; }
@@ -272,10 +315,26 @@
             return initGasOption;
         }
         hGas.initGas = initGas;
-        var SSRepository = (function () {
+        /**
+         * スプレッドシートをテーブルとしてCRUD操作を行う<br>
+         * 本abstract classをextendsして作成する<br>
+         * extendsしたクラスをgasInit().useSpreadsheetDBに入力すると利用可能となる<br>
+         * extendsしたクラスをインスタンス化して利用する
+         */
+        var SSRepository = /** @class */ (function () {
             function SSRepository() {
+                /**
+                 * テーブル作成(アップデート)時、初期にInsertされるデータ
+                 * @protected
+                 */
                 this.initData = [];
+                /**
+                 * トランザクションタイプ(LockService参照) default: user
+                 */
                 this.lockType = 'user';
+                /**
+                 * トランザクションロック開放を待つ時間(ミリ秒)
+                 */
                 this.lockWaitMSec = 10000;
             }
             Object.defineProperty(SSRepository.prototype, "sheet", {
@@ -293,6 +352,7 @@
                 return this.sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion;
             };
             SSRepository.prototype.createTable = function () {
+                // DataRangeが1行より多い場合、データはあると判断
                 if (this.sheet.getDataRange().getValues().length > 1) {
                     var oldVersion = this.sheet.getRange(1, 1, 1, 1).getValue();
                     var oldSheet = this.sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId));
@@ -300,8 +360,11 @@
                     oldSheet.setName(oldName);
                     this.sheet.clear();
                 }
+                // バージョン情報をセット
                 this.sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion);
+                //ヘッダーをセット
                 this.sheet.getRange(1, 2, 1, this.columnList.length).setValues([this.columnList]);
+                //初期データをインサート
                 for (var _i = 0, _a = this.initData; _i < _a.length; _i++) {
                     var e = _a[_i];
                     this.insert(e);
@@ -346,6 +409,9 @@
                     lock.releaseLock();
                 }
             };
+            /**
+             * gasInit().useSpreadsheetDBで利用される
+             */
             SSRepository.prototype.initTable = function () {
                 var spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
                 var sheet = spreadsheet.getSheetByName(this.tableName);
@@ -354,6 +420,10 @@
                     this.createTable();
                 }
             };
+            /**
+             * 挿入処理
+             * @param entity 挿入するデータ。rowの有無は任意(利用せず、新規rowが付与される)
+             */
             SSRepository.prototype.insert = function (entity) {
                 var _this = this;
                 this.onLock(function () {
@@ -368,13 +438,18 @@
                     }
                     var insertData = _this.toStringList(entity);
                     if (insertRowNumber === -1) {
+                        // 最後尾に挿入
                         _this.sheet.appendRow(insertData);
                     }
                     else {
+                        // 削除行に挿入
                         _this.getRowRange(insertRowNumber).setValues([insertData]);
                     }
                 });
             };
+            /**
+             * 全件取得(フィルターなどはJSで実施)
+             */
             SSRepository.prototype.getAll = function () {
                 var _this = this;
                 return this.onLock(function () {
@@ -391,6 +466,10 @@
                     return entities;
                 });
             };
+            /**
+             * １件取得
+             * @param row 取得するrow(rowは自動で付与され、不定一意)
+             */
             SSRepository.prototype.getByRow = function (row) {
                 var _this = this;
                 return this.onLock(function () {
@@ -399,12 +478,20 @@
                     return _this.toEntity(stringList);
                 });
             };
+            /**
+             * 更新処理(上書きなため、部分変更不可)
+             * @param entity 変更するデータ(row 必須)
+             */
             SSRepository.prototype.update = function (entity) {
                 var _this = this;
                 this.onLock(function () {
                     _this.getRowRange(entity.row).setValues([_this.toStringList(entity)]);
                 });
             };
+            /**
+             * 削除処理
+             * @param row 削除するrow(rowは自動で付与され、不定一意)
+             */
             SSRepository.prototype.delete = function (row) {
                 var _this = this;
                 this.onLock(function () {
@@ -431,27 +518,30 @@
                     case 0:
                         _a.trys.push([0, 5, , 6]);
                         returnValue = void 0;
-                        if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3, 2];
+                        if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
                         console.log('arg: ', args);
-                        return [4, controller[name](args)];
+                        return [4 /*yield*/, controller[name](args)];
                     case 1:
                         returnValue = _a.sent();
                         console.log('return: ', returnValue);
-                        return [3, 4];
-                    case 2: return [4, controller[name](args)];
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, controller[name](args)];
                     case 3:
                         returnValue = _a.sent();
                         _a.label = 4;
-                    case 4: return [2, JSON.stringify(returnValue)];
+                    case 4: return [2 /*return*/, JSON.stringify(returnValue)];
                     case 5:
                         e_1 = _a.sent();
                         hCommon.consoleLog.error('Controller error:', e_1);
                         throw e_1;
-                    case 6: return [2];
+                    case 6: return [2 /*return*/];
                 }
             });
         }); };
     }
+    /**
+     * gas側の機能拡張
+     */
     var initGasOption = {
         useController: function (initGlobal) {
             initGlobal(global, wrapperController);

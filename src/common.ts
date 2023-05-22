@@ -75,7 +75,8 @@ export namespace hCommon {
     }
     /**
      * Controllerの定義に利用<br>
-     * Interfaceにextendsを行う
+     * Interfaceにextendsを行う<br>
+     * 構成: {Controller名: {at: 引数型, rt: 戻り値型}}
      */
     export type BaseControllerInterface = {
         [name: string]: {
