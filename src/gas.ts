@@ -164,7 +164,7 @@ export namespace hGas {
             const sheet = spreadsheet.getSheetByName(this.tableName)
             this._sheet = sheet ?? undefined
         }
-        protected constructor() {
+        constructor() {
             this.startRepository()
         }
 

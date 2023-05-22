@@ -133,7 +133,7 @@ export declare namespace hGas {
         private getRowRange;
         private onLock;
         private startRepository;
-        protected constructor();
+        constructor();
         /**
          * gasInit().useSpreadsheetDBで利用される
          */
