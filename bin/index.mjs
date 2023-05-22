@@ -126,10 +126,10 @@ program.command('init')
 }`)
 
     // src
-    fs.rmdirSync(path.join(rootPath, 'src'))
+    if (!fs.existsSync(path.join(rootPath, 'src'))) fs.mkdirSync(path.join(rootPath, 'src'))
 
     //public
-    fs.rmdirSync(path.join(rootPath, 'src', 'public'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'public'))) fs.mkdirSync(path.join(rootPath, 'src', 'public'))
     fs.writeFileSync(path.join(rootPath, 'src', 'public', 'index.html'),`<!DOCTYPE html>
 <html>
 <head>
@@ -151,7 +151,7 @@ program.command('init')
 }`)
 
     // common
-    fs.rmdirSync(path.join(rootPath, 'src', 'common'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'common'))) fs.mkdirSync(path.join(rootPath, 'src', 'common'))
     fs.writeFileSync(path.join(rootPath, 'src', 'common', 'config.ts'), `import {hCommon} from 'ham-vue-gas'
 import Config = hCommon.Config
 
@@ -160,14 +160,14 @@ export const config = new Config(['debug'], ['spreadsheetId'], [''])`)
 import BaseControllerInterface = hCommon.BaseControllerInterface
 
 export interface ControllerInterface extends BaseControllerInterface {
-    SampleController: {
+    insertData: {
         at: string
         rt: string[]
     }
 }`)
 
     // vue
-    fs.rmdirSync(path.join(rootPath, 'src', 'vue'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'vue'))) fs.mkdirSync(path.join(rootPath, 'src', 'vue'))
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'index.ts'), `import {hVue} from 'ham-vue-gas'
 import initVue = hVue.initVue
 import Index from '@V/index.vue'
@@ -204,9 +204,14 @@ function onClickInput(){
     <span>{{text}}</span>
   </div>
 </template>`)
+    fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'vue.d.ts'),`declare module '*.vue' {
+    import type { DefineComponent } from 'vue'
+    const component: DefineComponent<{}, {}, any>
+    export default component
+}`)
 
     // gas
-    fs.rmdirSync(path.join(rootPath, 'src', 'gas'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'gas'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'index.ts'), `import {hGas} from 'ham-vue-gas'
 import initGas = hGas.initGas
 import {config} from '@C/config'
@@ -216,10 +221,10 @@ import {SampleRepository} from '@G/repository/sampleRepository'
 
 initGas(config, )
     .useController<ControllerInterface>((global, wrapperController) => {
-    global.insertData = wrapperController(sampleController, 'insertData')
+        global.insertData = wrapperController(sampleController, 'insertData')
     })
     .useSpreadsheetDB(SampleRepository,)`)
-    fs.rmdirSync(path.join(rootPath, 'src', 'gas', 'controller'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'controller'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'controller'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'controller', 'sampleController.ts'), `import {hGas} from 'ham-vue-gas'
 import ControllerType = hGas.ControllerType
 import {ControllerInterface} from '@C/controllerInterface'
@@ -232,14 +237,14 @@ export default {
         return repo.getAll().map(it => it.text)
     }
 } as ControllerType<ControllerInterface>`)
-    fs.rmdirSync(path.join(rootPath, 'src', 'gas', 'entity'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'entity'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'entity'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'entity', 'sampleEntity.ts'), `import {hGas} from 'ham-vue-gas'
 import SSEntity = hGas.SSEntity
 
 export interface SampleEntity extends SSEntity {
     text: string
 }`)
-    fs.rmdirSync(path.join(rootPath, 'src', 'gas', 'repository'))
+    if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'repository'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'repository'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'repository', 'sampleRepository.ts'), `import {hGas} from 'ham-vue-gas'
 import SSRepository = hGas.SSRepository
 import {SampleEntity} from '@G/entity/sampleEntity'
