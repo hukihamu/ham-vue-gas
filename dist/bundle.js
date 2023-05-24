@@ -23,8 +23,11 @@
                 var _a;
                 var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
                 if (!content) {
+                    hCommon.consoleLog.error('VueConfigが見つかりません');
                     return undefined;
                 }
+                if (Object.keys(JSON.parse(content)).every(function (it) { return it !== key; }))
+                    hCommon.consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
                 return JSON.parse(content)[key];
             };
             /**
@@ -32,6 +35,8 @@
              */
             Config.prototype.getGasConfig = function (key) {
                 var _a;
+                if (PropertiesService.getScriptProperties().getKeys().every(function (it) { return it !== key; }))
+                    hCommon.consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
                 return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
             };
             /**
@@ -372,7 +377,7 @@
                 // バージョン情報をセット
                 this.sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion);
                 //ヘッダーをセット
-                this.sheet.getRange(1, 2, 1, this.columnList.length).setValues([this.columnList]);
+                this.sheet.getRange(1, 2, 1, this.columnOrder.length).setValues([this.columnOrder]);
                 //初期データをインサート
                 for (var _i = 0, _a = this.initData; _i < _a.length; _i++) {
                     var e = _a[_i];
@@ -383,7 +388,7 @@
                 var _a;
                 var result = [];
                 result.push(SSRepository.ROW_FUNCTION);
-                for (var _i = 0, _b = this.columnList; _i < _b.length; _i++) {
+                for (var _i = 0, _b = this.columnOrder; _i < _b.length; _i++) {
                     var key = _b[_i];
                     var value = (_a = entity[key]) !== null && _a !== void 0 ? _a : '';
                     result.push(JSON.stringify(value));
@@ -396,13 +401,13 @@
                     row: stringList[0],
                 };
                 for (var i = 1; i < stringList.length; i++) {
-                    var key = this.columnList[i - 1];
+                    var key = this.columnOrder[i - 1];
                     entity[key] = JSON.parse((_a = stringList[i]) !== null && _a !== void 0 ? _a : '');
                 }
                 return entity;
             };
             SSRepository.prototype.getRowRange = function (rowNumber) {
-                return this.sheet.getRange(rowNumber, 1, 1, this.columnList.length + 1);
+                return this.sheet.getRange(rowNumber, 1, 1, this.columnOrder.length + 1);
             };
             SSRepository.prototype.onLock = function (runningInLock) {
                 if (this.lockType === 'none')
@@ -462,7 +467,7 @@
             SSRepository.prototype.getAll = function () {
                 var _this = this;
                 return this.onLock(function () {
-                    var values = _this.sheet.getRange(2, 1, _this.sheet.getLastRow() - 1, _this.columnList.length + 1).getValues();
+                    var values = _this.sheet.getRange(2, 1, _this.sheet.getLastRow() - 1, _this.columnOrder.length + 1).getValues();
                     var entities = [];
                     for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
                         var value = values_1[_i];
@@ -506,7 +511,7 @@
                 this.onLock(function () {
                     var range = _this.getRowRange(row);
                     range.clear();
-                    var d = new Array(_this.columnList.length + 1);
+                    var d = new Array(_this.columnOrder.length + 1);
                     d[0] = SSRepository.DELETE_LABEL;
                     range.setValues([d]);
                 });
@@ -518,41 +523,41 @@
         }());
         hGas.SSRepository = SSRepository;
     })(hGas || (hGas = {}));
-    function wrapperController(controller, name) {
-        var _this = this;
-        return function (args) { return __awaiter(_this, void 0, void 0, function () {
-            var returnValue, e_1;
-            return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0:
-                        _a.trys.push([0, 5, , 6]);
-                        returnValue = void 0;
-                        if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
-                        console.log('arg: ', args);
-                        return [4 /*yield*/, controller[name](args)];
-                    case 1:
-                        returnValue = _a.sent();
-                        console.log('return: ', returnValue);
-                        return [3 /*break*/, 4];
-                    case 2: return [4 /*yield*/, controller[name](args)];
-                    case 3:
-                        returnValue = _a.sent();
-                        _a.label = 4;
-                    case 4: return [2 /*return*/, JSON.stringify(returnValue)];
-                    case 5:
-                        e_1 = _a.sent();
-                        hCommon.consoleLog.error('Controller error:', e_1);
-                        throw e_1;
-                    case 6: return [2 /*return*/];
-                }
-            });
-        }); };
-    }
     /**
      * gas側の機能拡張
      */
     var initGasOption = {
-        useController: function (initGlobal) {
+        useController: function (controller, initGlobal) {
+            function wrapperController(name) {
+                var _this = this;
+                return function (args) { return __awaiter(_this, void 0, void 0, function () {
+                    var returnValue, e_1;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                _a.trys.push([0, 5, , 6]);
+                                returnValue = void 0;
+                                if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
+                                console.log('arg: ', args);
+                                return [4 /*yield*/, controller[name](args)];
+                            case 1:
+                                returnValue = _a.sent();
+                                console.log('return: ', returnValue);
+                                return [3 /*break*/, 4];
+                            case 2: return [4 /*yield*/, controller[name](args)];
+                            case 3:
+                                returnValue = _a.sent();
+                                _a.label = 4;
+                            case 4: return [2 /*return*/, JSON.stringify(returnValue)];
+                            case 5:
+                                e_1 = _a.sent();
+                                hCommon.consoleLog.error('Controller error:', e_1);
+                                throw e_1;
+                            case 6: return [2 /*return*/];
+                        }
+                    });
+                }); };
+            }
             initGlobal(global, wrapperController);
             return initGasOption;
         },

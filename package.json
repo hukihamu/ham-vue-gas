@@ -21,7 +21,7 @@
     "url": "https://github.com/hukihamu/ham-vue-gas/issues"
   },
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=18.0.0"
   },
   "bin": {
     "ham-vue-gas": "bin/index.mjs"
@@ -32,48 +32,48 @@
     "dist/bundle.d.ts"
   ],
   "dependencies": {
-    "typescript": "^5.0.4",
+    "typescript": "~5.0.4",
 
-    "@types/google-apps-script": "^1.0.62",
-    "@google/clasp": "^2.4.2",
+    "@types/google-apps-script": "~1.0.62",
+    "@google/clasp": "~2.4.2",
 
-    "vue": "^3.2.47",
-    "vue-router": "^4.1.6",
+    "vue": "~3.2.47",
+    "vue-router": "~4.1.6",
 
-    "commander": "^10.0.1",
-    "read-pkg-up": "^9.1.0",
-    "ora": "^6.3.0",
-    "loud-rejection": "^2.2.0",
+    "commander": "~10.0.1",
+    "read-pkg-up": "~9.1.0",
+    "ora": "~6.3.0",
+    "loud-rejection": "~2.2.0",
 
-    "webpack": "^5.82.1",
-    "webpack-cli": "^5.1.1",
-    "ts-loader": "^9.4.2",
+    "webpack": "~5.82.1",
+    "webpack-cli": "~5.1.1",
+    "ts-loader": "~9.4.2",
 
-    "gas-webpack-plugin": "^2.5.0",
-    "tsconfig-paths": "^4.2.0",
+    "gas-webpack-plugin": "~2.5.0",
+    "tsconfig-paths": "~4.2.0",
 
-    "sass": "^1.62.1",
-    "sass-loader": "^13.2.2",
-    "css-loader": "^6.7.3",
-    "vue-loader":  "^17.1.1",
-    "clean-webpack-plugin":  "^4.0.0",
-    "webpack-plugin-vuetify":  "^2.0.1",
-    "tsconfig-paths-webpack-plugin": "^4.0.1",
-    "copy-webpack-plugin": "^11.0.0",
-    "html-webpack-plugin": "^5.5.1",
-    "html-inline-script-webpack-plugin": "^3.1.0",
-    "html-inline-css-webpack-plugin": "^1.11.1",
-    "mini-css-extract-plugin": "^2.7.5",
-    "css-minimizer-webpack-plugin": "^5.0.0"
+    "sass": "~1.62.1",
+    "sass-loader": "~13.3.0",
+    "css-loader": "~6.7.3",
+    "vue-loader":  "~17.1.1",
+    "clean-webpack-plugin":  "~4.0.0",
+    "webpack-plugin-vuetify":  "~2.0.1",
+    "tsconfig-paths-webpack-plugin": "~4.0.1",
+    "copy-webpack-plugin": "~11.0.0",
+    "html-webpack-plugin": "~5.5.1",
+    "html-inline-script-webpack-plugin": "~3.1.0",
+    "html-inline-css-webpack-plugin": "~1.11.1",
+    "mini-css-extract-plugin": "~2.7.5",
+    "css-minimizer-webpack-plugin": "~5.0.0"
   },
   "devDependencies": {
 
-    "rollup": "^3.21.2",
-    "@rollup/plugin-commonjs": "^24.1.0",
-    "@rollup/plugin-babel": "^6.0.3",
-    "@babel/preset-env": "^7.21.5",
-    "@rollup/plugin-typescript": "^11.1.0",
-    "tslib": "^2.5.0",
-    "@babel/core": "^7.21.8"
+    "rollup": "~3.21.2",
+    "@rollup/plugin-commonjs": "~24.1.0",
+    "@rollup/plugin-babel": "~6.0.3",
+    "@babel/preset-env": "~7.21.5",
+    "@rollup/plugin-typescript": "~11.1.0",
+    "tslib": "~2.5.0",
+    "@babel/core": "~7.21.8"
   }
 }

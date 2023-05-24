@@ -103,7 +103,7 @@ export declare namespace hGas {
          * スプレッドシートに保存する際のカラム順を決める
          * @protected
          */
-        protected abstract readonly columnList: (keyof InitEntity<E>)[];
+        protected abstract readonly columnOrder: (keyof InitEntity<E>)[];
         /**
          * テーブル作成(アップデート)時、初期にInsertされるデータ
          * @protected
@@ -174,9 +174,9 @@ interface InitGasOptions {
      */
     useController<C extends {
         [name: string]: any;
-    }>(initGlobal: (global: {
+    }>(controller: hGas.ControllerType<C>, initGlobal: (global: {
         [K in keyof C]: WrapperController<C, K>;
-    }, wrapperController: <C extends hCommon.BaseControllerInterface, K extends keyof C>(controller: hGas.ControllerType<C>, name: K) => WrapperController<C, K>) => void): InitGasOptions;
+    }, wrapperController: <K extends keyof C>(name: K) => WrapperController<C, K>) => void): InitGasOptions;
     /**
      * SpreadsheetをDBとして利用する<br>
      * 作成したRepositoryを登録する

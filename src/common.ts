@@ -13,14 +13,17 @@ export namespace hCommon {
         getVueConfig(key: Exclude<(V | C | 'debug'), ''>): string | undefined {
             const content = document.getElementById('vue-config')?.textContent
             if (!content) {
+                consoleLog.error('VueConfigが見つかりません')
                 return undefined
             }
+            if (Object.keys(JSON.parse(content)).every(it => it !== key)) consoleLog.warn(`key"${key}" のconfigが見つかりません`)
             return JSON.parse(content)[key]
         }
         /**
          * gasサイドでのみ利用可能
          */
         getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined {
+            if (PropertiesService.getScriptProperties().getKeys().every(it => it !== key)) consoleLog.warn(`key"${key}" のconfigが見つかりません`)
             return PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
         }
 

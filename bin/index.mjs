@@ -70,7 +70,7 @@ program.command('build')
       const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
       const { CleanWebpackPlugin } = require('clean-webpack-plugin')
       const { VuetifyPlugin } = require('webpack-plugin-vuetify')
-      module.exports = {mode: 'production',entry: {vue: '${v}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt']})]}`
+      module.exports = {mode: 'production',entry: {vue: '${v}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -220,8 +220,8 @@ import sampleController from '@G/controller/sampleController'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
 initGas(config, )
-    .useController<ControllerInterface>((global, wrapperController) => {
-        global.insertData = wrapperController(sampleController, 'insertData')
+    .useController(sampleController, (global, wrapperController) => {
+        global.insertData = wrapperController('insertData')
     })
     .useSpreadsheetDB(SampleRepository,)`)
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'controller'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'controller'))
@@ -251,7 +251,7 @@ import {SampleEntity} from '@G/entity/sampleEntity'
 import {config} from '@C/config'
 
 export class SampleRepository extends SSRepository<SampleEntity> {
-    protected readonly columnList: (keyof hGas.InitEntity<SampleEntity>)[] = ['text']
+    protected readonly columnOrder: (keyof hGas.InitEntity<SampleEntity>)[] = ['text']
     protected readonly spreadsheetId: string = config.getGasConfig('spreadsheetId')
     protected readonly tableName: string = 'SampleTable'
     protected readonly tableVersion: number = 1

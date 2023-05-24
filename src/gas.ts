@@ -78,7 +78,7 @@ export namespace hGas {
          * スプレッドシートに保存する際のカラム順を決める
          * @protected
          */
-        protected abstract readonly columnList: (keyof InitEntity<E>)[]
+        protected abstract readonly columnOrder: (keyof InitEntity<E>)[]
         /**
          * テーブル作成(アップデート)時、初期にInsertされるデータ
          * @protected
@@ -121,7 +121,7 @@ export namespace hGas {
             // バージョン情報をセット
             this.sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion)
             //ヘッダーをセット
-            this.sheet.getRange(1, 2, 1, this.columnList.length).setValues([this.columnList])
+            this.sheet.getRange(1, 2, 1, this.columnOrder.length).setValues([this.columnOrder])
             //初期データをインサート
             for (const e of this.initData) {
                 this.insert(e)
@@ -131,7 +131,7 @@ export namespace hGas {
         private toStringList(entity: E | InitEntity<E>): string[] {
             const result: string[] = []
             result.push(SSRepository.ROW_FUNCTION)
-            for (const key of this.columnList) {
+            for (const key of this.columnOrder) {
                 const value = entity[key] ?? ''
                 result.push(JSON.stringify(value))
             }
@@ -144,14 +144,14 @@ export namespace hGas {
             }
 
             for (let i = 1; i < stringList.length; i++) {
-                const key = this.columnList[i - 1]
+                const key = this.columnOrder[i - 1]
                 entity[key] = JSON.parse(stringList[i] ?? '')
             }
             return entity as E
         }
 
         private getRowRange(rowNumber: number): GoogleAppsScript.Spreadsheet.Range {
-            return this.sheet.getRange(rowNumber, 1, 1, this.columnList.length + 1)
+            return this.sheet.getRange(rowNumber, 1, 1, this.columnOrder.length + 1)
         }
 
         private onLock<R>(runningInLock: () => R): R {
@@ -210,7 +210,7 @@ export namespace hGas {
          */
         getAll(): E[] {
             return this.onLock(() => {
-                const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnList.length + 1).getValues()
+                const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
                 const entities: E[] = []
                 for (const value of values) {
                     if (!value[0]) break
@@ -250,7 +250,7 @@ export namespace hGas {
             this.onLock(() => {
                 const range = this.getRowRange(row)
                 range.clear()
-                const d = new Array(this.columnList.length + 1)
+                const d = new Array(this.columnOrder.length + 1)
                 d[0] = SSRepository.DELETE_LABEL
                 range.setValues([d])
             })
@@ -269,9 +269,9 @@ interface InitGasOptions {
      * globalへ代入前に"wrapperController"を利用する<br>
      * ControllerInterfaceをGenerics宣言すると、コード補完される
      */
-    useController<C extends { [name: string]: any }>(initGlobal: (
+    useController<C extends { [name: string]: any }>(controller: hGas.ControllerType<C>, initGlobal: (
         global: {[K in keyof C]: WrapperController<C, K>},
-        wrapperController: <C extends hCommon.BaseControllerInterface, K extends keyof C>(controller: hGas.ControllerType<C>, name: K)=> WrapperController<C,K>)=>void): InitGasOptions
+        wrapperController: <K extends keyof C>(name: K)=> WrapperController<C,K>)=>void): InitGasOptions
     /**
      * SpreadsheetをDBとして利用する<br>
      * 作成したRepositoryを登録する
@@ -279,31 +279,33 @@ interface InitGasOptions {
     useSpreadsheetDB (...repositoryList: { new (): hGas.SSRepository<any> }[]): InitGasOptions,
 }
 
-function wrapperController<C extends hCommon.BaseControllerInterface, K extends keyof C>(controller: hGas.ControllerType<C>, name: K): WrapperController<C, K> {
-    return async (args: any) => {
-        try {
-            let returnValue
-            if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
-                console.log('arg: ', args)
-                returnValue = await controller[name](args)
-                console.log('return: ', returnValue)
-            } else {
-                returnValue = await controller[name](args)
-            }
-            return JSON.stringify(returnValue)
-        } catch (e) {
-            hCommon.consoleLog.error('Controller error:', e)
-            throw e
-        }
-    }
-}
 /**
  * gas側の機能拡張
  */
 const initGasOption: InitGasOptions = {
-    useController<C extends hCommon.BaseControllerInterface>(initGlobal: (
+    useController<C extends hCommon.BaseControllerInterface>(controller: hGas.ControllerType<C>,initGlobal: (
         global: {[K in keyof C]: WrapperController<C, K>},
-        wrapperController: <C extends hCommon.BaseControllerInterface, K extends keyof C>(controller: hGas.ControllerType<C>, name: K)=> WrapperController<C,K>)=>void): InitGasOptions {
+        wrapperController: <K extends keyof C>(name: K)=> WrapperController<C,K>)=>void): InitGasOptions {
+
+        function wrapperController<K extends keyof C>(name: K): WrapperController<C, K> {
+            return async (args: any) => {
+                try {
+                    let returnValue
+                    if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
+                        console.log('arg: ', args)
+                        returnValue = await controller[name](args)
+                        console.log('return: ', returnValue)
+                    } else {
+                        returnValue = await controller[name](args)
+                    }
+                    return JSON.stringify(returnValue)
+                } catch (e) {
+                    hCommon.consoleLog.error('Controller error:', e)
+                    throw e
+                }
+            }
+        }
+
         initGlobal(global as any, wrapperController)
         return initGasOption
     },
