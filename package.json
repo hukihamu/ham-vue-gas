@@ -37,7 +37,7 @@
     "@types/google-apps-script": "~1.0.62",
     "@google/clasp": "~2.4.2",
 
-    "vue": "~3.2.47",
+    "vue": "3.2.47",
     "vue-router": "~4.1.6",
 
     "commander": "~10.0.1",

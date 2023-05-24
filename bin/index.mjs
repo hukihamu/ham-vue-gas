@@ -112,6 +112,9 @@ program.command('init')
       "@G/*": ["src/gas/*"],
       "@V/*": ["src/vue/*"]
     }
+    "removeComments": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true
   },
   "include": [
     "src"
