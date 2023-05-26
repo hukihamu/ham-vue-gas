@@ -8,6 +8,7 @@ import {fileURLToPath} from 'url'
 import ora from 'ora'
 import {exec} from 'child_process'
 import fs from 'fs'
+import http from "http"
 
 const __dirname = dirname(fileURLToPath(import.meta.url)) // /bin
 
@@ -25,9 +26,7 @@ const stopSpinner = () => {
 
 program.command('build')
   .description('build vue-gas')
-  // TODO defaultをsrc/publicに
   .option('-a, --appsscript <file>', `appsscript.json file. default: ./src/public/appsscript.json`)
-  // TODO defaultをsrc/publicに
   .option('-h, --html <file>', `html file. default: ./src/public/index.html`)
   .option('-t, --tsconfig <file>', 'tsconfig.json file. default: ./tsconfig.json')
   .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts')
@@ -260,6 +259,38 @@ export class SampleRepository extends SSRepository<SampleEntity> {
     protected readonly tableVersion: number = 1
 }`)
   })
+
+program.command('serve')
+    .description('run mock server')
+    .option('-p, --properties <file>', `gas script properties json mock.`)
+    .option('-o, --output <directory>', 'build file output directory. default: ./dist')
+    .action((_, options) => {
+        const rootPath = path.join(__dirname, '../../../')
+        const o = path.join(rootPath, options.output ?? './dist').replaceAll('\\', '\\\\')
+        let json = '{}'
+        if (options.properties) {
+            const p = path.join(rootPath, options.properties).replaceAll('\\', '\\\\')
+            json = fs.readFileSync(path.join(__dirname, 'properties.json')).toString()
+        }
+
+
+        if (!fs.existsSync(path.join(o, 'gas.js'))) throw `nou found gas build file. path:${o}`
+        if (!fs.existsSync(path.join(o, 'index.html'))) throw `nou found vue build file. path:${o}`
+
+        const serve = http.createServer((req, res) => {
+            let vueMock = fs.readFileSync(path.join(__dirname, 'vueMock.js')).toString()
+            vueMock = vueMock.replace('{/**/}', json)
+            let gasMock = fs.readFileSync(path.join(__dirname, 'gasMock.js')).toString()
+            gasMock = gasMock.replace('{/**/}', json)
+            let gas = fs.readFileSync(path.join(o, 'gas.js'))
+            let html = fs.readFileSync(path.join(o, 'index.html')).toString()
+            html = html.replace('<head>', `<head><script>${gasMock}</script><script>${gas}</script><script>${vueMock}</script>`)
+            res.writeHead(200, {'Content-Type': 'text/html'})
+            res.write(html)
+            res.end()
+        })
+        serve.listen(3000)
+    })
 
 
 const [_bin, _sourcePath, ...args] = process.argv
