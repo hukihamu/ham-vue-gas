@@ -15,6 +15,7 @@
 - [ ] テスト
 - [ ] サンプル作成
 - [ ] Config キャッシュ
+- [ ] bin `use vuetify`追加
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
   - [x] スクリプトプロパティの対応
