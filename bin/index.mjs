@@ -110,7 +110,7 @@ program.command('init')
       "@C/*": ["src/common/*"],
       "@G/*": ["src/gas/*"],
       "@V/*": ["src/vue/*"]
-    }
+    },
     "removeComments": false,
     "esModuleInterop": true,
     "experimentalDecorators": true
@@ -217,7 +217,6 @@ function onClickInput(){
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'index.ts'), `import {hGas} from 'ham-vue-gas'
 import initGas = hGas.initGas
 import {config} from '@C/config'
-import {ControllerInterface} from '@C/controllerInterface'
 import sampleController from '@G/controller/sampleController'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
