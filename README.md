@@ -17,6 +17,8 @@
 - [ ] Config キャッシュ
 - [ ] bin `use vuetify`追加
 - [ ] index.vueの名前はバグの温床
+- [ ] piniaが利用できない
+- [ ] vuetify オートインポート
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
   - [x] スクリプトプロパティの対応
