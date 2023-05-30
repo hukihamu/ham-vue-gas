@@ -8,13 +8,7 @@ export namespace hCommon {
         private readonly cache: { [name: string]: string | undefined } = {}
         constructor(private commonConfigKeys: NonEmptyArray<C>, private gasConfigKeys: NonEmptyArray<G>, private vueConfigKeys: NonEmptyArray<V>) {
             // cache生成
-            if (document) {
-                // vue
-                const content = document.getElementById('vue-config')?.textContent
-                if (content) {
-                    this.cache = JSON.parse(content)
-                }
-            } else {
+            if (PropertiesService) {
                 // gas
                 let config: {[key: string]: string | undefined} = { }
                 config['debug'] = PropertiesService.getScriptProperties().getProperty('debug') ?? undefined
@@ -27,6 +21,12 @@ export namespace hCommon {
                     config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
                 }
                 this.cache = config as {[key in (G | C)]: string | undefined}
+            } else {
+                // vue
+                const content = document.getElementById('vue-config')?.textContent
+                if (content) {
+                    this.cache = JSON.parse(content)
+                }
             }
         }
 
