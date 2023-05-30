@@ -18,7 +18,7 @@
                 this.vueConfigKeys = vueConfigKeys;
                 this.cache = {};
                 // cache生成
-                if (PropertiesService) {
+                if (globalThis.PropertiesService) {
                     // gas
                     var config = {};
                     config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;

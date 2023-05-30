@@ -8,7 +8,7 @@ export namespace hCommon {
         private readonly cache: { [name: string]: string | undefined } = {}
         constructor(private commonConfigKeys: NonEmptyArray<C>, private gasConfigKeys: NonEmptyArray<G>, private vueConfigKeys: NonEmptyArray<V>) {
             // cache生成
-            if (PropertiesService) {
+            if (globalThis.PropertiesService) {
                 // gas
                 let config: {[key: string]: string | undefined} = { }
                 config['debug'] = PropertiesService.getScriptProperties().getProperty('debug') ?? undefined
