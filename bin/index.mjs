@@ -69,7 +69,7 @@ program.command('build')
       const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
       const { CleanWebpackPlugin } = require('clean-webpack-plugin')
       const { VuetifyPlugin } = require('webpack-plugin-vuetify')
-      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
+      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new VuetifyPlugin({ autoImport: true }),new VueLoaderPlugin(),new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -179,11 +179,12 @@ import initVue = hVue.initVue
 import Main from '@V/main.vue'
 import GasClient = hVue.GasClient
 import {ControllerInterface} from '@C/controllerInterface'
+${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import components from 'vuetify/components'\n" : ""}${v ? "import directives from 'vuetify/directives'\n" : ""}
 
 initVue([{
     path: '/',
     component: Main
-}], )
+}], app => app.use(createVuetify({components, directives})))
 
 
 export const gasClient = new GasClient<ControllerInterface>() `)
@@ -202,6 +203,7 @@ function onClickInput(){
 </script>
 
 <template>
+  ${v ? '<v-card>' : ''}
   <h1>Welcome HamVueGas</h1>
   <div>
     <input v-model="inputText"><button @click="onClickInput">Input</button>
@@ -209,6 +211,7 @@ function onClickInput(){
   <div v-for="text in dateList">
     <span>{{text}}</span>
   </div>
+  ${v ? '</v-card>' : ''}
 </template>`)
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'vue.d.ts'),`declare module '*.vue' {
     import type { DefineComponent } from 'vue'
