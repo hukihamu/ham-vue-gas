@@ -96,8 +96,8 @@ program.command('build')
 
 program.command('init')
   .description('init vue-gas')
-  .option('-v, --vuetify', `use vuetify`)
-  .action(() => {
+  .option('-vf, --vuetify', `use vuetify`)
+  .action((_, options) => {
     const rootPath = path.join(__dirname, '../../../')
 
     // 直下
