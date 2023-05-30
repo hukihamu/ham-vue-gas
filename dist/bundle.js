@@ -18,30 +18,30 @@
                 this.vueConfigKeys = vueConfigKeys;
                 this.cache = {};
                 // cache生成
-                if (document) {
-                    // vue
-                    var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
-                    if (content) {
-                        this.cache = JSON.parse(content);
-                    }
-                }
-                else {
+                if (PropertiesService) {
                     // gas
                     var config = {};
-                    config['debug'] = (_b = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _b !== void 0 ? _b : undefined;
+                    config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
                     for (var _i = 0, _e = this.commonConfigKeys; _i < _e.length; _i++) {
                         var key = _e[_i];
                         if (key === '')
                             continue;
-                        config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
+                        config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
                     }
                     for (var _f = 0, _g = this.gasConfigKeys; _f < _g.length; _f++) {
                         var key = _g[_f];
                         if (key === '')
                             continue;
-                        config[key] = (_d = PropertiesService.getScriptProperties().getProperty(key)) !== null && _d !== void 0 ? _d : undefined;
+                        config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
                     }
                     this.cache = config;
+                }
+                else {
+                    // vue
+                    var content = (_d = document.getElementById('vue-config')) === null || _d === void 0 ? void 0 : _d.textContent;
+                    if (content) {
+                        this.cache = JSON.parse(content);
+                    }
                 }
             }
             /**
