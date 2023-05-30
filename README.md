@@ -15,10 +15,10 @@
 - [ ] テスト
 - [ ] サンプル作成
 - [x] Config キャッシュ
-- [ ] bin `use vuetify`追加
+- [x] bin `use vuetify`追加
 - [x] index.vueの名前はバグの温床
-- [ ] piniaが利用できない
-- [ ] vuetify オートインポート
+- [x] piniaが利用できない -> vuexに変更
+- [x] vuetify オートインポート
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
   - [x] スクリプトプロパティの対応
