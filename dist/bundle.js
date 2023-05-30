@@ -12,15 +12,47 @@
          */
         var Config = /** @class */ (function () {
             function Config(commonConfigKeys, gasConfigKeys, vueConfigKeys) {
+                var _a, _b, _c, _d;
                 this.commonConfigKeys = commonConfigKeys;
                 this.gasConfigKeys = gasConfigKeys;
                 this.vueConfigKeys = vueConfigKeys;
+                this.cache = {};
+                // cache生成
+                if (document) {
+                    // vue
+                    var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
+                    if (content) {
+                        this.cache = JSON.parse(content);
+                    }
+                }
+                else {
+                    // gas
+                    var config = {};
+                    config['debug'] = (_b = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _b !== void 0 ? _b : undefined;
+                    for (var _i = 0, _e = this.commonConfigKeys; _i < _e.length; _i++) {
+                        var key = _e[_i];
+                        if (key === '')
+                            continue;
+                        config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
+                    }
+                    for (var _f = 0, _g = this.gasConfigKeys; _f < _g.length; _f++) {
+                        var key = _g[_f];
+                        if (key === '')
+                            continue;
+                        config[key] = (_d = PropertiesService.getScriptProperties().getProperty(key)) !== null && _d !== void 0 ? _d : undefined;
+                    }
+                    this.cache = config;
+                }
             }
             /**
              * vueサイドでのみ利用可能
              */
             Config.prototype.getVueConfig = function (key) {
                 var _a;
+                var cacheResult = this.cache[key];
+                if (cacheResult !== undefined) {
+                    return cacheResult;
+                }
                 var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
                 if (!content) {
                     hCommon.consoleLog.error('VueConfigが見つかりません');
@@ -35,6 +67,10 @@
              */
             Config.prototype.getGasConfig = function (key) {
                 var _a;
+                var cacheResult = this.cache[key];
+                if (cacheResult !== undefined) {
+                    return cacheResult;
+                }
                 if (PropertiesService.getScriptProperties().getKeys().every(function (it) { return it !== key; }))
                     hCommon.consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
                 return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
@@ -53,27 +89,6 @@
                     config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
                 }
                 for (var _e = 0, _f = this.vueConfigKeys; _e < _f.length; _e++) {
-                    var key = _f[_e];
-                    if (key === '')
-                        continue;
-                    config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
-                }
-                return config;
-            };
-            /**
-             * すべてのGasConfigを取得(gasサイドでのみ利用可能)
-             */
-            Config.prototype.getAllGasConfig = function () {
-                var _a, _b, _c;
-                var config = {};
-                config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
-                for (var _i = 0, _d = this.commonConfigKeys; _i < _d.length; _i++) {
-                    var key = _d[_i];
-                    if (key === '')
-                        continue;
-                    config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
-                }
-                for (var _e = 0, _f = this.gasConfigKeys; _e < _f.length; _e++) {
                     var key = _f[_e];
                     if (key === '')
                         continue;

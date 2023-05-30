@@ -7,6 +7,7 @@ export declare namespace hCommon {
         private commonConfigKeys;
         private gasConfigKeys;
         private vueConfigKeys;
+        private readonly cache;
         constructor(commonConfigKeys: NonEmptyArray<C>, gasConfigKeys: NonEmptyArray<G>, vueConfigKeys: NonEmptyArray<V>);
         /**
          * vueサイドでのみ利用可能
@@ -21,12 +22,6 @@ export declare namespace hCommon {
          */
         getAllVueConfig(): {
             [key in Exclude<(V | C), ''>]: string | undefined;
-        };
-        /**
-         * すべてのGasConfigを取得(gasサイドでのみ利用可能)
-         */
-        getAllGasConfig(): {
-            [key in Exclude<(G | C), ''>]: string | undefined;
         };
     }
     /**

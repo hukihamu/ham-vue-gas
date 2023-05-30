@@ -96,6 +96,7 @@ program.command('build')
 
 program.command('init')
   .description('init vue-gas')
+  .option('-v, --vuetify', `use vuetify`)
   .action(() => {
     const rootPath = path.join(__dirname, '../../../')
 
@@ -136,6 +137,8 @@ program.command('init')
 <html>
 <head>
     <meta charset="UTF-8">
+    ${options.vuetify ? '<link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">' : ''}
+    ${options.vuetify ? '<link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">' : ''}
     <title></title>
 </head>
 <body>
@@ -172,18 +175,18 @@ export interface ControllerInterface extends BaseControllerInterface {
     if (!fs.existsSync(path.join(rootPath, 'src', 'vue'))) fs.mkdirSync(path.join(rootPath, 'src', 'vue'))
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'index.ts'), `import {hVue} from 'ham-vue-gas'
 import initVue = hVue.initVue
-import Index from '@V/index.vue'
+import Main from '@V/main.vue'
 import GasClient = hVue.GasClient
 import {ControllerInterface} from '@C/controllerInterface'
 
 initVue([{
     path: '/',
-    component: Index
+    component: Main
 }], )
 
 
 export const gasClient = new GasClient<ControllerInterface>() `)
-    fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'index.vue'), `<script setup lang="ts">
+    fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'main.vue'), `<script setup lang="ts">
 import {gasClient} from '@V/index'
 import {ref} from 'vue'
 

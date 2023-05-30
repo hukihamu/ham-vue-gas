@@ -5,12 +5,40 @@ export namespace hCommon {
      * gasInit実行時に必須
      */
     export class Config<C extends string, G extends string, V extends string> {
-        constructor(private commonConfigKeys: NonEmptyArray<C>, private gasConfigKeys: NonEmptyArray<G>, private vueConfigKeys: NonEmptyArray<V>) {}
+        private readonly cache: { [name: string]: string | undefined } = {}
+        constructor(private commonConfigKeys: NonEmptyArray<C>, private gasConfigKeys: NonEmptyArray<G>, private vueConfigKeys: NonEmptyArray<V>) {
+            // cache生成
+            if (document) {
+                // vue
+                const content = document.getElementById('vue-config')?.textContent
+                if (content) {
+                    this.cache = JSON.parse(content)
+                }
+            } else {
+                // gas
+                let config: {[key: string]: string | undefined} = { }
+                config['debug'] = PropertiesService.getScriptProperties().getProperty('debug') ?? undefined
+                for (const key of this.commonConfigKeys) {
+                    if (key === '') continue
+                    config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
+                }
+                for (const key of this.gasConfigKeys) {
+                    if (key === '') continue
+                    config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
+                }
+                this.cache = config as {[key in (G | C)]: string | undefined}
+            }
+        }
 
         /**
          * vueサイドでのみ利用可能
          */
         getVueConfig(key: Exclude<(V | C | 'debug'), ''>): string | undefined {
+            const cacheResult = this.cache[key]
+            if (cacheResult !== undefined) {
+                return cacheResult
+            }
+
             const content = document.getElementById('vue-config')?.textContent
             if (!content) {
                 consoleLog.error('VueConfigが見つかりません')
@@ -23,6 +51,10 @@ export namespace hCommon {
          * gasサイドでのみ利用可能
          */
         getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined {
+            const cacheResult = this.cache[key]
+            if (cacheResult !== undefined) {
+                return cacheResult
+            }
             if (PropertiesService.getScriptProperties().getKeys().every(it => it !== key)) consoleLog.warn(`key"${key}" のconfigが見つかりません`)
             return PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
         }
@@ -42,22 +74,6 @@ export namespace hCommon {
                 config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
             }
             return config as {[key in (V | C)]: string | undefined}
-        }
-        /**
-         * すべてのGasConfigを取得(gasサイドでのみ利用可能)
-         */
-        getAllGasConfig(): {[key in Exclude<(G | C), ''>]: string | undefined } {
-            let config: {[key: string]: string | undefined} = { }
-            config['debug'] = PropertiesService.getScriptProperties().getProperty('debug') ?? undefined
-            for (const key of this.commonConfigKeys) {
-                if (key === '') continue
-                config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
-            }
-            for (const key of this.gasConfigKeys) {
-                if (key === '') continue
-                config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
-            }
-            return config as {[key in (G | C)]: string | undefined}
         }
     }
 

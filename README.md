@@ -14,9 +14,9 @@
 - [ ] 使い方
 - [ ] テスト
 - [ ] サンプル作成
-- [ ] Config キャッシュ
+- [x] Config キャッシュ
 - [ ] bin `use vuetify`追加
-- [ ] index.vueの名前はバグの温床
+- [x] index.vueの名前はバグの温床
 - [ ] piniaが利用できない
 - [ ] vuetify オートインポート
 - ローカルで実行できるようなgasMock
