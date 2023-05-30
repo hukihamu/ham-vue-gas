@@ -138,8 +138,6 @@ program.command('init')
 <html>
 <head>
     <meta charset="UTF-8">
-    ${v ? '<link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">' : ''}
-    ${v ? '<link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">' : ''}
     <title></title>
 </head>
 <body>
@@ -179,7 +177,7 @@ import initVue = hVue.initVue
 import Main from '@V/main.vue'
 import GasClient = hVue.GasClient
 import {ControllerInterface} from '@C/controllerInterface'
-${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import components from 'vuetify/components'\n" : ""}${v ? "import directives from 'vuetify/directives'\n" : ""}
+${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import * as components from 'vuetify/components'\n" : ""}${v ? "import * as directives from 'vuetify/directives'\n" : ""}
 
 initVue([{
     path: '/',
