@@ -15,7 +15,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url)) // /bin
 loudRejection()
 const manifest = readPackageUpSync({cwd: __dirname})
 program.storeOptionsAsProperties(false)
-program.version(manifest ? manifest.packageJson.version : 'unknown', '-v, --version', 'output the current version')
+program.version(manifest ? manifest.packageJson.version : 'unknown', '-V, --version', 'output the current version')
 program.name('ham-vue-gas').usage('<command> [options]').description(`ham-vue-gas - The Apps Script + Vue(router)`)
 const spinner = ora()
 const stopSpinner = () => {
@@ -26,29 +26,29 @@ const stopSpinner = () => {
 
 program.command('build')
   .description('build vue-gas')
-  .option('-a, --appsscript <file>', `appsscript.json file. default: ./src/public/appsscript.json`)
-  .option('-h, --html <file>', `html file. default: ./src/public/index.html`)
-  .option('-t, --tsconfig <file>', 'tsconfig.json file. default: ./tsconfig.json')
-  .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts')
-  .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts')
-  .option('-o, --output <directory>', 'build file output directory. default: ./dist')
-  .option('-w, --watch', 'build watch')
-  .action((_, options) => {
+  .option('-a, --appsscript <file>', `appsscript.json file. default: ./src/public/appsscript.json`, './src/public/appsscript.json')
+  .option('-h, --html <file>', `html file. default: ./src/public/index.html`, './src/public/index.html')
+  .option('-t, --tsconfig <file>', 'tsconfig.json file. default: ./tsconfig.json', './tsconfig.json')
+  .option('-g, --gas <file>', 'server side main file. default: ./src/gas/index.ts', './src/gas/index.ts')
+  .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts', './src/vue/index.ts')
+  .option('-o, --output <directory>', 'build file output directory. default: ./dist', './dist')
+  .option('-w, --watch', 'build watch', false)
+  .action(function () {
     const rootPath = path.join(__dirname, '../../../')
 
-    const a = path.join(rootPath, options.appsscript ?? './src/public/appsscript.json').replaceAll('\\', '\\\\')
-    const h = path.join(rootPath, options.html ?? './src/public/index.html').replaceAll('\\', '\\\\')
-    const t = path.join(rootPath, options.tsconfig ?? './tsconfig.json').replaceAll('\\', '\\\\')
-    const g = path.join(rootPath, options.gas ?? './src/gas/index.ts').replaceAll('\\', '\\\\')
-    const v = path.join(rootPath, options.vue ?? './src/vue/index.ts').replaceAll('\\', '\\\\')
-    const o = path.join(rootPath, options.output ?? './dist').replaceAll('\\', '\\\\')
-    const w = options.watch ?? false
+    const a = path.join(rootPath, this.opts().appsscript).replaceAll('\\', '\\\\')
+    const h = path.join(rootPath, this.opts().html).replaceAll('\\', '\\\\')
+    const t = path.join(rootPath, this.opts().tsconfig).replaceAll('\\', '\\\\')
+    const g = path.join(rootPath, this.opts().gas).replaceAll('\\', '\\\\')
+    const e = path.join(rootPath, this.opts().vue).replaceAll('\\', '\\\\')
+    const o = path.join(rootPath, this.opts().output).replaceAll('\\', '\\\\')
+    const w = this.opts().watch
     // 設定値存在確認
     if (!fs.existsSync(a)) throw `nou found appsscript.json. path:${a}`
     if (!fs.existsSync(h)) throw `nou found html. path:${h}`
     if (!fs.existsSync(t)) throw `nou found tsconfig.json. path:${t}`
     if (!fs.existsSync(g)) throw `nou found gas main file. path:${g}`
-    if (!fs.existsSync(v)) throw `nou found vue main file. path:${v}`
+    if (!fs.existsSync(e)) throw `nou found vue main file. path:${e}`
 
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = `
@@ -69,7 +69,7 @@ program.command('build')
       const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
       const { CleanWebpackPlugin } = require('clean-webpack-plugin')
       const { VuetifyPlugin } = require('webpack-plugin-vuetify')
-      module.exports = {mode: 'production',entry: {vue: '${v}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
+      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new VueLoaderPlugin(),new VuetifyPlugin({ autoImport: true }),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -96,9 +96,10 @@ program.command('build')
 
 program.command('init')
   .description('init vue-gas')
-  .option('-vf, --vuetify', `use vuetify`)
-  .action((_, options) => {
+  .option('-v --vuetify', `use vuetify`, false)
+  .action(function () {
     const rootPath = path.join(__dirname, '../../../')
+    const v = this.opts().vuetify
 
     // 直下
     fs.writeFileSync(path.join(rootPath, 'tsconfig.json'),`{
@@ -137,8 +138,8 @@ program.command('init')
 <html>
 <head>
     <meta charset="UTF-8">
-    ${options.vuetify ? '<link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">' : ''}
-    ${options.vuetify ? '<link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">' : ''}
+    ${v ? '<link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">' : ''}
+    ${v ? '<link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">' : ''}
     <title></title>
 </head>
 <body>
