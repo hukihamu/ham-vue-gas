@@ -65,11 +65,9 @@ program.command('build')
       const HtmlWebpackPlugin = require('html-webpack-plugin')
       const HtmlInlineScriptWebpackPlugin = require('html-inline-script-webpack-plugin')
       const HtmlInlineCssWebpackPlugin = require('html-inline-css-webpack-plugin').default
-      const MiniCssExtractPlugin = require('mini-css-extract-plugin')
-      const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
       const { CleanWebpackPlugin } = require('clean-webpack-plugin')
       const { VuetifyPlugin } = require('webpack-plugin-vuetify')
-      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader',options: {extractCSS: true}},{test: /\\.css$/,use: [MiniCssExtractPlugin.loader,'css-loader']},{test: /\\.s([ca])ss$/,use: ['style-loader','css-loader',{loader: 'sass-loader',options: {implementation: require('sass')}}]}]},optimization: {minimize: true,minimizer: [\`...\`,new CssMinimizerPlugin({minimizerOptions: {preset: ["default",{discardComments: { removeAll: true },},]}})]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new VuetifyPlugin({ autoImport: true }),new VueLoaderPlugin(),new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new MiniCssExtractPlugin({ filename: 'vue.css' }),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
+      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader'},{ test: /\\.css$/, use: ['css-loader'] }]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new VuetifyPlugin({ autoImport: true, styles: 'none' }),new VueLoaderPlugin(),new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -138,6 +136,7 @@ program.command('init')
 <html>
 <head>
     <meta charset="UTF-8">
+    ${v ? '<link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">\n    ' : ''}<link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <title></title>
 </head>
 <body>
