@@ -16,4 +16,4 @@
 - [ ] サンプル作成
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
-  - [x] SS利用時、キャッシュを利用するように修正
+- [ ] cssが反映されない問題(vuetify classが問題？)
