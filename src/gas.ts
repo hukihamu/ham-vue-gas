@@ -186,6 +186,7 @@ export namespace hGas {
          */
         insert(entity: E | InitEntity<E>): void {
             this.onLock(() => {
+                CacheService.getScriptCache().remove(this.tableName)
                 let insertRowNumber = -1
                 const values = this.sheet.getDataRange().getValues()
                 for (let i = 1; i < values.length; i++) {
@@ -209,16 +210,24 @@ export namespace hGas {
          * 全件取得(フィルターなどはJSで実施)
          */
         getAll(): E[] {
-            return this.onLock(() => {
-                const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
-                const entities: E[] = []
-                for (const value of values) {
-                    if (!value[0]) break
-                    if (value[0] === SSRepository.DELETE_LABEL) continue
-                    entities.push(this.toEntity(value))
-                }
-                return entities
-            })
+            const cache = CacheService.getScriptCache().get(this.tableName)
+            let values: any[][] = []
+            if (cache){
+                values = JSON.parse(cache)
+            } else {
+                values = this.onLock(() => {
+                    const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
+                    CacheService.getScriptCache().put(this.tableName, JSON.stringify(values), 21600)
+                    return values
+                })
+            }
+            const entities: E[] = []
+            for (const value of values) {
+                if (!value[0]) break
+                if (value[0] === SSRepository.DELETE_LABEL) continue
+                entities.push(this.toEntity(value))
+            }
+            return entities
         }
 
         /**
@@ -226,10 +235,16 @@ export namespace hGas {
          * @param row 取得するrow(rowは自動で付与され、不定一意)
          */
         getByRow(row: number): E {
-            return this.onLock(() => {
-                const stringList = this.getRowRange(row).getValues()[0] ?? []
-                return this.toEntity(stringList)
-            })
+            const cache = CacheService.getScriptCache().get(this.tableName)
+            let stringList = []
+            if (cache){
+                stringList = JSON.parse(cache)[row - 2]
+            } else {
+                this.onLock(() => {
+                    stringList = this.getRowRange(row).getValues()[0] ?? []
+                })
+            }
+            return this.toEntity(stringList)
         }
 
         /**
@@ -238,6 +253,7 @@ export namespace hGas {
          */
         update(entity: E): void {
             this.onLock(() => {
+                CacheService.getScriptCache().remove(this.tableName)
                 this.getRowRange(entity.row).setValues([this.toStringList(entity)])
             })
         }
@@ -248,6 +264,7 @@ export namespace hGas {
          */
         delete(row: number): void {
             this.onLock(() => {
+                CacheService.getScriptCache().remove(this.tableName)
                 const range = this.getRowRange(row)
                 range.clear()
                 const d = new Array(this.columnOrder.length + 1)

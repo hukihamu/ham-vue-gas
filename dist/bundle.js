@@ -457,6 +457,7 @@
                 var _this = this;
                 this.onLock(function () {
                     var _a;
+                    CacheService.getScriptCache().remove(_this.tableName);
                     var insertRowNumber = -1;
                     var values = _this.sheet.getDataRange().getValues();
                     for (var i = 1; i < values.length; i++) {
@@ -481,19 +482,28 @@
              */
             SSRepository.prototype.getAll = function () {
                 var _this = this;
-                return this.onLock(function () {
-                    var values = _this.sheet.getRange(2, 1, _this.sheet.getLastRow() - 1, _this.columnOrder.length + 1).getValues();
-                    var entities = [];
-                    for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
-                        var value = values_1[_i];
-                        if (!value[0])
-                            break;
-                        if (value[0] === SSRepository.DELETE_LABEL)
-                            continue;
-                        entities.push(_this.toEntity(value));
-                    }
-                    return entities;
-                });
+                var cache = CacheService.getScriptCache().get(this.tableName);
+                var values = [];
+                if (cache) {
+                    values = JSON.parse(cache);
+                }
+                else {
+                    values = this.onLock(function () {
+                        var values = _this.sheet.getRange(2, 1, _this.sheet.getLastRow() - 1, _this.columnOrder.length + 1).getValues();
+                        CacheService.getScriptCache().put(_this.tableName, JSON.stringify(values), 21600);
+                        return values;
+                    });
+                }
+                var entities = [];
+                for (var _i = 0, values_1 = values; _i < values_1.length; _i++) {
+                    var value = values_1[_i];
+                    if (!value[0])
+                        break;
+                    if (value[0] === SSRepository.DELETE_LABEL)
+                        continue;
+                    entities.push(this.toEntity(value));
+                }
+                return entities;
             };
             /**
              * １件取得
@@ -501,11 +511,18 @@
              */
             SSRepository.prototype.getByRow = function (row) {
                 var _this = this;
-                return this.onLock(function () {
-                    var _a;
-                    var stringList = (_a = _this.getRowRange(row).getValues()[0]) !== null && _a !== void 0 ? _a : [];
-                    return _this.toEntity(stringList);
-                });
+                var cache = CacheService.getScriptCache().get(this.tableName);
+                var stringList = [];
+                if (cache) {
+                    stringList = JSON.parse(cache)[row - 2];
+                }
+                else {
+                    this.onLock(function () {
+                        var _a;
+                        stringList = (_a = _this.getRowRange(row).getValues()[0]) !== null && _a !== void 0 ? _a : [];
+                    });
+                }
+                return this.toEntity(stringList);
             };
             /**
              * 更新処理(上書きなため、部分変更不可)
@@ -514,6 +531,7 @@
             SSRepository.prototype.update = function (entity) {
                 var _this = this;
                 this.onLock(function () {
+                    CacheService.getScriptCache().remove(_this.tableName);
                     _this.getRowRange(entity.row).setValues([_this.toStringList(entity)]);
                 });
             };
@@ -524,6 +542,7 @@
             SSRepository.prototype.delete = function (row) {
                 var _this = this;
                 this.onLock(function () {
+                    CacheService.getScriptCache().remove(_this.tableName);
                     var range = _this.getRowRange(row);
                     range.clear();
                     var d = new Array(_this.columnOrder.length + 1);
