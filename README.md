@@ -17,3 +17,4 @@
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
 - [ ] cssが反映されない問題(vuetify classが問題？)
+- [ ] root(常時表示)となるapp.vue内の処理をinitでできるように

@@ -1,16 +1,22 @@
 import {App, Component, createApp} from 'vue'
 import {createRouter, createWebHistory, Router, RouteRecordRaw} from 'vue-router'
 import {hCommon} from '@/common'
+import {SetupContext} from '@vue/runtime-core'
 
+type ArgsOption = {
+    usePlugin?: (app: App<Element>) => App<Element>
+    mountContainer?: string
+    vueMainScript?: (context: SetupContext) => {}
+}
 export namespace hVue{
     /**
      * Vue側entryファイルで実行する関数<br>
      *
      * @param app Componentか、Routingを設定可能
-     * @param useFunc Vueに追加するプラグインを登録するFunction. example: app => app.use(vuetify). default: app => app
-     * @param mountContainer マウントするエレメント default: #app
+     * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
      */
-    export function initVue(app: Component | RouteRecordRaw[], useFunc: (app: App<Element>) => App<Element> = (app) => app, mountContainer: string = '#app') {
+    export function initVue(app: Component | RouteRecordRaw[],
+                            option: ArgsOption = {}) {
         hCommon.consoleLog.debug = (label: string, data: any) => {
             const content = document.getElementById('vue-config')?.textContent ?? ''
             if (JSON.parse(content)['debug'] === 'true') console.log(label, data)
@@ -22,11 +28,11 @@ export namespace hVue{
                 history: createWebHistory(),
                 routes: app as RouteRecordRaw[]
             })
-            appElement = createApp(rootComponent(router)).use(router)
+            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router)
         } else {
             appElement = createApp(app)
         }
-        useFunc(appElement).mount(mountContainer)
+        (option.usePlugin ? option.usePlugin(appElement) : appElement).mount(option.mountContainer ?? '#app')
     }
 
     /**
@@ -55,17 +61,18 @@ export namespace hVue{
     }
 }
 
-function rootComponent(router: Router): Component{
+function rootComponent(router: Router, main: ArgsOption['vueMainScript']): Component{
     return {
-        setup(){
+        setup(_, context){
             router.afterEach(route => {
                 window.google.script.history.replace(undefined, route.query, route.path)
             })
             window.google.script.url.getLocation(location => {
                 const path = location.hash ? location.hash : '/'
                 const query = location.parameter
-                router.replace({ path, query })
+                router.replace({ path, query }).then()
             })
+            if (main) main(context)
         },
         template: '<router-view />'
     }

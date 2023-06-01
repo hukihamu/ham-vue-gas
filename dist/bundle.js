@@ -124,12 +124,11 @@
          * Vue側entryファイルで実行する関数<br>
          *
          * @param app Componentか、Routingを設定可能
-         * @param useFunc Vueに追加するプラグインを登録するFunction. example: app => app.use(vuetify). default: app => app
-         * @param mountContainer マウントするエレメント default: #app
+         * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
          */
-        function initVue(app, useFunc, mountContainer) {
-            if (useFunc === void 0) { useFunc = function (app) { return app; }; }
-            if (mountContainer === void 0) { mountContainer = '#app'; }
+        function initVue(app, option) {
+            var _a;
+            if (option === void 0) { option = {}; }
             hCommon.consoleLog.debug = function (label, data) {
                 var _a, _b;
                 var content = (_b = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
@@ -143,12 +142,12 @@
                     history: vueRouter.createWebHistory(),
                     routes: app
                 });
-                appElement = vue.createApp(rootComponent(router)).use(router);
+                appElement = vue.createApp(rootComponent(router, option.vueMainScript)).use(router);
             }
             else {
                 appElement = vue.createApp(app);
             }
-            useFunc(appElement).mount(mountContainer);
+            (option.usePlugin ? option.usePlugin(appElement) : appElement).mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
         }
         hVue.initVue = initVue;
         /**
@@ -181,17 +180,19 @@
         }());
         hVue.GasClient = GasClient;
     })(hVue || (hVue = {}));
-    function rootComponent(router) {
+    function rootComponent(router, main) {
         return {
-            setup: function () {
+            setup: function (_, context) {
                 router.afterEach(function (route) {
                     window.google.script.history.replace(undefined, route.query, route.path);
                 });
                 window.google.script.url.getLocation(function (location) {
                     var path = location.hash ? location.hash : '/';
                     var query = location.parameter;
-                    router.replace({ path: path, query: query });
+                    router.replace({ path: path, query: query }).then();
                 });
+                if (main)
+                    main(context);
             },
             template: '<router-view />'
         };
@@ -318,20 +319,19 @@
         /**
          * Gas側entryファイルで実行する関数<br>
          * @param config インスタンス化したhCommon.Configを入力
-         * @param htmlFileName htmlファイル名を設定 default: index
-         * @param editHtmlOutput gasの機能で、htmlオブジェクトを編集したい際に利用(title変更など)
+         * @param option htmlファイル名を変更したり、htmlを変更する際に利用
          */
-        function initGas(config, htmlFileName, editHtmlOutput) {
-            if (htmlFileName === void 0) { htmlFileName = 'index'; }
-            if (editHtmlOutput === void 0) { editHtmlOutput = function (output) { return output; }; }
+        function initGas(config, option) {
+            if (option === void 0) { option = {}; }
             hCommon.consoleLog.debug = function (label, data) {
                 if (config.getGasConfig('debug') === 'true')
                     console.log(label, data);
             };
             global.doGet = function () {
-                var gasHtml = HtmlService.createHtmlOutputFromFile(htmlFileName);
+                var _a;
+                var gasHtml = HtmlService.createHtmlOutputFromFile((_a = option.htmlFileName) !== null && _a !== void 0 ? _a : 'index');
                 gasHtml.setContent(gasHtml.getContent().replace('<body>', "<body><script type='application/json' id=\"vue-config\">".concat(JSON.stringify(config.getAllVueConfig()), "</script>")));
-                return editHtmlOutput(gasHtml);
+                return option.editHtmlOutput ? option.editHtmlOutput(gasHtml) : gasHtml;
             };
             return initGasOption;
         }

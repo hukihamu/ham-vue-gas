@@ -54,33 +54,36 @@ export declare namespace hGas {
     /**
      * Controller実装に利用する
      */
-    type ControllerType<C extends hCommon.BaseControllerInterface> = {
+    export type ControllerType<C extends hCommon.BaseControllerInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
     };
     /**
      * SSRepositoryのinitData、columnListの宣言に使用
      */
-    type InitEntity<E extends SSEntity> = Omit<E, 'row'>;
+    export type InitEntity<E extends SSEntity> = Omit<E, 'row'>;
     /**
      * スプレッドシートに格納するデータオブジェクトを定義
      */
-    type SSEntity = {
+    export type SSEntity = {
         row: number;
+    };
+    type ArgsOption = {
+        htmlFileName?: string;
+        editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
     };
     /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
-     * @param htmlFileName htmlファイル名を設定 default: index
-     * @param editHtmlOutput gasの機能で、htmlオブジェクトを編集したい際に利用(title変更など)
+     * @param option htmlファイル名を変更したり、htmlを変更する際に利用
      */
-    function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>, htmlFileName?: string, editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput): InitGasOptions;
+    export function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>, option?: ArgsOption): InitGasOptions;
     /**
      * スプレッドシートをテーブルとしてCRUD操作を行う<br>
      * 本abstract classをextendsして作成する<br>
      * extendsしたクラスをgasInit().useSpreadsheetDBに入力すると利用可能となる<br>
      * extendsしたクラスをインスタンス化して利用する
      */
-    abstract class SSRepository<E extends SSEntity> {
+    export abstract class SSRepository<E extends SSEntity> {
         private _sheet;
         private importSheet;
         private get sheet();
@@ -157,6 +160,7 @@ export declare namespace hGas {
          */
         delete(row: number): void;
     }
+    
 }
 type LockType = 'user' | 'script' | 'none';
 type WrapperController<C extends hCommon.BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
@@ -195,15 +199,20 @@ declare const _default: {
 import { App, Component } from 'vue';
 import { RouteRecordRaw } from 'vue-router';
 
+
+type ArgsOption = {
+    usePlugin?: (app: App<Element>) => App<Element>;
+    mountContainer?: string;
+    vueMainScript?: (context: SetupContext) => {};
+};
 export declare namespace hVue {
     /**
      * Vue側entryファイルで実行する関数<br>
      *
      * @param app Componentか、Routingを設定可能
-     * @param useFunc Vueに追加するプラグインを登録するFunction. example: app => app.use(vuetify). default: app => app
-     * @param mountContainer マウントするエレメント default: #app
+     * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
      */
-    function initVue(app: Component | RouteRecordRaw[], useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
+    function initVue(app: Component | RouteRecordRaw[], option?: ArgsOption): void;
     /**
      * Vue側からGasで作成したコントローラを呼び出すクラス<br>
      * Gas側で作成したControllerInterfaceをgenerics宣言する
@@ -218,6 +227,7 @@ export declare namespace hVue {
         send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>;
     }
 }
+
 
 declare namespace google {
   namespace script {

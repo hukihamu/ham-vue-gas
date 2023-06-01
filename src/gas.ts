@@ -17,25 +17,24 @@ export namespace hGas {
     export type SSEntity = {
         row: number
     }
-
+    type ArgsOption = {
+        htmlFileName?: string
+        editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput
+    }
     /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
-     * @param htmlFileName htmlファイル名を設定 default: index
-     * @param editHtmlOutput gasの機能で、htmlオブジェクトを編集したい際に利用(title変更など)
+     * @param option htmlファイル名を変更したり、htmlを変更する際に利用
      */
-    export function initGas<C extends string, G extends string, V extends string>(
-        config: hCommon.Config<C, G, V>,
-        htmlFileName: string = 'index',
-        editHtmlOutput: (output:  GoogleAppsScript.HTML.HtmlOutput) =>  GoogleAppsScript.HTML.HtmlOutput
-            = (output) => output): InitGasOptions{
-        hCommon.consoleLog.debug = (label: string, data: any)=> {
+    export function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>,
+                                                                                  option: ArgsOption = {}): InitGasOptions {
+        hCommon.consoleLog.debug = (label: string, data: any) => {
             if (config.getGasConfig('debug') === 'true') console.log(label, data)
-        };
+        }
         global.doGet = () => {
-            const gasHtml = HtmlService.createHtmlOutputFromFile(htmlFileName)
+            const gasHtml = HtmlService.createHtmlOutputFromFile(option.htmlFileName ?? 'index')
             gasHtml.setContent(gasHtml.getContent().replace('<body>', `<body><script type='application/json' id="vue-config">${JSON.stringify(config.getAllVueConfig())}</script>`))
-            return editHtmlOutput(gasHtml)
+            return option.editHtmlOutput ? option.editHtmlOutput(gasHtml) : gasHtml
         }
         return initGasOption
     }
