@@ -6,7 +6,7 @@ import {SetupContext} from '@vue/runtime-core'
 type ArgsOption = {
     usePlugin?: (app: App<Element>) => App<Element>
     mountContainer?: string
-    vueMainScript?: (context: SetupContext) => {}
+    vueMainScript?: (context: SetupContext) => void
 }
 export namespace hVue{
     /**

@@ -181,7 +181,9 @@ ${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import * as componen
 initVue([{
     path: '/',
     component: Main
-}], app => app.use(createVuetify({components, directives})))
+}], {
+    ${v ? 'usePlugin: app => app.use(createVuetify({components, directives}))' : ''}
+})
 
 
 export const gasClient = new GasClient<ControllerInterface>() `)
