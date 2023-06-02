@@ -226,7 +226,7 @@ import {config} from '@C/config'
 import sampleController from '@G/controller/sampleController'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
-initGas(config, )
+initGas(config, {editHtmlOutput: output => output.addMetaTag('viewport', 'width=device-width, initial-scale=1')})
     .useController(sampleController, (global, wrapperController) => {
         global.insertData = wrapperController('insertData')
     })

@@ -1,4 +1,5 @@
 import {hCommon} from '@/common'
+import consoleLog = hCommon.consoleLog
 
 export namespace hGas {
     /**
@@ -54,13 +55,19 @@ export namespace hGas {
         }
 
         private get sheet(): GoogleAppsScript.Spreadsheet.Sheet{
-            const throwText = () => {
-                throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
-            }
             if (!this._sheet) {
                 this._sheet = this.importSheet()
+                if (this._sheet) {
+                    if (this.checkRequiredUpdate(this._sheet)){
+                        throw `not updated Sheet "${this.tableName}" gas editor run "initTables"`
+                    } else {
+                        return this._sheet
+                    }
+                }
+                throw `not found Sheet "${this.tableName}" gas editor run "initTables"`
+            } else {
+                return this._sheet
             }
-            return this._sheet ?? throwText()
         }
         private static readonly TABLE_VERSION_LABEL = 'ver:'
         private static readonly DELETE_LABEL = 'DELETE'
@@ -104,23 +111,23 @@ export namespace hGas {
 
 
 
-        private checkVersionUpdated(): boolean {
-            return this.sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
+        private checkRequiredUpdate(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
+            return sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
         }
 
-        private createTable(): void {
+        private createTable(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
             // DataRangeが1行より多い場合、データはあると判断
-            if (this.sheet.getDataRange().getValues().length > 1) {
-                const oldVersion = this.sheet.getRange(1, 1, 1, 1).getValue()
-                const oldSheet = this.sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId))
-                const oldName = this.sheet.getName() + ' version:' + oldVersion
+            if (sheet.getDataRange().getValues().length > 1) {
+                const oldVersion = sheet.getRange(1, 1, 1, 1).getValue()
+                const oldSheet = sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId))
+                const oldName = sheet.getName() + ' version:' + oldVersion
                 oldSheet.setName(oldName)
-                this.sheet.clear()
+                sheet.clear()
             }
             // バージョン情報をセット
-            this.sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion)
+            sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion)
             //ヘッダーをセット
-            this.sheet.getRange(1, 2, 1, this.columnOrder.length).setValues([this.columnOrder])
+            sheet.getRange(1, 2, 1, this.columnOrder.length).setValues([this.columnOrder])
             //初期データをインサート
             for (const e of this.initData) {
                 this.insert(e)
@@ -167,15 +174,16 @@ export namespace hGas {
         }
 
         /**
-         * gasInit().useSpreadsheetDBで利用される
+         * gas console上で動作させるinitTables()で利用される
          */
         initTable(): void {
+            // シートがない場合生成する必要がある
             const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
             const sheet = spreadsheet.getSheetByName(this.tableName)
             this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName)
 
-            if (this.checkVersionUpdated()) {
-                this.createTable()
+            if (this.checkRequiredUpdate(this._sheet)) {
+                this.createTable(this._sheet)
             }
         }
 
@@ -326,11 +334,18 @@ const initGasOption: InitGasOptions = {
         return initGasOption
     },
     useSpreadsheetDB(...repositoryList): InitGasOptions {
-        for (const repository of repositoryList) {
-            try {
-                new repository().initTable()
-            }catch (e) {
-                hCommon.consoleLog.error('init spreadsheet error', e)
+        global.initTables = () => {
+            for (const repository of repositoryList) {
+                try {
+                    consoleLog.info('create instances')
+                    const r = new repository()
+                    const name = r['tableName']
+                    consoleLog.info('start', name)
+                    r.initTable()
+                    consoleLog.info('success', name)
+                }catch (e) {
+                    hCommon.consoleLog.error('init spreadsheet error', e)
+                }
             }
         }
         return initGasOption

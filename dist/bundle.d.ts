@@ -28,10 +28,10 @@ export declare namespace hCommon {
      * Vue・Gas共に利用可能なLog出力
      */
     const consoleLog: {
-        info(label: string, data?: any): void;
-        debug(label: string, data?: any): void;
-        warn(label: string, data?: any): void;
-        error(label: string, data?: any): void;
+        info(label: string, ...data: any[]): void;
+        debug(label: string, ...data: any[]): void;
+        warn(label: string, ...data: any[]): void;
+        error(label: string, ...data: any[]): void;
     };
     /**
      * Controllerの定義に利用<br>
@@ -125,14 +125,14 @@ export declare namespace hGas {
          * トランザクションロック開放を待つ時間(ミリ秒)
          */
         lockWaitMSec: number;
-        private checkVersionUpdated;
+        private checkRequiredUpdate;
         private createTable;
         private toStringList;
         private toEntity;
         private getRowRange;
         private onLock;
         /**
-         * gasInit().useSpreadsheetDBで利用される
+         * gas console上で動作させるinitTables()で利用される
          */
         initTable(): void;
         /**
