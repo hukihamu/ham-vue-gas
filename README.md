@@ -16,4 +16,4 @@
 - [ ] サンプル作成
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
-- [x] cssが反映されない問題(vuetify classが問題？)
+- [x] bundle-dtsがesのd.tsを取り込んでいる

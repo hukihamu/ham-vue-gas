@@ -1,7 +1,6 @@
-import {App, Component, createApp} from 'vue'
+import {App, Component, createApp, SetupContext} from 'vue'
 import {createRouter, createWebHistory, Router, RouteRecordRaw} from 'vue-router'
 import {hCommon} from '@/common'
-import {SetupContext} from '@vue/runtime-core'
 
 type ArgsOption = {
     usePlugin?: (app: App<Element>) => App<Element>
