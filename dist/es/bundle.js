@@ -1,7 +1,5 @@
-'use strict';
-
-var vue = require('vue');
-var vueRouter = require('vue-router');
+import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
 
 function __awaiter(thisArg, _arguments, P, generator) {
   function adopt(value) {
@@ -128,7 +126,7 @@ function __spreadArray(to, from, pack) {
   return to.concat(ar || Array.prototype.slice.call(from));
 }
 
-exports.hCommon = void 0;
+var hCommon;
 (function (hCommon) {
     /**
      * Gasの機能「スクリプトプロパティ」をConfigとして利用する<br>
@@ -256,9 +254,9 @@ exports.hCommon = void 0;
             console.error.apply(console, __spreadArray([label], data, false));
         },
     };
-})(exports.hCommon || (exports.hCommon = {}));
+})(hCommon || (hCommon = {}));
 
-exports.hVue = void 0;
+var hVue;
 (function (hVue) {
     /**
      * Vue側entryファイルで実行する関数<br>
@@ -269,7 +267,7 @@ exports.hVue = void 0;
     function initVue(app, option) {
         var _a;
         if (option === void 0) { option = {}; }
-        exports.hCommon.consoleLog.debug = function (label, data) {
+        hCommon.consoleLog.debug = function (label, data) {
             var _a, _b;
             var content = (_b = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
             if (JSON.parse(content)['debug'] === 'true')
@@ -278,14 +276,14 @@ exports.hVue = void 0;
         var appElement;
         if ('length' in app) {
             // router
-            var router = vueRouter.createRouter({
-                history: vueRouter.createWebHistory(),
+            var router = createRouter({
+                history: createWebHistory(),
                 routes: app
             });
-            appElement = vue.createApp(rootComponent(router, option.vueMainScript)).use(router);
+            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router);
         }
         else {
-            appElement = vue.createApp(app);
+            appElement = createApp(app);
         }
         (option.usePlugin ? option.usePlugin(appElement) : appElement).mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
     }
@@ -319,7 +317,7 @@ exports.hVue = void 0;
         return GasClient;
     }());
     hVue.GasClient = GasClient;
-})(exports.hVue || (exports.hVue = {}));
+})(hVue || (hVue = {}));
 function rootComponent(router, main) {
     return {
         setup: function (_, context) {
@@ -338,8 +336,8 @@ function rootComponent(router, main) {
     };
 }
 
-var consoleLog = exports.hCommon.consoleLog;
-exports.hGas = void 0;
+var consoleLog = hCommon.consoleLog;
+var hGas;
 (function (hGas) {
     /**
      * Gas側entryファイルで実行する関数<br>
@@ -348,7 +346,7 @@ exports.hGas = void 0;
      */
     function initGas(config, option) {
         if (option === void 0) { option = {}; }
-        exports.hCommon.consoleLog.debug = function (label, data) {
+        hCommon.consoleLog.debug = function (label, data) {
             if (config.getGasConfig('debug') === 'true')
                 console.log(label, data);
         };
@@ -589,7 +587,7 @@ exports.hGas = void 0;
         return SSRepository;
     }());
     hGas.SSRepository = SSRepository;
-})(exports.hGas || (exports.hGas = {}));
+})(hGas || (hGas = {}));
 /**
  * gas側の機能拡張
  */
@@ -618,7 +616,7 @@ var initGasOption = {
                         case 4: return [2 /*return*/, JSON.stringify(returnValue)];
                         case 5:
                             e_1 = _a.sent();
-                            exports.hCommon.consoleLog.error('Controller error:', e_1);
+                            hCommon.consoleLog.error('Controller error:', e_1);
                             throw e_1;
                         case 6: return [2 /*return*/];
                     }
@@ -645,10 +643,12 @@ var initGasOption = {
                     consoleLog.info('success', name_1);
                 }
                 catch (e) {
-                    exports.hCommon.consoleLog.error('init spreadsheet error', e);
+                    hCommon.consoleLog.error('init spreadsheet error', e);
                 }
             }
         };
         return initGasOption;
     }
 };
+
+export { hCommon, hGas, hVue };

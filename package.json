@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "google apps script + vue.js web system template",
   "main": "dist/bundle.js",
+  "module": "dist/es/bundle.js",
   "types": "dist/bundle.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -34,6 +35,7 @@
   "files": [
     "bin",
     "dist/bundle.js",
+    "dist/es/bundle.js",
     "dist/bundle.d.ts"
   ],
   "dependencies": {

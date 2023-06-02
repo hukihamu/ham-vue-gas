@@ -8,11 +8,16 @@ const __dirname = path.dirname(__filename);
 
 export default {
   input: 'src/main.ts',
-  output: {
-    file: 'dist/bundle.js',
-    format: 'umd',
-    name: 'VueGas'
-  },
+  output: [
+    {
+      file: 'dist/es/bundle.js',
+      format: 'es'
+    },
+    {
+      file: 'dist/bundle.js',
+      format: 'cjs'
+    },
+  ],
   plugins: [
     typescript(),
     babel({
