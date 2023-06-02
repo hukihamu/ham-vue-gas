@@ -19,6 +19,6 @@
 - [ ] cssが反映されない問題(vuetify classが問題？)
 - [x] root(常時表示)となるapp.vue内の処理をinitでできるように
 - [x] addmetatagをinitで
-- [ ] cdnのやつ、resolveあたりでなんかあった気がする
+- [x] cdnのやつ、resolveあたりでなんかあった気がする
 - [x] inittableが毎回呼ばれるのをなんとかする -> 手動でやるように
 - [x] DBインスタンス生成時もSSに接続=遅い問題 -> cacheがないor CUD時にSS接続
