@@ -16,4 +16,3 @@
 - [ ] サンプル作成
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
-- [x] bundle-dtsがesのd.tsを取り込んでいる

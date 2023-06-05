@@ -5,9 +5,13 @@ export namespace hGas {
     /**
      * GasMethod実装に利用する
      */
-    export type GasMethodType<C extends hCommon.BaseGasMethodInterface> = {
+    export type GasMethodsType<C extends hCommon.BaseGasMethodInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>
     }
+    /**
+     * GasMethod実装に利用する
+     */
+    export type GasMethodType<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>
     /**
      * SSRepositoryのinitData、columnListの宣言に使用
      */
@@ -299,7 +303,7 @@ interface InitGasOptions {
      * globalへ代入前に"wrapperMethod"を利用する<br>
      * GasMethodInterfaceをGenerics宣言すると、コード補完される
      */
-    useGasMethod<C extends { [name: string]: any }>(gasMethod: hGas.GasMethodType<C>, initGlobal: (
+    useGasMethod<C extends { [name: string]: any }>(gasMethod: hGas.GasMethodsType<C>, initGlobal: (
         global: {[K in keyof C]: WrapperMethod<C, K>},
         wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions
     /**
@@ -313,7 +317,7 @@ interface InitGasOptions {
  * gas側の機能拡張
  */
 const initGasOption: InitGasOptions = {
-    useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod: hGas.GasMethodType<C>, initGlobal: (
+    useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod: hGas.GasMethodsType<C>, initGlobal: (
         global: {[K in keyof C]: WrapperMethod<C, K>},
         wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions {
 
