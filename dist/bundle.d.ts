@@ -34,11 +34,11 @@ export declare namespace hCommon {
         error(label: string, ...data: any[]): void;
     };
     /**
-     * Controllerの定義に利用<br>
+     * Gasで実行される関数の定義に利用<br>
      * Interfaceにextendsを行う<br>
-     * 構成: {Controller名: {at: 引数型, rt: 戻り値型}}
+     * 構成: {Method名: {at: 引数型, rt: 戻り値型}}
      */
-    type BaseControllerInterface = {
+    type BaseGasMethodInterface = {
         [name: string]: {
             at: unknown;
             rt: unknown;
@@ -52,9 +52,9 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 export declare namespace hGas {
     /**
-     * Controller実装に利用する
+     * GasMethod実装に利用する
      */
-    export type ControllerType<C extends hCommon.BaseControllerInterface> = {
+    export type GasMethodType<C extends hCommon.BaseGasMethodInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
     };
     /**
@@ -163,19 +163,20 @@ export declare namespace hGas {
     
 }
 type LockType = 'user' | 'script' | 'none';
-type WrapperController<C extends hCommon.BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
+type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
 interface InitGasOptions {
     /**
-     * Controllerを登録する<br>
-     * 変数"global[{Controller名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
-     * globalへ代入前に"wrapperController"を利用する<br>
-     * ControllerInterfaceをGenerics宣言すると、コード補完される
+     * Gasで実行される関数を登録する<br>
+     * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
+     * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
+     * globalへ代入前に"wrapperMethod"を利用する<br>
+     * GasMethodInterfaceをGenerics宣言すると、コード補完される
      */
-    useController<C extends {
+    useGasMethod<C extends {
         [name: string]: any;
-    }>(controller: hGas.ControllerType<C>, initGlobal: (global: {
-        [K in keyof C]: WrapperController<C, K>;
-    }, wrapperController: <K extends keyof C>(name: K) => WrapperController<C, K>) => void): InitGasOptions;
+    }>(gasMethod: hGas.GasMethodType<C>, initGlobal: (global: {
+        [K in keyof C]: WrapperMethod<C, K>;
+    }, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): InitGasOptions;
     /**
      * SpreadsheetをDBとして利用する<br>
      * 作成したRepositoryを登録する
@@ -208,14 +209,14 @@ export declare namespace hVue {
     function initVue(app: Component | RouteRecordRaw[], option?: ArgsOption): void;
     /**
      * Vue側からGasで作成したコントローラを呼び出すクラス<br>
-     * Gas側で作成したControllerInterfaceをgenerics宣言する
+     * Gas側で作成したGasMethodInterfaceをgenerics宣言する
      */
-    class GasClient<C extends hCommon.BaseControllerInterface> {
+    class GasClient<C extends hCommon.BaseGasMethodInterface> {
         /**
-         * Controllerの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
-         * ControllerInterfaceを宣言すれば、コード補完で作成している名前が確認できる
-         * @param name Controller名
-         * @param args Controller引数
+         * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+         * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+         * @param name GasMethod名
+         * @param args GasMethod引数
          */
         send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>;
     }

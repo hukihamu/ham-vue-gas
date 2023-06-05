@@ -3,9 +3,9 @@ import consoleLog = hCommon.consoleLog
 
 export namespace hGas {
     /**
-     * Controller実装に利用する
+     * GasMethod実装に利用する
      */
-    export type ControllerType<C extends hCommon.BaseControllerInterface> = {
+    export type GasMethodType<C extends hCommon.BaseGasMethodInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>
     }
     /**
@@ -223,6 +223,11 @@ export namespace hGas {
                 values = JSON.parse(cache)
             } else {
                 values = this.onLock(() => {
+                    const lastRow = this.sheet.getLastRow()
+                    if (lastRow <= 1) {
+                        // 0件の場合は取得しない
+                        return []
+                    }
                     const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
                     CacheService.getScriptCache().put(this.tableName, JSON.stringify(values), 21600)
                     return values
@@ -284,18 +289,19 @@ export namespace hGas {
 
 type LockType = 'user' | 'script' | 'none'
 declare let global: { [name: string]: unknown }
-type WrapperController<C extends hCommon.BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>
+type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>
 
 interface InitGasOptions {
     /**
-     * Controllerを登録する<br>
-     * 変数"global[{Controller名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
-     * globalへ代入前に"wrapperController"を利用する<br>
-     * ControllerInterfaceをGenerics宣言すると、コード補完される
+     * Gasで実行される関数を登録する<br>
+     * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
+     * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
+     * globalへ代入前に"wrapperMethod"を利用する<br>
+     * GasMethodInterfaceをGenerics宣言すると、コード補完される
      */
-    useController<C extends { [name: string]: any }>(controller: hGas.ControllerType<C>, initGlobal: (
-        global: {[K in keyof C]: WrapperController<C, K>},
-        wrapperController: <K extends keyof C>(name: K)=> WrapperController<C,K>)=>void): InitGasOptions
+    useGasMethod<C extends { [name: string]: any }>(gasMethod: hGas.GasMethodType<C>, initGlobal: (
+        global: {[K in keyof C]: WrapperMethod<C, K>},
+        wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions
     /**
      * SpreadsheetをDBとして利用する<br>
      * 作成したRepositoryを登録する
@@ -307,30 +313,30 @@ interface InitGasOptions {
  * gas側の機能拡張
  */
 const initGasOption: InitGasOptions = {
-    useController<C extends hCommon.BaseControllerInterface>(controller: hGas.ControllerType<C>,initGlobal: (
-        global: {[K in keyof C]: WrapperController<C, K>},
-        wrapperController: <K extends keyof C>(name: K)=> WrapperController<C,K>)=>void): InitGasOptions {
+    useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod: hGas.GasMethodType<C>, initGlobal: (
+        global: {[K in keyof C]: WrapperMethod<C, K>},
+        wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions {
 
-        function wrapperController<K extends keyof C>(name: K): WrapperController<C, K> {
+        function wrapperMethod<K extends keyof C>(name: K): WrapperMethod<C, K> {
             return async (args: any) => {
                 try {
                     let returnValue
                     if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
                         console.log('arg: ', args)
-                        returnValue = await controller[name](args)
+                        returnValue = await gasMethod[name](args)
                         console.log('return: ', returnValue)
                     } else {
-                        returnValue = await controller[name](args)
+                        returnValue = await gasMethod[name](args)
                     }
                     return JSON.stringify(returnValue)
                 } catch (e) {
-                    hCommon.consoleLog.error('Controller error:', e)
+                    hCommon.consoleLog.error('GasMethod error:', e)
                     throw e
                 }
             }
         }
 
-        initGlobal(global as any, wrapperController)
+        initGlobal(global as any, wrapperMethod)
         return initGasOption
     },
     useSpreadsheetDB(...repositoryList): InitGasOptions {

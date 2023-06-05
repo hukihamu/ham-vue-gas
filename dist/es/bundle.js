@@ -290,16 +290,16 @@ var hVue;
     hVue.initVue = initVue;
     /**
      * Vue側からGasで作成したコントローラを呼び出すクラス<br>
-     * Gas側で作成したControllerInterfaceをgenerics宣言する
+     * Gas側で作成したGasMethodInterfaceをgenerics宣言する
      */
     var GasClient = /** @class */ (function () {
         function GasClient() {
         }
         /**
-         * Controllerの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
-         * ControllerInterfaceを宣言すれば、コード補完で作成している名前が確認できる
-         * @param name Controller名
-         * @param args Controller引数
+         * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+         * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+         * @param name GasMethod名
+         * @param args GasMethod引数
          */
         GasClient.prototype.send = function (name, args) {
             return new Promise(function (resolve, reject) {
@@ -310,7 +310,7 @@ var hVue;
                     run(args);
                 }
                 else {
-                    reject("not found controller: ".concat(name));
+                    reject("not found GasMethod: ".concat(name));
                 }
             });
         };
@@ -520,6 +520,11 @@ var hGas;
             }
             else {
                 values = this.onLock(function () {
+                    var lastRow = _this.sheet.getLastRow();
+                    if (lastRow <= 1) {
+                        // 0件の場合は取得しない
+                        return [];
+                    }
                     var values = _this.sheet.getRange(2, 1, _this.sheet.getLastRow() - 1, _this.columnOrder.length + 1).getValues();
                     CacheService.getScriptCache().put(_this.tableName, JSON.stringify(values), 21600);
                     return values;
@@ -592,8 +597,8 @@ var hGas;
  * gas側の機能拡張
  */
 var initGasOption = {
-    useController: function (controller, initGlobal) {
-        function wrapperController(name) {
+    useGasMethod: function (gasMethod, initGlobal) {
+        function wrapperMethod(name) {
             var _this = this;
             return function (args) { return __awaiter(_this, void 0, void 0, function () {
                 var returnValue, e_1;
@@ -604,26 +609,26 @@ var initGasOption = {
                             returnValue = void 0;
                             if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
                             console.log('arg: ', args);
-                            return [4 /*yield*/, controller[name](args)];
+                            return [4 /*yield*/, gasMethod[name](args)];
                         case 1:
                             returnValue = _a.sent();
                             console.log('return: ', returnValue);
                             return [3 /*break*/, 4];
-                        case 2: return [4 /*yield*/, controller[name](args)];
+                        case 2: return [4 /*yield*/, gasMethod[name](args)];
                         case 3:
                             returnValue = _a.sent();
                             _a.label = 4;
                         case 4: return [2 /*return*/, JSON.stringify(returnValue)];
                         case 5:
                             e_1 = _a.sent();
-                            hCommon.consoleLog.error('Controller error:', e_1);
+                            hCommon.consoleLog.error('GasMethod error:', e_1);
                             throw e_1;
                         case 6: return [2 /*return*/];
                     }
                 });
             }); };
         }
-        initGlobal(global, wrapperController);
+        initGlobal(global, wrapperMethod);
         return initGasOption;
     },
     useSpreadsheetDB: function () {

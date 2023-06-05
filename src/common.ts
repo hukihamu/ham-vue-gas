@@ -95,11 +95,11 @@ export namespace hCommon {
         },
     }
     /**
-     * Controllerの定義に利用<br>
+     * Gasで実行される関数の定義に利用<br>
      * Interfaceにextendsを行う<br>
-     * 構成: {Controller名: {at: 引数型, rt: 戻り値型}}
+     * 構成: {Method名: {at: 引数型, rt: 戻り値型}}
      */
-    export type BaseControllerInterface = {
+    export type BaseGasMethodInterface = {
         [name: string]: {
             at: unknown
             rt: unknown

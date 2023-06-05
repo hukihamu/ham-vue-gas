@@ -36,14 +36,14 @@ export namespace hVue{
 
     /**
      * Vue側からGasで作成したコントローラを呼び出すクラス<br>
-     * Gas側で作成したControllerInterfaceをgenerics宣言する
+     * Gas側で作成したGasMethodInterfaceをgenerics宣言する
      */
-    export class GasClient <C extends hCommon.BaseControllerInterface>{
+    export class GasClient <C extends hCommon.BaseGasMethodInterface>{
         /**
-         * Controllerの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
-         * ControllerInterfaceを宣言すれば、コード補完で作成している名前が確認できる
-         * @param name Controller名
-         * @param args Controller引数
+         * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+         * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+         * @param name GasMethod名
+         * @param args GasMethod引数
          */
         send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>{
             return new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ export namespace hVue{
                 if (run) {
                     run(args)
                 } else {
-                    reject(`not found controller: ${name as string}`)
+                    reject(`not found GasMethod: ${name as string}`)
                 }
             })
         }
