@@ -52,13 +52,19 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 export declare namespace hGas {
     /**
-     * GasMethod実装に利用する
+     * GasMethod実装に利用する(全メソッド必須)
      */
-    export type GasMethodsType<C extends hCommon.BaseGasMethodInterface> = {
+    export type GasMethodsTypeRequired<C extends hCommon.BaseGasMethodInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
     };
     /**
-     * GasMethod実装に利用する
+     * GasMethod実装に利用する(任意の複数メソッド)
+     */
+    export type GasMethodsType<C extends hCommon.BaseGasMethodInterface> = Partial<{
+        [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
+    }>;
+    /**
+     * GasMethod実装に利用する(1メソッドのみ)
      */
     export type GasMethodType<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>;
     /**
@@ -178,7 +184,7 @@ interface InitGasOptions {
      */
     useGasMethod<C extends {
         [name: string]: any;
-    }>(gasMethod: hGas.GasMethodsType<C>, initGlobal: (global: {
+    }>(gasMethod: hGas.GasMethodsTypeRequired<C>, initGlobal: (global: {
         [K in keyof C]: WrapperMethod<C, K>;
     }, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): InitGasOptions;
     /**

@@ -223,7 +223,7 @@ function onClickInput(){
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'index.ts'), `import {hGas} from 'ham-vue-gas'
 import initGas = hGas.initGas
 import {config} from '@C/config'
-import sampleMethod from '@G/methods/sampleMethod'
+import {sampleMethod} from '@G/methods/sampleMethod'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
 initGas(config, {editHtmlOutput: output => output.addMetaTag('viewport', 'width=device-width, initial-scale=1')})
@@ -233,17 +233,17 @@ initGas(config, {editHtmlOutput: output => output.addMetaTag('viewport', 'width=
     .useSpreadsheetDB(SampleRepository,)`)
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'methods'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'methods'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'methods', 'sampleMethod.ts'), `import {hGas} from 'ham-vue-gas'
-import GasMethodType = hGas.GasMethodType
+import GasMethodsType = hGas.GasMethodsType
 import {GasMethodInterface} from '@C/gasMethodInterface'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
-export default {
+export const sampleMethod: GasMethodsType<GasMethodInterface> = {
     async insertData(args){
         const repo = new SampleRepository()
         repo.insert({text: args})
         return repo.getAll().map(it => it.text)
     }
-} as GasMethodType<GasMethodInterface>`)
+}`)
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'entity'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'entity'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'entity', 'sampleEntity.ts'), `import {hGas} from 'ham-vue-gas'
 import SSEntity = hGas.SSEntity
