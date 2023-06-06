@@ -282,7 +282,7 @@ exports.hVue = void 0;
                 history: vueRouter.createWebHistory(),
                 routes: app
             });
-            appElement = vue.createApp(rootComponent(option.vueMainScript)).use(router);
+            appElement = vue.createApp(rootComponent(router, option.vueMainScript)).use(router);
         }
         else {
             appElement = vue.createApp(app);
@@ -321,19 +321,16 @@ exports.hVue = void 0;
     }());
     hVue.GasClient = GasClient;
 })(exports.hVue || (exports.hVue = {}));
-function rootComponent(main) {
+function rootComponent(router, main) {
     return {
         setup: function (_, context) {
-            var router = vueRouter.useRouter();
-            vue.computed(function () {
-                router.afterEach(function (route) {
-                    window.google.script.history.replace(undefined, route.query, route.path);
-                });
-                window.google.script.url.getLocation(function (location) {
-                    var path = location.hash ? location.hash : '/';
-                    var query = location.parameter;
-                    router.replace({ path: path, query: query }).then();
-                });
+            router.afterEach(function (route) {
+                window.google.script.history.replace(undefined, route.query, route.path);
+            });
+            window.google.script.url.getLocation(function (location) {
+                var path = location.hash ? location.hash : '/';
+                var query = location.parameter;
+                router.replace({ path: path, query: query }).then();
             });
             if (main)
                 return main(context);

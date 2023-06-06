@@ -1,5 +1,5 @@
 import {App, Component, createApp, SetupContext} from 'vue'
-import {createRouter, createWebHistory, RouteRecordRaw, useRouter} from 'vue-router'
+import {createRouter, createWebHistory, Router, RouteRecordRaw} from 'vue-router'
 import {hCommon} from '@/common'
 
 type ArgsOption = {
@@ -27,7 +27,7 @@ export namespace hVue{
                 history: createWebHistory(),
                 routes: app as RouteRecordRaw[]
             })
-            appElement = createApp(rootComponent(option.vueMainScript)).use(router)
+            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router)
         } else {
             appElement = createApp(app)
         }
@@ -61,10 +61,9 @@ export namespace hVue{
     }
 }
 
-function rootComponent(main: ArgsOption['vueMainScript']): Component{
+function rootComponent(router: Router, main: ArgsOption['vueMainScript']): Component{
     return {
         setup(_, context){
-            const router = useRouter()
             router.afterEach(route => {
                 window.google.script.history.replace(undefined, route.query, route.path)
             })
