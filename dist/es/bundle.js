@@ -342,7 +342,9 @@ function rootComponent(router, main, template) {
                             });
                             if (!main) return [3 /*break*/, 2];
                             return [4 /*yield*/, main(context)];
-                        case 1: return [2 /*return*/, _a.sent()];
+                        case 1:
+                            _a.sent();
+                            _a.label = 2;
                         case 2: return [2 /*return*/];
                     }
                 });

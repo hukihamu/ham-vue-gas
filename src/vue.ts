@@ -77,7 +77,7 @@ function rootComponent(router: Router, main: ArgsOption['vueMainScript'], templa
                 const query = location.parameter
                 router.replace({ path, query }).then()
             })
-            if (main) return await main(context)
+            if (main) await main(context)
         },
         template
     }
