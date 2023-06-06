@@ -1,5 +1,5 @@
-import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { createApp, watch } from 'vue';
+import { createRouter, createWebHistory, useRouter } from 'vue-router';
 
 function __awaiter(thisArg, _arguments, P, generator) {
   function adopt(value) {
@@ -265,6 +265,7 @@ var hVue;
      * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
      */
     function initVue(app, option) {
+        var _a;
         if (option === void 0) { option = {}; }
         hCommon.consoleLog.debug = function (label, data) {
             var _a, _b;
@@ -279,16 +280,13 @@ var hVue;
                 history: createWebHistory(),
                 routes: app
             });
-            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router);
+            appElement = createApp(rootComponent(option.vueMainScript)).use(router);
         }
         else {
             appElement = createApp(app);
         }
         appElement = option.usePlugin ? option.usePlugin(appElement) : appElement;
-        setTimeout(function () {
-            var _a;
-            appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
-        }, 1000);
+        appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
     }
     hVue.initVue = initVue;
     /**
@@ -321,17 +319,22 @@ var hVue;
     }());
     hVue.GasClient = GasClient;
 })(hVue || (hVue = {}));
-function rootComponent(router, main) {
+function rootComponent(main) {
     return {
         setup: function (_, context) {
-            router.afterEach(function (route) {
-                window.google.script.history.replace(undefined, route.query, route.path);
-            });
-            window.google.script.url.getLocation(function (location) {
-                var path = location.hash ? location.hash : '/';
-                var query = location.parameter;
-                router.replace({ path: path, query: query }).then();
-            });
+            var router = useRouter();
+            watch(router, function () {
+                if (router) {
+                    router.afterEach(function (route) {
+                        window.google.script.history.replace(undefined, route.query, route.path);
+                    });
+                    window.google.script.url.getLocation(function (location) {
+                        var path = location.hash ? location.hash : '/';
+                        var query = location.parameter;
+                        router.replace({ path: path, query: query }).then();
+                    });
+                }
+            }, { immediate: true });
             if (main)
                 return main(context);
         },

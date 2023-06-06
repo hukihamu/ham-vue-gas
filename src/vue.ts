@@ -1,5 +1,5 @@
-import {App, Component, createApp, SetupContext} from 'vue'
-import {createRouter, createWebHistory, Router, RouteRecordRaw} from 'vue-router'
+import {App, Component, createApp, SetupContext, watch} from 'vue'
+import {createRouter, createWebHistory, RouteRecordRaw, useRouter} from 'vue-router'
 import {hCommon} from '@/common'
 
 type ArgsOption = {
@@ -27,14 +27,12 @@ export namespace hVue{
                 history: createWebHistory(),
                 routes: app as RouteRecordRaw[]
             })
-            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router)
+            appElement = createApp(rootComponent(option.vueMainScript)).use(router)
         } else {
             appElement = createApp(app)
         }
         appElement = option.usePlugin ? option.usePlugin(appElement) : appElement
-        setTimeout(() => {
-            appElement.mount(option.mountContainer ?? '#app')
-        }, 1000)
+        appElement.mount(option.mountContainer ?? '#app')
     }
 
     /**
@@ -63,17 +61,22 @@ export namespace hVue{
     }
 }
 
-function rootComponent(router: Router, main: ArgsOption['vueMainScript']): Component{
+function rootComponent(main: ArgsOption['vueMainScript']): Component{
     return {
         setup(_, context){
-            router.afterEach(route => {
-                window.google.script.history.replace(undefined, route.query, route.path)
-            })
-            window.google.script.url.getLocation(location => {
-                const path = location.hash ? location.hash : '/'
-                const query = location.parameter
-                router.replace({ path, query }).then()
-            })
+            const router = useRouter()
+            watch(router, () => {
+                if (router){
+                    router.afterEach(route => {
+                        window.google.script.history.replace(undefined, route.query, route.path)
+                    })
+                    window.google.script.url.getLocation(location => {
+                        const path = location.hash ? location.hash : '/'
+                        const query = location.parameter
+                        router.replace({ path, query }).then()
+                    })
+                }
+            }, {immediate: true})
             if (main) return main(context)
         },
         template: '<router-view />'

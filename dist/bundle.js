@@ -267,6 +267,7 @@ exports.hVue = void 0;
      * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
      */
     function initVue(app, option) {
+        var _a;
         if (option === void 0) { option = {}; }
         exports.hCommon.consoleLog.debug = function (label, data) {
             var _a, _b;
@@ -281,16 +282,13 @@ exports.hVue = void 0;
                 history: vueRouter.createWebHistory(),
                 routes: app
             });
-            appElement = vue.createApp(rootComponent(router, option.vueMainScript)).use(router);
+            appElement = vue.createApp(rootComponent(option.vueMainScript)).use(router);
         }
         else {
             appElement = vue.createApp(app);
         }
         appElement = option.usePlugin ? option.usePlugin(appElement) : appElement;
-        setTimeout(function () {
-            var _a;
-            appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
-        }, 1000);
+        appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
     }
     hVue.initVue = initVue;
     /**
@@ -323,17 +321,22 @@ exports.hVue = void 0;
     }());
     hVue.GasClient = GasClient;
 })(exports.hVue || (exports.hVue = {}));
-function rootComponent(router, main) {
+function rootComponent(main) {
     return {
         setup: function (_, context) {
-            router.afterEach(function (route) {
-                window.google.script.history.replace(undefined, route.query, route.path);
-            });
-            window.google.script.url.getLocation(function (location) {
-                var path = location.hash ? location.hash : '/';
-                var query = location.parameter;
-                router.replace({ path: path, query: query }).then();
-            });
+            var router = vueRouter.useRouter();
+            vue.watch(router, function () {
+                if (router) {
+                    router.afterEach(function (route) {
+                        window.google.script.history.replace(undefined, route.query, route.path);
+                    });
+                    window.google.script.url.getLocation(function (location) {
+                        var path = location.hash ? location.hash : '/';
+                        var query = location.parameter;
+                        router.replace({ path: path, query: query }).then();
+                    });
+                }
+            }, { immediate: true });
             if (main)
                 return main(context);
         },
