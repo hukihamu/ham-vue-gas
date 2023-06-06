@@ -321,6 +321,8 @@ var hVue;
 function rootComponent(router, main) {
     return {
         setup: function (_, context) {
+            if (main)
+                main(context);
             router.afterEach(function (route) {
                 window.google.script.history.replace(undefined, route.query, route.path);
             });
@@ -329,8 +331,6 @@ function rootComponent(router, main) {
                 var query = location.parameter;
                 router.replace({ path: path, query: query }).then();
             });
-            if (main)
-                main(context);
         },
         template: '<router-view />'
     };
