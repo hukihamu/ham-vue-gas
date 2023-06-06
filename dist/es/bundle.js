@@ -280,7 +280,7 @@ var hVue;
                 history: createWebHistory(),
                 routes: app
             });
-            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router);
+            appElement = createApp(rootComponent(router, option.vueMainScript, option.vueMainTemplate)).use(router);
         }
         else {
             appElement = createApp(app);
@@ -319,21 +319,36 @@ var hVue;
     }());
     hVue.GasClient = GasClient;
 })(hVue || (hVue = {}));
-function rootComponent(router, main) {
+function rootComponent(router, main, template) {
+    if (template === void 0) { template = '<router-view />'; }
     return {
         setup: function (_, context) {
-            router.afterEach(function (route) {
-                window.google.script.history.replace(undefined, route.query, route.path);
+            return __awaiter(this, void 0, void 0, function () {
+                var userCodeAppPanel;
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0:
+                            userCodeAppPanel = router.beforeEach(function (route) {
+                                userCodeAppPanel();
+                                return route.fullPath !== '/userCodeAppPanel';
+                            });
+                            router.afterEach(function (route) {
+                                window.google.script.history.replace(undefined, route.query, route.path);
+                            });
+                            window.google.script.url.getLocation(function (location) {
+                                var path = location.hash ? location.hash : '/';
+                                var query = location.parameter;
+                                router.replace({ path: path, query: query }).then();
+                            });
+                            if (!main) return [3 /*break*/, 2];
+                            return [4 /*yield*/, main(context)];
+                        case 1: return [2 /*return*/, _a.sent()];
+                        case 2: return [2 /*return*/];
+                    }
+                });
             });
-            window.google.script.url.getLocation(function (location) {
-                var path = location.hash ? location.hash : '/';
-                var query = location.parameter;
-                router.replace({ path: path, query: query }).then();
-            });
-            if (main)
-                return main(context);
         },
-        template: '<router-view />'
+        template: template
     };
 }
 

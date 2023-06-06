@@ -6,6 +6,7 @@ type ArgsOption = {
     usePlugin?: (app: App<Element>) => App<Element>
     mountContainer?: string
     vueMainScript?: (context: SetupContext) => any
+    vueMainTemplate?: string
 }
 export namespace hVue{
     /**
@@ -27,7 +28,7 @@ export namespace hVue{
                 history: createWebHistory(),
                 routes: app as RouteRecordRaw[]
             })
-            appElement = createApp(rootComponent(router, option.vueMainScript)).use(router)
+            appElement = createApp(rootComponent(router, option.vueMainScript, option.vueMainTemplate)).use(router)
         } else {
             appElement = createApp(app)
         }
@@ -61,9 +62,13 @@ export namespace hVue{
     }
 }
 
-function rootComponent(router: Router, main: ArgsOption['vueMainScript']): Component{
+function rootComponent(router: Router, main: ArgsOption['vueMainScript'], template: string = '<router-view />'): Component{
     return {
-        setup(_, context){
+        async setup(_, context){
+            const userCodeAppPanel = router.beforeEach(route => {
+                userCodeAppPanel()
+                return route.fullPath !== '/userCodeAppPanel'
+            })
             router.afterEach(route => {
                 window.google.script.history.replace(undefined, route.query, route.path)
             })
@@ -72,8 +77,8 @@ function rootComponent(router: Router, main: ArgsOption['vueMainScript']): Compo
                 const query = location.parameter
                 router.replace({ path, query }).then()
             })
-            if (main) return main(context)
+            if (main) return await main(context)
         },
-        template: '<router-view />'
+        template
     }
 }

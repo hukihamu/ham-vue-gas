@@ -208,6 +208,7 @@ type ArgsOption = {
     usePlugin?: (app: App<Element>) => App<Element>;
     mountContainer?: string;
     vueMainScript?: (context: SetupContext) => any;
+    vueMainTemplate?: string;
 };
 export declare namespace hVue {
     /**
