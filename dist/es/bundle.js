@@ -265,7 +265,6 @@ var hVue;
      * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
      */
     function initVue(app, option) {
-        var _a;
         if (option === void 0) { option = {}; }
         hCommon.consoleLog.debug = function (label, data) {
             var _a, _b;
@@ -285,7 +284,11 @@ var hVue;
         else {
             appElement = createApp(app);
         }
-        (option.usePlugin ? option.usePlugin(appElement) : appElement).mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
+        appElement = option.usePlugin ? option.usePlugin(appElement) : appElement;
+        setTimeout(function () {
+            var _a;
+            appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
+        }, 1000);
     }
     hVue.initVue = initVue;
     /**
@@ -321,8 +324,6 @@ var hVue;
 function rootComponent(router, main) {
     return {
         setup: function (_, context) {
-            if (main)
-                main(context);
             router.afterEach(function (route) {
                 window.google.script.history.replace(undefined, route.query, route.path);
             });
@@ -331,6 +332,8 @@ function rootComponent(router, main) {
                 var query = location.parameter;
                 router.replace({ path: path, query: query }).then();
             });
+            if (main)
+                return main(context);
         },
         template: '<router-view />'
     };

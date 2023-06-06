@@ -207,7 +207,7 @@ import { RouteRecordRaw } from 'vue-router';
 type ArgsOption = {
     usePlugin?: (app: App<Element>) => App<Element>;
     mountContainer?: string;
-    vueMainScript?: (context: SetupContext) => void;
+    vueMainScript?: (context: SetupContext) => any;
 };
 export declare namespace hVue {
     /**
