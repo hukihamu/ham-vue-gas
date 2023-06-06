@@ -64,7 +64,7 @@ export namespace hVue{
 
 function rootComponent(router: Router, main: ArgsOption['vueMainScript'], template: string = '<router-view />'): Component{
     return {
-        async setup(_, context){
+        setup(_, context){
             const userCodeAppPanel = router.beforeEach(route => {
                 userCodeAppPanel()
                 return route.fullPath !== '/userCodeAppPanel'
@@ -77,7 +77,7 @@ function rootComponent(router: Router, main: ArgsOption['vueMainScript'], templa
                 const query = location.parameter
                 router.replace({ path, query }).then()
             })
-            if (main) await main(context)
+            if (main) return main(context)
         },
         template
     }
