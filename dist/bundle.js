@@ -325,18 +325,16 @@ function rootComponent(main) {
     return {
         setup: function (_, context) {
             var router = vueRouter.useRouter();
-            vue.watch(router, function () {
-                if (router) {
-                    router.afterEach(function (route) {
-                        window.google.script.history.replace(undefined, route.query, route.path);
-                    });
-                    window.google.script.url.getLocation(function (location) {
-                        var path = location.hash ? location.hash : '/';
-                        var query = location.parameter;
-                        router.replace({ path: path, query: query }).then();
-                    });
-                }
-            }, { immediate: true });
+            vue.computed(function () {
+                router.afterEach(function (route) {
+                    window.google.script.history.replace(undefined, route.query, route.path);
+                });
+                window.google.script.url.getLocation(function (location) {
+                    var path = location.hash ? location.hash : '/';
+                    var query = location.parameter;
+                    router.replace({ path: path, query: query }).then();
+                });
+            });
             if (main)
                 return main(context);
         },

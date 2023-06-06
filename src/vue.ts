@@ -1,4 +1,4 @@
-import {App, Component, createApp, SetupContext, watch} from 'vue'
+import {App, Component, computed, createApp, SetupContext} from 'vue'
 import {createRouter, createWebHistory, RouteRecordRaw, useRouter} from 'vue-router'
 import {hCommon} from '@/common'
 
@@ -65,18 +65,16 @@ function rootComponent(main: ArgsOption['vueMainScript']): Component{
     return {
         setup(_, context){
             const router = useRouter()
-            watch(router, () => {
-                if (router){
-                    router.afterEach(route => {
-                        window.google.script.history.replace(undefined, route.query, route.path)
-                    })
-                    window.google.script.url.getLocation(location => {
-                        const path = location.hash ? location.hash : '/'
-                        const query = location.parameter
-                        router.replace({ path, query }).then()
-                    })
-                }
-            }, {immediate: true})
+            computed(()=>{
+                router.afterEach(route => {
+                    window.google.script.history.replace(undefined, route.query, route.path)
+                })
+                window.google.script.url.getLocation(location => {
+                    const path = location.hash ? location.hash : '/'
+                    const query = location.parameter
+                    router.replace({ path, query }).then()
+                })
+            })
             if (main) return main(context)
         },
         template: '<router-view />'
