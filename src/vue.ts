@@ -5,7 +5,7 @@ import {hCommon} from '@/common'
 type ArgsOption = {
     usePlugin?: (app: App<Element>) => App<Element>
     mountContainer?: string
-    vueMainScript?: (context: SetupContext) => any
+    vueMainScript?: (context: SetupContext) => void
 }
 export namespace hVue{
     /**
@@ -72,7 +72,7 @@ function rootComponent(router: Router, main: ArgsOption['vueMainScript']): Compo
                 const query = location.parameter
                 router.replace({ path, query }).then()
             })
-            if (main) return main(context)
+            if (main) main(context)
         },
         template: '<router-view />'
     }

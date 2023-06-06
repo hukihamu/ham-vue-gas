@@ -331,7 +331,7 @@ function rootComponent(router, main) {
                 router.replace({ path: path, query: query }).then();
             });
             if (main)
-                return main(context);
+                main(context);
         },
         template: '<router-view />'
     };
