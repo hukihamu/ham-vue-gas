@@ -484,6 +484,7 @@ exports.hGas = void 0;
             var spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
             var sheet = spreadsheet.getSheetByName(this.tableName);
             this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName);
+            CacheService.getScriptCache().remove(this.tableName);
             if (this.checkRequiredUpdate(this._sheet)) {
                 this.createTable(this._sheet);
             }
@@ -657,6 +658,22 @@ var initGasOption = {
                 }
                 catch (e) {
                     exports.hCommon.consoleLog.error('init spreadsheet error', e);
+                }
+            }
+        };
+        global.clearCacheTable = function () {
+            for (var _i = 0, repositoryList_2 = repositoryList; _i < repositoryList_2.length; _i++) {
+                var repository = repositoryList_2[_i];
+                try {
+                    consoleLog.info('cache clear');
+                    var r = new repository();
+                    var name_2 = r['tableName'];
+                    consoleLog.info('start', name_2);
+                    CacheService.getScriptCache().remove(name_2);
+                    consoleLog.info('success', name_2);
+                }
+                catch (e) {
+                    exports.hCommon.consoleLog.error('clear cache table error', e);
                 }
             }
         };

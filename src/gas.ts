@@ -191,6 +191,7 @@ export namespace hGas {
             const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
             const sheet = spreadsheet.getSheetByName(this.tableName)
             this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName)
+            CacheService.getScriptCache().remove(this.tableName)
 
             if (this.checkRequiredUpdate(this._sheet)) {
                 this.createTable(this._sheet)
@@ -361,6 +362,20 @@ const initGasOption: InitGasOptions = {
                     consoleLog.info('success', name)
                 }catch (e) {
                     hCommon.consoleLog.error('init spreadsheet error', e)
+                }
+            }
+        }
+        global.clearCacheTable = () => {
+            for (const repository of repositoryList) {
+                try {
+                    consoleLog.info('cache clear')
+                    const r = new repository()
+                    const name = r['tableName']
+                    consoleLog.info('start', name)
+                    CacheService.getScriptCache().remove(name)
+                    consoleLog.info('success', name)
+                }catch (e) {
+                    hCommon.consoleLog.error('clear cache table error', e)
                 }
             }
         }
