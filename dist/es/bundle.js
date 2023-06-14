@@ -490,10 +490,11 @@ var hGas;
         /**
          * 挿入処理
          * @param entity 挿入するデータ。rowの有無は任意(利用せず、新規rowが付与される)
+         * @return 挿入したデータのrow
          */
         SSRepository.prototype.insert = function (entity) {
             var _this = this;
-            this.onLock(function () {
+            return this.onLock(function () {
                 var _a;
                 CacheService.getScriptCache().remove(_this.tableName);
                 var insertRowNumber = -1;
@@ -508,10 +509,12 @@ var hGas;
                 if (insertRowNumber === -1) {
                     // 最後尾に挿入
                     _this.sheet.appendRow(insertData);
+                    return values.length;
                 }
                 else {
                     // 削除行に挿入
                     _this.getRowRange(insertRowNumber).setValues([insertData]);
+                    return insertRowNumber;
                 }
             });
         };

@@ -201,9 +201,10 @@ export namespace hGas {
         /**
          * 挿入処理
          * @param entity 挿入するデータ。rowの有無は任意(利用せず、新規rowが付与される)
+         * @return 挿入したデータのrow
          */
-        insert(entity: E | InitEntity<E>): void {
-            this.onLock(() => {
+        insert(entity: E | InitEntity<E>): number {
+            return this.onLock(() => {
                 CacheService.getScriptCache().remove(this.tableName)
                 let insertRowNumber = -1
                 const values = this.sheet.getDataRange().getValues()
@@ -217,9 +218,11 @@ export namespace hGas {
                 if (insertRowNumber === -1) {
                     // 最後尾に挿入
                     this.sheet.appendRow(insertData)
+                    return values.length
                 } else {
                     // 削除行に挿入
                     this.getRowRange(insertRowNumber).setValues([insertData])
+                    return insertRowNumber
                 }
             })
         }
