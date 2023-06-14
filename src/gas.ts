@@ -218,7 +218,7 @@ export namespace hGas {
                 if (insertRowNumber === -1) {
                     // 最後尾に挿入
                     this.sheet.appendRow(insertData)
-                    return values.length
+                    return values.length + 1
                 } else {
                     // 削除行に挿入
                     this.getRowRange(insertRowNumber).setValues([insertData])

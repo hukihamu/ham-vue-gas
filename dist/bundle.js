@@ -313,7 +313,7 @@ exports.hVue = void 0;
                     run(args);
                 }
                 else {
-                    reject("not found GasMethod: ".concat(name));
+                    reject("not found GasMethod: ".concat(name, " \nset \"useGasMethod\""));
                 }
             });
         };
@@ -511,7 +511,7 @@ exports.hGas = void 0;
                 if (insertRowNumber === -1) {
                     // 最後尾に挿入
                     _this.sheet.appendRow(insertData);
-                    return values.length;
+                    return values.length + 1;
                 }
                 else {
                     // 削除行に挿入
