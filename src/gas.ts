@@ -1,12 +1,23 @@
 import {hCommon} from '@/common'
+import consoleLog = hCommon.consoleLog
 
 export namespace hGas {
     /**
-     * Controller実装に利用する
+     * GasMethod実装に利用する(全メソッド必須)
      */
-    export type ControllerType<C extends hCommon.BaseControllerInterface> = {
+    export type GasMethodsTypeRequired<C extends hCommon.BaseGasMethodInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>
     }
+    /**
+     * GasMethod実装に利用する(任意の複数メソッド)
+     */
+    export type GasMethodsType<C extends hCommon.BaseGasMethodInterface> = Partial<{
+        [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>
+    }>
+    /**
+     * GasMethod実装に利用する(1メソッドのみ)
+     */
+    export type GasMethodType<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>
     /**
      * SSRepositoryのinitData、columnListの宣言に使用
      */
@@ -17,25 +28,24 @@ export namespace hGas {
     export type SSEntity = {
         row: number
     }
-
+    type ArgsOption = {
+        htmlFileName?: string
+        editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput
+    }
     /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
-     * @param htmlFileName htmlファイル名を設定 default: index
-     * @param editHtmlOutput gasの機能で、htmlオブジェクトを編集したい際に利用(title変更など)
+     * @param option htmlファイル名を変更したり、htmlを変更する際に利用
      */
-    export function initGas<C extends string, G extends string, V extends string>(
-        config: hCommon.Config<C, G, V>,
-        htmlFileName: string = 'index',
-        editHtmlOutput: (output:  GoogleAppsScript.HTML.HtmlOutput) =>  GoogleAppsScript.HTML.HtmlOutput
-            = (output) => output): InitGasOptions{
-        hCommon.consoleLog.debug = (label: string, data: any)=> {
+    export function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>,
+                                                                                  option: ArgsOption = {}): InitGasOptions {
+        hCommon.consoleLog.debug = (label: string, data: any) => {
             if (config.getGasConfig('debug') === 'true') console.log(label, data)
-        };
+        }
         global.doGet = () => {
-            const gasHtml = HtmlService.createHtmlOutputFromFile(htmlFileName)
+            const gasHtml = HtmlService.createHtmlOutputFromFile(option.htmlFileName ?? 'index')
             gasHtml.setContent(gasHtml.getContent().replace('<body>', `<body><script type='application/json' id="vue-config">${JSON.stringify(config.getAllVueConfig())}</script>`))
-            return editHtmlOutput(gasHtml)
+            return option.editHtmlOutput ? option.editHtmlOutput(gasHtml) : gasHtml
         }
         return initGasOption
     }
@@ -55,13 +65,19 @@ export namespace hGas {
         }
 
         private get sheet(): GoogleAppsScript.Spreadsheet.Sheet{
-            const throwText = () => {
-                throw 'not found GoogleAppsScript.Spreadsheet.Sheet'
-            }
             if (!this._sheet) {
                 this._sheet = this.importSheet()
+                if (this._sheet) {
+                    if (this.checkRequiredUpdate(this._sheet)){
+                        throw `not updated Sheet "${this.tableName}" gas editor run "initTables"`
+                    } else {
+                        return this._sheet
+                    }
+                }
+                throw `not found Sheet "${this.tableName}" gas editor run "initTables"`
+            } else {
+                return this._sheet
             }
-            return this._sheet ?? throwText()
         }
         private static readonly TABLE_VERSION_LABEL = 'ver:'
         private static readonly DELETE_LABEL = 'DELETE'
@@ -105,23 +121,23 @@ export namespace hGas {
 
 
 
-        private checkVersionUpdated(): boolean {
-            return this.sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
+        private checkRequiredUpdate(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
+            return sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
         }
 
-        private createTable(): void {
+        private createTable(sheet: GoogleAppsScript.Spreadsheet.Sheet): void {
             // DataRangeが1行より多い場合、データはあると判断
-            if (this.sheet.getDataRange().getValues().length > 1) {
-                const oldVersion = this.sheet.getRange(1, 1, 1, 1).getValue()
-                const oldSheet = this.sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId))
-                const oldName = this.sheet.getName() + ' version:' + oldVersion
+            if (sheet.getDataRange().getValues().length > 1) {
+                const oldVersion = sheet.getRange(1, 1, 1, 1).getValue()
+                const oldSheet = sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId))
+                const oldName = sheet.getName() + ' version:' + oldVersion
                 oldSheet.setName(oldName)
-                this.sheet.clear()
+                sheet.clear()
             }
             // バージョン情報をセット
-            this.sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion)
+            sheet.getRange(1, 1, 1, 1).setValue(SSRepository.TABLE_VERSION_LABEL + this.tableVersion)
             //ヘッダーをセット
-            this.sheet.getRange(1, 2, 1, this.columnOrder.length).setValues([this.columnOrder])
+            sheet.getRange(1, 2, 1, this.columnOrder.length).setValues([this.columnOrder])
             //初期データをインサート
             for (const e of this.initData) {
                 this.insert(e)
@@ -168,25 +184,27 @@ export namespace hGas {
         }
 
         /**
-         * gasInit().useSpreadsheetDBで利用される
+         * gas console上で動作させるinitTables()で利用される
          */
         initTable(): void {
+            // シートがない場合生成する必要がある
             const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
             const sheet = spreadsheet.getSheetByName(this.tableName)
             this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName)
+            CacheService.getScriptCache().remove(this.tableName)
 
-            if (this.checkVersionUpdated()) {
-                this.createTable()
+            if (this.checkRequiredUpdate(this._sheet)) {
+                this.createTable(this._sheet)
             }
         }
 
         /**
          * 挿入処理
          * @param entity 挿入するデータ。rowの有無は任意(利用せず、新規rowが付与される)
-         * @return インサートしたrow number
          */
-        insert(entity: E | InitEntity<E>): number {
-            return this.onLock(() => {
+        insert(entity: E | InitEntity<E>): void {
+            this.onLock(() => {
+                CacheService.getScriptCache().remove(this.tableName)
                 let insertRowNumber = -1
                 const values = this.sheet.getDataRange().getValues()
                 for (let i = 1; i < values.length; i++) {
@@ -199,11 +217,9 @@ export namespace hGas {
                 if (insertRowNumber === -1) {
                     // 最後尾に挿入
                     this.sheet.appendRow(insertData)
-                    return values.length
                 } else {
                     // 削除行に挿入
                     this.getRowRange(insertRowNumber).setValues([insertData])
-                    return insertRowNumber
                 }
             })
         }
@@ -212,16 +228,29 @@ export namespace hGas {
          * 全件取得(フィルターなどはJSで実施)
          */
         getAll(): E[] {
-            return this.onLock(() => {
-                const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
-                const entities: E[] = []
-                for (const value of values) {
-                    if (!value[0]) break
-                    if (value[0] === SSRepository.DELETE_LABEL) continue
-                    entities.push(this.toEntity(value))
-                }
-                return entities
-            })
+            const cache = CacheService.getScriptCache().get(this.tableName)
+            let values: any[][] = []
+            if (cache){
+                values = JSON.parse(cache)
+            } else {
+                values = this.onLock(() => {
+                    const lastRow = this.sheet.getLastRow()
+                    if (lastRow <= 1) {
+                        // 0件の場合は取得しない
+                        return []
+                    }
+                    const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
+                    CacheService.getScriptCache().put(this.tableName, JSON.stringify(values), 21600)
+                    return values
+                })
+            }
+            const entities: E[] = []
+            for (const value of values) {
+                if (!value[0]) break
+                if (value[0] === SSRepository.DELETE_LABEL) continue
+                entities.push(this.toEntity(value))
+            }
+            return entities
         }
 
         /**
@@ -229,10 +258,16 @@ export namespace hGas {
          * @param row 取得するrow(rowは自動で付与され、不定一意)
          */
         getByRow(row: number): E {
-            return this.onLock(() => {
-                const stringList = this.getRowRange(row).getValues()[0] ?? []
-                return this.toEntity(stringList)
-            })
+            const cache = CacheService.getScriptCache().get(this.tableName)
+            let stringList = []
+            if (cache){
+                stringList = JSON.parse(cache)[row - 2]
+            } else {
+                this.onLock(() => {
+                    stringList = this.getRowRange(row).getValues()[0] ?? []
+                })
+            }
+            return this.toEntity(stringList)
         }
 
         /**
@@ -241,6 +276,7 @@ export namespace hGas {
          */
         update(entity: E): void {
             this.onLock(() => {
+                CacheService.getScriptCache().remove(this.tableName)
                 this.getRowRange(entity.row).setValues([this.toStringList(entity)])
             })
         }
@@ -251,6 +287,7 @@ export namespace hGas {
          */
         delete(row: number): void {
             this.onLock(() => {
+                CacheService.getScriptCache().remove(this.tableName)
                 const range = this.getRowRange(row)
                 range.clear()
                 const d = new Array(this.columnOrder.length + 1)
@@ -263,18 +300,19 @@ export namespace hGas {
 
 type LockType = 'user' | 'script' | 'none'
 declare let global: { [name: string]: unknown }
-type WrapperController<C extends hCommon.BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>
+type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>
 
 interface InitGasOptions {
     /**
-     * Controllerを登録する<br>
-     * 変数"global[{Controller名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
-     * globalへ代入前に"wrapperController"を利用する<br>
-     * ControllerInterfaceをGenerics宣言すると、コード補完される
+     * Gasで実行される関数を登録する<br>
+     * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
+     * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
+     * globalへ代入前に"wrapperMethod"を利用する<br>
+     * GasMethodInterfaceをGenerics宣言すると、コード補完される
      */
-    useController<C extends { [name: string]: any }>(controller: hGas.ControllerType<C>, initGlobal: (
-        global: {[K in keyof C]: WrapperController<C, K>},
-        wrapperController: <K extends keyof C>(name: K)=> WrapperController<C,K>)=>void): InitGasOptions
+    useGasMethod<C extends { [name: string]: any }>(gasMethod: hGas.GasMethodsTypeRequired<C>, initGlobal: (
+        global: {[K in keyof C]: WrapperMethod<C, K>},
+        wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions
     /**
      * SpreadsheetをDBとして利用する<br>
      * 作成したRepositoryを登録する
@@ -286,38 +324,59 @@ interface InitGasOptions {
  * gas側の機能拡張
  */
 const initGasOption: InitGasOptions = {
-    useController<C extends hCommon.BaseControllerInterface>(controller: hGas.ControllerType<C>,initGlobal: (
-        global: {[K in keyof C]: WrapperController<C, K>},
-        wrapperController: <K extends keyof C>(name: K)=> WrapperController<C,K>)=>void): InitGasOptions {
+    useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod: hGas.GasMethodsTypeRequired<C>, initGlobal: (
+        global: {[K in keyof C]: WrapperMethod<C, K>},
+        wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions {
 
-        function wrapperController<K extends keyof C>(name: K): WrapperController<C, K> {
+        function wrapperMethod<K extends keyof C>(name: K): WrapperMethod<C, K> {
             return async (args: any) => {
                 try {
                     let returnValue
                     if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
                         console.log('arg: ', args)
-                        returnValue = await controller[name](args)
+                        returnValue = await gasMethod[name](args)
                         console.log('return: ', returnValue)
                     } else {
-                        returnValue = await controller[name](args)
+                        returnValue = await gasMethod[name](args)
                     }
                     return JSON.stringify(returnValue)
                 } catch (e) {
-                    hCommon.consoleLog.error('Controller error:', e)
+                    hCommon.consoleLog.error('GasMethod error:', e)
                     throw e
                 }
             }
         }
 
-        initGlobal(global as any, wrapperController)
+        initGlobal(global as any, wrapperMethod)
         return initGasOption
     },
     useSpreadsheetDB(...repositoryList): InitGasOptions {
-        for (const repository of repositoryList) {
-            try {
-                new repository().initTable()
-            }catch (e) {
-                hCommon.consoleLog.error('init spreadsheet error', e)
+        global.initTables = () => {
+            for (const repository of repositoryList) {
+                try {
+                    consoleLog.info('create instances')
+                    const r = new repository()
+                    const name = r['tableName']
+                    consoleLog.info('start', name)
+                    r.initTable()
+                    consoleLog.info('success', name)
+                }catch (e) {
+                    hCommon.consoleLog.error('init spreadsheet error', e)
+                }
+            }
+        }
+        global.clearCacheTable = () => {
+            for (const repository of repositoryList) {
+                try {
+                    consoleLog.info('cache clear')
+                    const r = new repository()
+                    const name = r['tableName']
+                    consoleLog.info('start', name)
+                    CacheService.getScriptCache().remove(name)
+                    consoleLog.info('success', name)
+                }catch (e) {
+                    hCommon.consoleLog.error('clear cache table error', e)
+                }
             }
         }
         return initGasOption

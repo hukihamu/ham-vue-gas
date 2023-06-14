@@ -67,7 +67,7 @@ program.command('build')
       const HtmlInlineCssWebpackPlugin = require('html-inline-css-webpack-plugin').default
       const { CleanWebpackPlugin } = require('clean-webpack-plugin')
       const { VuetifyPlugin } = require('webpack-plugin-vuetify')
-      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader'},{ test: /\\.css$/, use: ['css-loader'] }]},resolve: {plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new VuetifyPlugin({ autoImport: true, styles: 'none' }),new VueLoaderPlugin(),new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
+      module.exports = {mode: 'production',entry: {vue: '${e}'},output: {filename: 'vue.js',path: '${o}'},module: {rules: [{test: /\\.ts$/,loader: 'ts-loader',options: {appendTsSuffixTo: [/\\.vue$/]}},{test: /\\.vue$/,loader: 'vue-loader'},{ test: /\\.css$/, use: ['vue-style-loader','css-loader'] }]},resolve: {alias: { 'vue$': 'vue/dist/vue.esm-bundler.js' },plugins: [new TsconfigPathsPlugin({ configFile: '${t}' })],extensions: ['.ts', '.vue', '.js']},plugins: [new VueLoaderPlugin(),new VuetifyPlugin({ styles: 'none' }),new HtmlWebpackPlugin({template: '${h.replaceAll('\\', '\\\\')}',inject: 'body',minify: {removeComments: true,collapseWhitespace: true}}),new HtmlInlineScriptWebpackPlugin(),new HtmlInlineCssWebpackPlugin(),new CopyWebpackPlugin({patterns: [{ from: Path.resolve(__dirname, '${a.replaceAll('\\', '\\\\')}'), to: '' }]}),new CleanWebpackPlugin({protectWebpackAssets: false,cleanOnceBeforeBuildPatterns: ['!gas.js'],cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt','gas.js.LICENSE.txt']})]}`
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -159,10 +159,10 @@ program.command('init')
 import Config = hCommon.Config
 
 export const config = new Config(['debug'], ['spreadsheetId'], [''])`)
-    fs.writeFileSync(path.join(rootPath, 'src', 'common', 'controllerInterface.ts'), `import {hCommon} from 'ham-vue-gas'
-import BaseControllerInterface = hCommon.BaseControllerInterface
+    fs.writeFileSync(path.join(rootPath, 'src', 'common', 'gasMethodInterface.ts'), `import {hCommon} from 'ham-vue-gas'
+import BaseGasMethodInterface = hCommon.BaseGasMethodInterface
 
-export interface ControllerInterface extends BaseControllerInterface {
+export interface GasMethodInterface extends BaseGasMethodInterface {
     insertData: {
         at: string
         rt: string[]
@@ -175,16 +175,18 @@ export interface ControllerInterface extends BaseControllerInterface {
 import initVue = hVue.initVue
 import Main from '@V/main.vue'
 import GasClient = hVue.GasClient
-import {ControllerInterface} from '@C/controllerInterface'
+import {GasMethodInterface} from '@C/gasMethodInterface'
 ${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import * as components from 'vuetify/components'\n" : ""}${v ? "import * as directives from 'vuetify/directives'\n" : ""}
 
 initVue([{
     path: '/',
     component: Main
-}], app => app.use(createVuetify({components, directives})))
+}], {
+    ${v ? 'usePlugin: app => app.use(createVuetify({components, directives}))' : ''}
+})
 
 
-export const gasClient = new GasClient<ControllerInterface>() `)
+export const gasClient = new GasClient<GasMethodInterface>() `)
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'main.vue'), `<script setup lang="ts">
 import {gasClient} from '@V/index'
 import {ref} from 'vue'
@@ -221,27 +223,27 @@ function onClickInput(){
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'index.ts'), `import {hGas} from 'ham-vue-gas'
 import initGas = hGas.initGas
 import {config} from '@C/config'
-import sampleController from '@G/controller/sampleController'
+import {sampleMethod} from '@G/methods/sampleMethod'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
-initGas(config, )
-    .useController(sampleController, (global, wrapperController) => {
-        global.insertData = wrapperController('insertData')
+initGas(config, {editHtmlOutput: output => output.addMetaTag('viewport', 'width=device-width, initial-scale=1')})
+    .useGasMethod(sampleMethod, (global, wrapperMethod) => {
+        global.insertData = wrapperMethod('insertData')
     })
     .useSpreadsheetDB(SampleRepository,)`)
-    if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'controller'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'controller'))
-    fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'controller', 'sampleController.ts'), `import {hGas} from 'ham-vue-gas'
-import ControllerType = hGas.ControllerType
-import {ControllerInterface} from '@C/controllerInterface'
+    if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'methods'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'methods'))
+    fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'methods', 'sampleMethod.ts'), `import {hGas} from 'ham-vue-gas'
+import GasMethodsType = hGas.GasMethodsType
+import {GasMethodInterface} from '@C/gasMethodInterface'
 import {SampleRepository} from '@G/repository/sampleRepository'
 
-export default {
+export const sampleMethod: GasMethodsType<GasMethodInterface> = {
     async insertData(args){
         const repo = new SampleRepository()
         repo.insert({text: args})
         return repo.getAll().map(it => it.text)
     }
-} as ControllerType<ControllerInterface>`)
+}`)
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'entity'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'entity'))
     fs.writeFileSync(path.join(rootPath, 'src', 'gas', 'entity', 'sampleEntity.ts'), `import {hGas} from 'ham-vue-gas'
 import SSEntity = hGas.SSEntity

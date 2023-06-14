@@ -1,6 +1,10 @@
 const fs = require("fs");
 
 
+if (fs.existsSync('./dist/es/dts')){
+  fs.rmdirSync('./dist/es/dts', {recursive: true})
+}
+
 const output = [];
 const processDir = (dir = "./dist/") => {
   const files = fs.readdirSync(dir);

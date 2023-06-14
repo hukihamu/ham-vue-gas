@@ -28,17 +28,17 @@ export declare namespace hCommon {
      * Vue・Gas共に利用可能なLog出力
      */
     const consoleLog: {
-        info(label: string, data?: any): void;
-        debug(label: string, data?: any): void;
-        warn(label: string, data?: any): void;
-        error(label: string, data?: any): void;
+        info(label: string, ...data: any[]): void;
+        debug(label: string, ...data: any[]): void;
+        warn(label: string, ...data: any[]): void;
+        error(label: string, ...data: any[]): void;
     };
     /**
-     * Controllerの定義に利用<br>
+     * Gasで実行される関数の定義に利用<br>
      * Interfaceにextendsを行う<br>
-     * 構成: {Controller名: {at: 引数型, rt: 戻り値型}}
+     * 構成: {Method名: {at: 引数型, rt: 戻り値型}}
      */
-    type BaseControllerInterface = {
+    type BaseGasMethodInterface = {
         [name: string]: {
             at: unknown;
             rt: unknown;
@@ -52,35 +52,48 @@ type NonEmptyArray<T> = [T, ...T[]];
 
 export declare namespace hGas {
     /**
-     * Controller実装に利用する
+     * GasMethod実装に利用する(全メソッド必須)
      */
-    type ControllerType<C extends hCommon.BaseControllerInterface> = {
+    export type GasMethodsTypeRequired<C extends hCommon.BaseGasMethodInterface> = {
         [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
     };
     /**
+     * GasMethod実装に利用する(任意の複数メソッド)
+     */
+    export type GasMethodsType<C extends hCommon.BaseGasMethodInterface> = Partial<{
+        [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
+    }>;
+    /**
+     * GasMethod実装に利用する(1メソッドのみ)
+     */
+    export type GasMethodType<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>;
+    /**
      * SSRepositoryのinitData、columnListの宣言に使用
      */
-    type InitEntity<E extends SSEntity> = Omit<E, 'row'>;
+    export type InitEntity<E extends SSEntity> = Omit<E, 'row'>;
     /**
      * スプレッドシートに格納するデータオブジェクトを定義
      */
-    type SSEntity = {
+    export type SSEntity = {
         row: number;
+    };
+    type ArgsOption = {
+        htmlFileName?: string;
+        editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
     };
     /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
-     * @param htmlFileName htmlファイル名を設定 default: index
-     * @param editHtmlOutput gasの機能で、htmlオブジェクトを編集したい際に利用(title変更など)
+     * @param option htmlファイル名を変更したり、htmlを変更する際に利用
      */
-    function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>, htmlFileName?: string, editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput): InitGasOptions;
+    export function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>, option?: ArgsOption): InitGasOptions;
     /**
      * スプレッドシートをテーブルとしてCRUD操作を行う<br>
      * 本abstract classをextendsして作成する<br>
      * extendsしたクラスをgasInit().useSpreadsheetDBに入力すると利用可能となる<br>
      * extendsしたクラスをインスタンス化して利用する
      */
-    abstract class SSRepository<E extends SSEntity> {
+    export abstract class SSRepository<E extends SSEntity> {
         private _sheet;
         private importSheet;
         private get sheet();
@@ -122,14 +135,14 @@ export declare namespace hGas {
          * トランザクションロック開放を待つ時間(ミリ秒)
          */
         lockWaitMSec: number;
-        private checkVersionUpdated;
+        private checkRequiredUpdate;
         private createTable;
         private toStringList;
         private toEntity;
         private getRowRange;
         private onLock;
         /**
-         * gasInit().useSpreadsheetDBで利用される
+         * gas console上で動作させるinitTables()で利用される
          */
         initTable(): void;
         /**
@@ -158,21 +171,23 @@ export declare namespace hGas {
          */
         delete(row: number): void;
     }
+    
 }
 type LockType = 'user' | 'script' | 'none';
-type WrapperController<C extends hCommon.BaseControllerInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
+type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
 interface InitGasOptions {
     /**
-     * Controllerを登録する<br>
-     * 変数"global[{Controller名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
-     * globalへ代入前に"wrapperController"を利用する<br>
-     * ControllerInterfaceをGenerics宣言すると、コード補完される
+     * Gasで実行される関数を登録する<br>
+     * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
+     * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
+     * globalへ代入前に"wrapperMethod"を利用する<br>
+     * GasMethodInterfaceをGenerics宣言すると、コード補完される
      */
-    useController<C extends {
+    useGasMethod<C extends {
         [name: string]: any;
-    }>(controller: hGas.ControllerType<C>, initGlobal: (global: {
-        [K in keyof C]: WrapperController<C, K>;
-    }, wrapperController: <K extends keyof C>(name: K) => WrapperController<C, K>) => void): InitGasOptions;
+    }>(gasMethod: hGas.GasMethodsTypeRequired<C>, initGlobal: (global: {
+        [K in keyof C]: WrapperMethod<C, K>;
+    }, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): InitGasOptions;
     /**
      * SpreadsheetをDBとして利用する<br>
      * 作成したRepositoryを登録する
@@ -186,39 +201,39 @@ interface InitGasOptions {
 
 
 
-declare const _default: {
-    hVue: typeof hVue;
-    hCommon: typeof hCommon;
-    hGas: typeof hGas;
-};
 
-
-import { App, Component } from 'vue';
+import { App, Component, SetupContext } from 'vue';
 import { RouteRecordRaw } from 'vue-router';
 
+type ArgsOption = {
+    usePlugin?: (app: App<Element>) => App<Element>;
+    mountContainer?: string;
+    vueMainScript?: (context: SetupContext) => any;
+    vueMainTemplate?: string;
+};
 export declare namespace hVue {
     /**
      * Vue側entryファイルで実行する関数<br>
      *
      * @param app Componentか、Routingを設定可能
-     * @param useFunc Vueに追加するプラグインを登録するFunction. example: app => app.use(vuetify). default: app => app
-     * @param mountContainer マウントするエレメント default: #app
+     * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
      */
-    function initVue(app: Component | RouteRecordRaw[], useFunc?: (app: App<Element>) => App<Element>, mountContainer?: string): void;
+    function initVue(app: Component | RouteRecordRaw[], option?: ArgsOption): void;
     /**
      * Vue側からGasで作成したコントローラを呼び出すクラス<br>
-     * Gas側で作成したControllerInterfaceをgenerics宣言する
+     * Gas側で作成したGasMethodInterfaceをgenerics宣言する
      */
-    class GasClient<C extends hCommon.BaseControllerInterface> {
+    class GasClient<C extends hCommon.BaseGasMethodInterface> {
         /**
-         * Controllerの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
-         * ControllerInterfaceを宣言すれば、コード補完で作成している名前が確認できる
-         * @param name Controller名
-         * @param args Controller引数
+         * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+         * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+         * @param name GasMethod名
+         * @param args GasMethod引数
          */
         send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>;
     }
 }
+
 
 declare namespace google {
   namespace script {
