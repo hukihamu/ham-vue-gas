@@ -329,21 +329,25 @@ const initGasOption: InitGasOptions = {
         wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions {
 
         function wrapperMethod<K extends keyof C>(name: K): WrapperMethod<C, K> {
-            return async (args: any) => {
-                try {
-                    let returnValue
-                    if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
-                        console.log('arg: ', args)
-                        returnValue = await gasMethod[name](args)
-                        console.log('return: ', returnValue)
-                    } else {
-                        returnValue = await gasMethod[name](args)
+            return (args: any) => {
+                return new Promise((resolve, reject) => {
+                    try {
+                        if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
+                            console.log('arg: ', args)
+                            gasMethod[name](args).then(returnValue => {
+                                console.log('return: ', returnValue)
+                                resolve(JSON.stringify(returnValue))
+                            })
+                        } else {
+                            gasMethod[name](args).then(returnValue => {
+                                resolve(JSON.stringify(returnValue))
+                            })
+                        }
+                    } catch (e) {
+                        hCommon.consoleLog.error('GasMethod error:', e)
+                        reject(e)
                     }
-                    return JSON.stringify(returnValue)
-                } catch (e) {
-                    hCommon.consoleLog.error('GasMethod error:', e)
-                    throw e
-                }
+                })
             }
         }
 
