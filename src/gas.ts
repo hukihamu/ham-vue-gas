@@ -303,7 +303,7 @@ export namespace hGas {
 
 type LockType = 'user' | 'script' | 'none'
 declare let global: { [name: string]: unknown }
-type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>
+type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {e: any}>
 
 interface InitGasOptions {
     /**
@@ -332,25 +332,21 @@ const initGasOption: InitGasOptions = {
         wrapperMethod: <K extends keyof C>(name: K)=> WrapperMethod<C,K>)=>void): InitGasOptions {
 
         function wrapperMethod<K extends keyof C>(name: K): WrapperMethod<C, K> {
-            return (args: any) => {
-                return new Promise((resolve, reject) => {
-                    try {
-                        if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
-                            console.log('arg: ', args)
-                            gasMethod[name](args).then(returnValue => {
-                                console.log('return: ', returnValue)
-                                resolve(JSON.stringify(returnValue))
-                            })
-                        } else {
-                            gasMethod[name](args).then(returnValue => {
-                                resolve(JSON.stringify(returnValue))
-                            })
-                        }
-                    } catch (e) {
-                        hCommon.consoleLog.error('GasMethod error:', e)
-                        reject(e)
+            return async (args: any) => {
+                try {
+                    let returnValue
+                    if (PropertiesService.getScriptProperties().getProperty('debug') === 'true') {
+                        console.log('arg: ', args)
+                        returnValue = await gasMethod[name](args)
+                        console.log('return: ', returnValue)
+                    } else {
+                        returnValue = await gasMethod[name](args)
                     }
-                })
+                    return JSON.stringify(returnValue)
+                } catch (e) {
+                    hCommon.consoleLog.error('GasMethod error:', e)
+                    return {e}
+                }
             }
         }
 

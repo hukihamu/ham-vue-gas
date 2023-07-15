@@ -50,7 +50,7 @@ export namespace hVue{
         send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>{
             return new Promise((resolve, reject) => {
                 const run = google.script.run
-                    .withSuccessHandler(it => resolve(JSON.parse(it)))
+                    .withSuccessHandler(it => typeof it === 'string' ? resolve(JSON.parse(it)) : reject(it.e))
                     .withFailureHandler(error => reject(error))[name as string]
                 if (run) {
                     run(args)

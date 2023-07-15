@@ -174,7 +174,9 @@ export declare namespace hGas {
     
 }
 type LockType = 'user' | 'script' | 'none';
-type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string>;
+type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {
+    e: any;
+}>;
 interface InitGasOptions {
     /**
      * Gasで実行される関数を登録する<br>
