@@ -55,7 +55,7 @@ export namespace hVue{
                 if (run) {
                     run(args)
                 } else {
-                    reject(`not found GasMethod: ${name as string}`)
+                    reject(`not found GasMethod: ${name as string} \nset "useGasMethod"`)
                 }
             })
         }

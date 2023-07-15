@@ -148,8 +148,9 @@ export declare namespace hGas {
         /**
          * 挿入処理
          * @param entity 挿入するデータ。rowの有無は任意(利用せず、新規rowが付与される)
+         * @return 挿入したデータのrow
          */
-        insert(entity: E | InitEntity<E>): void;
+        insert(entity: E | InitEntity<E>): number;
         /**
          * 全件取得(フィルターなどはJSで実施)
          */
