@@ -10,6 +10,8 @@
 - configはgasのスクリプト プロパティに設定
 - gas環境のルーティングはハッシュ`#/`がパス
 - SpreadsheetのDB化時、rowは生きている間一意を担保するが、delete後の担保はされない(rowの再利用をするため)
+- `submit`で利用するとエラー
+  - `submit.prevent`で`return false`とする
 
 ## TODO
 - [ ] 使い方
