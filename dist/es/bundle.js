@@ -611,12 +611,10 @@ var initGasOption = {
         function wrapperMethod(name) {
             var _this = this;
             return function (args) { return __awaiter(_this, void 0, void 0, function () {
-                var returnValue, e_1;
+                var returnValue;
                 return __generator(this, function (_a) {
                     switch (_a.label) {
                         case 0:
-                            _a.trys.push([0, 5, , 6]);
-                            returnValue = void 0;
                             if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
                             console.log('arg: ', args);
                             return [4 /*yield*/, gasMethod[name](args)];
@@ -629,11 +627,6 @@ var initGasOption = {
                             returnValue = _a.sent();
                             _a.label = 4;
                         case 4: return [2 /*return*/, JSON.stringify(returnValue)];
-                        case 5:
-                            e_1 = _a.sent();
-                            hCommon.consoleLog.error('GasMethod error:', e_1);
-                            return [2 /*return*/, { e: e_1 }];
-                        case 6: return [2 /*return*/];
                     }
                 });
             }); };
