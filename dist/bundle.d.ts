@@ -81,6 +81,17 @@ export declare namespace hGas {
         htmlFileName?: string;
         editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
     };
+    export type SSCache<T extends string> = {
+        get(key: T): unknown | undefined;
+        set(key: T, value: any): void;
+    };
+    /**
+     * SpreadsheetCacheインスタンスを生成<br>
+     * "initGas"にて"useSpreadsheetCache"が必要
+     * @param cacheKeys Cache名
+     * @return object or undefined(keyが存在しない)
+     */
+    export function newInstanceSSCache<T extends string>(cacheKeys: T[]): SSCache<T>;
     /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
@@ -135,6 +146,18 @@ export declare namespace hGas {
          * トランザクションロック開放を待つ時間(ミリ秒)
          */
         lockWaitMSec: number;
+        /**
+         * read処理時にCacheを取得する<br>
+         * override可
+         * @protected
+         */
+        protected getCache(): string | undefined;
+        /**
+         * insert,update,delete時にCacheを操作する<br>
+         * override可
+         * @protected
+         */
+        protected changeCache(entity: E | InitEntity<E> | number): void;
         private checkRequiredUpdate;
         private createTable;
         private toStringList;
@@ -197,6 +220,12 @@ interface InitGasOptions {
     useSpreadsheetDB(...repositoryList: {
         new (): hGas.SSRepository<any>;
     }[]): InitGasOptions;
+    /**
+     * 永続的なCacheをSpreadsheetで再現する<br>
+     * newInstance時、テーブル名をkeyとして登録するとSpreadsheetDBで利用される
+     * @param cacheSSId cache二利用するSpreadsheetId "cache"シートが生成される
+     */
+    useSpreadsheetCache(cacheSSId: string): InitGasOptions;
 }
 
 

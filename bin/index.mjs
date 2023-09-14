@@ -48,7 +48,8 @@ program.command('build')
     if (!fs.existsSync(h)) throw `nou found html. path:${h}`
     if (!fs.existsSync(t)) throw `nou found tsconfig.json. path:${t}`
     if (!fs.existsSync(g)) throw `nou found gas main file. path:${g}`
-    if (!fs.existsSync(e)) throw `nou found vue main file. path:${e}`
+    // vueはなくても動作させる
+    const existsVueFile = fs.existsSync(e)
 
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = `
@@ -73,7 +74,7 @@ program.command('build')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
     const vueConfigPath = path.join(tempDirPath, 'webpack.config.vue.js')
     const gasConfigPath = path.join(tempDirPath, 'webpack.config.gas.js')
-    fs.writeFileSync(vueConfigPath, vueWebpackConfig)
+    if (existsVueFile) fs.writeFileSync(vueConfigPath, vueWebpackConfig)
     fs.writeFileSync(gasConfigPath, gasWebpackConfig)
     // webpack 実行
     const execResult = (error, stdout, stderr) => {
@@ -87,7 +88,7 @@ program.command('build')
         console.error('Exec error: ', error);
       }
     }
-    exec(`npx webpack --config ${vueConfigPath} ${w ? '-w': ''}`, execResult)
+    if (existsVueFile) exec(`npx webpack --config ${vueConfigPath} ${w ? '-w': ''}`, execResult)
     exec(`npx webpack --config ${gasConfigPath} ${w ? '-w': ''}`, execResult)
   })
 
