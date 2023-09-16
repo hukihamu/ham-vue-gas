@@ -348,47 +348,6 @@ var consoleLog = exports.hCommon.consoleLog;
 exports.hGas = void 0;
 (function (hGas) {
     /**
-     * SpreadsheetCacheインスタンスを生成<br>
-     * "initGas"にて"useSpreadsheetCache"が必要
-     * @param cacheKeys Cache名
-     * @return object or undefined(keyが存在しない)
-     */
-    function newInstanceSSCache(cacheKeys) {
-        cacheInstance = {
-            get: function (key) {
-                var _a, _b;
-                if (!cacheSheet)
-                    throw 'not run "useSpreadsheetCache"';
-                var index = cacheKeys.indexOf(key);
-                if (index < 0)
-                    return undefined;
-                var values = (_a = cacheSheet.getRange(index, cacheSheet.getLastColumn()).getValues()[0]) !== null && _a !== void 0 ? _a : [];
-                var isSplit = true;
-                var i = 0;
-                var jsonString = '';
-                while (isSplit) {
-                    if (values[i])
-                        jsonString += values[i];
-                    isSplit = ((_b = values[i]) === null || _b === void 0 ? void 0 : _b.length) === 50000;
-                    i++;
-                }
-                return JSON.parse(jsonString);
-            },
-            set: function (key, value) {
-                if (!cacheSheet)
-                    throw 'not run "useSpreadsheetCache"';
-                var index = cacheKeys.indexOf(key);
-                if (index < 0)
-                    return undefined;
-                var jsonString = JSON.stringify(value).split(/.{50000}/);
-                cacheSheet.getRange(index, cacheSheet.getLastColumn()).setValues([jsonString]);
-                return;
-            }
-        };
-        return cacheInstance;
-    }
-    hGas.newInstanceSSCache = newInstanceSSCache;
-    /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
      * @param option htmlファイル名を変更したり、htmlを変更する際に利用
@@ -456,23 +415,6 @@ exports.hGas = void 0;
             enumerable: false,
             configurable: true
         });
-        /**
-         * read処理時にCacheを取得する<br>
-         * override可
-         * @protected
-         */
-        SSRepository.prototype.getCache = function () {
-            var _a;
-            return (_a = CacheService.getScriptCache().get(this.tableName)) !== null && _a !== void 0 ? _a : undefined;
-        };
-        /**
-         * insert,update,delete時にCacheを操作する<br>
-         * override可
-         * @protected
-         */
-        SSRepository.prototype.changeCache = function (entity) {
-            CacheService.getScriptCache().remove(this.tableName);
-        };
         SSRepository.prototype.checkRequiredUpdate = function (sheet) {
             return sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion;
         };
@@ -555,7 +497,7 @@ exports.hGas = void 0;
             var _this = this;
             return this.onLock(function () {
                 var _a;
-                _this.changeCache(entity);
+                CacheService.getScriptCache().remove(_this.tableName);
                 var insertRowNumber = -1;
                 var values = _this.sheet.getDataRange().getValues();
                 for (var i = 1; i < values.length; i++) {
@@ -582,7 +524,7 @@ exports.hGas = void 0;
          */
         SSRepository.prototype.getAll = function () {
             var _this = this;
-            var cache = this.getCache();
+            var cache = CacheService.getScriptCache().get(this.tableName);
             var values = [];
             if (cache) {
                 values = JSON.parse(cache);
@@ -616,7 +558,7 @@ exports.hGas = void 0;
          */
         SSRepository.prototype.getByRow = function (row) {
             var _this = this;
-            var cache = this.getCache();
+            var cache = CacheService.getScriptCache().get(this.tableName);
             var stringList = [];
             if (cache) {
                 stringList = JSON.parse(cache)[row - 2];
@@ -636,7 +578,7 @@ exports.hGas = void 0;
         SSRepository.prototype.update = function (entity) {
             var _this = this;
             this.onLock(function () {
-                _this.changeCache(entity);
+                CacheService.getScriptCache().remove(_this.tableName);
                 _this.getRowRange(entity.row).setValues([_this.toStringList(entity)]);
             });
         };
@@ -647,7 +589,7 @@ exports.hGas = void 0;
         SSRepository.prototype.delete = function (row) {
             var _this = this;
             this.onLock(function () {
-                _this.changeCache(row);
+                CacheService.getScriptCache().remove(_this.tableName);
                 var range = _this.getRowRange(row);
                 range.clear();
                 var d = new Array(_this.columnOrder.length + 1);
@@ -662,8 +604,6 @@ exports.hGas = void 0;
     }());
     hGas.SSRepository = SSRepository;
 })(exports.hGas || (exports.hGas = {}));
-var cacheSheet = undefined;
-var cacheInstance;
 /**
  * gas側の機能拡張
  */
@@ -743,24 +683,6 @@ var initGasOption = {
                 }
             }
         };
-        return initGasOption;
-    },
-    /**
-     * 永続的なCacheをSpreadsheetで再現する<br>
-     * newInstance時、テーブル名をkeyとして登録するとSpreadsheetDBで利用される
-     * @param cacheSSId cache二利用するSpreadsheetId "cache"シートが生成される
-     */
-    useSpreadsheetCache: function (cacheSSId) {
-        var _a;
-        if (cacheSSId === void 0) { cacheSSId = 'cache_ss_id'; }
-        try {
-            var sheetName = 'cache';
-            var spreadsheet = SpreadsheetApp.openById(cacheSSId);
-            cacheSheet = (_a = spreadsheet.getSheetByName(sheetName)) !== null && _a !== void 0 ? _a : spreadsheet.insertSheet().setName(sheetName);
-        }
-        catch (e) {
-            exports.hCommon.consoleLog.error('init cache spreadsheet error', e);
-        }
         return initGasOption;
     },
 };

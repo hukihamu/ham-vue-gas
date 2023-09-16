@@ -33,45 +33,6 @@ export namespace hGas {
         htmlFileName?: string
         editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput
     }
-    export type SSCache<T extends string> = {
-        get(key: T): unknown | undefined
-        set(key: T, value: any): void
-    }
-
-    /**
-     * SpreadsheetCacheインスタンスを生成<br>
-     * "initGas"にて"useSpreadsheetCache"が必要
-     * @param cacheKeys Cache名
-     * @return object or undefined(keyが存在しない)
-     */
-    export function newInstanceSSCache<T extends string>(cacheKeys: T[]): SSCache<T> {
-        cacheInstance = {
-            get(key: T): unknown | undefined {
-                if (!cacheSheet) throw 'not run "useSpreadsheetCache"'
-                const index = cacheKeys.indexOf(key)
-                if (index < 0) return undefined
-                const values = cacheSheet.getRange(index, cacheSheet.getLastColumn()).getValues()[0] ?? []
-                let isSplit = true
-                let i = 0
-                let jsonString = ''
-                while (isSplit) {
-                    if (values[i]) jsonString += values[i]
-                    isSplit = values[i]?.length === 50000
-                    i++
-                }
-                return JSON.parse(jsonString)
-            },
-            set(key: T, value: any) {
-                if (!cacheSheet) throw 'not run "useSpreadsheetCache"'
-                const index = cacheKeys.indexOf(key)
-                if (index < 0) return undefined
-                const jsonString = JSON.stringify(value).split(/.{50000}/)
-                cacheSheet.getRange(index, cacheSheet.getLastColumn()).setValues([jsonString])
-                return
-            }
-        }
-        return cacheInstance
-    }
     /**
      * Gas側entryファイルで実行する関数<br>
      * @param config インスタンス化したhCommon.Configを入力
@@ -159,27 +120,6 @@ export namespace hGas {
          */
         lockWaitMSec: number = 10000
 
-        /**
-         * read処理時にCacheを取得する<br>
-         * override可
-         * @protected
-         */
-        protected getCache(): string | undefined {
-            return CacheService.getScriptCache().get(this.tableName) ?? undefined
-        }
-
-        /**
-         * insert,update,delete時にCacheを操作する<br>
-         * override可
-         * @protected
-         */
-        protected changeCache(entity: E | InitEntity<E> |number): void {
-            entity
-            CacheService.getScriptCache().remove(this.tableName)
-        }
-
-
-
         private checkRequiredUpdate(sheet: GoogleAppsScript.Spreadsheet.Sheet): boolean {
             return sheet.getRange(1, 1, 1, 1).getValue() !== SSRepository.TABLE_VERSION_LABEL + this.tableVersion
         }
@@ -263,7 +203,7 @@ export namespace hGas {
          */
         insert(entity: E | InitEntity<E>): number {
             return this.onLock(() => {
-                this.changeCache(entity)
+                CacheService.getScriptCache().remove(this.tableName)
                 let insertRowNumber = -1
                 const values = this.sheet.getDataRange().getValues()
                 for (let i = 1; i < values.length; i++) {
@@ -289,7 +229,7 @@ export namespace hGas {
          * 全件取得(フィルターなどはJSで実施)
          */
         getAll(): E[] {
-            const cache = this.getCache()
+            const cache = CacheService.getScriptCache().get(this.tableName)
             let values: any[][] = []
             if (cache){
                 values = JSON.parse(cache)
@@ -319,7 +259,7 @@ export namespace hGas {
          * @param row 取得するrow(rowは自動で付与され、不定一意)
          */
         getByRow(row: number): E {
-            const cache = this.getCache()
+            const cache = CacheService.getScriptCache().get(this.tableName)
             let stringList = []
             if (cache){
                 stringList = JSON.parse(cache)[row - 2]
@@ -337,7 +277,7 @@ export namespace hGas {
          */
         update(entity: E): void {
             this.onLock(() => {
-                this.changeCache(entity)
+                CacheService.getScriptCache().remove(this.tableName)
                 this.getRowRange(entity.row).setValues([this.toStringList(entity)])
             })
         }
@@ -348,7 +288,7 @@ export namespace hGas {
          */
         delete(row: number): void {
             this.onLock(() => {
-                this.changeCache(row)
+                CacheService.getScriptCache().remove(this.tableName)
                 const range = this.getRowRange(row)
                 range.clear()
                 const d = new Array(this.columnOrder.length + 1)
@@ -361,8 +301,7 @@ export namespace hGas {
 type LockType = 'user' | 'script' | 'none'
 declare let global: { [name: string]: unknown }
 type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {e: any}>
-let cacheSheet: GoogleAppsScript.Spreadsheet.Sheet | undefined = undefined
-let cacheInstance: hGas.SSCache<any> | undefined
+
 interface InitGasOptions {
     /**
      * Gasで実行される関数を登録する<br>
@@ -379,12 +318,6 @@ interface InitGasOptions {
      * 作成したRepositoryを登録する
      */
     useSpreadsheetDB (...repositoryList: { new (): hGas.SSRepository<any> }[]): InitGasOptions,
-    /**
-     * 永続的なCacheをSpreadsheetで再現する<br>
-     * newInstance時、テーブル名をkeyとして登録するとSpreadsheetDBで利用される
-     * @param cacheSSId cache二利用するSpreadsheetId "cache"シートが生成される
-     */
-    useSpreadsheetCache (cacheSSId: string): InitGasOptions,
 }
 
 /**
@@ -452,21 +385,6 @@ const initGasOption: InitGasOptions = {
                     hCommon.consoleLog.error('clear cache table error', e)
                 }
             }
-        }
-        return initGasOption
-    },
-    /**
-     * 永続的なCacheをSpreadsheetで再現する<br>
-     * newInstance時、テーブル名をkeyとして登録するとSpreadsheetDBで利用される
-     * @param cacheSSId cache二利用するSpreadsheetId "cache"シートが生成される
-     */
-    useSpreadsheetCache (cacheSSId: string = 'cache_ss_id'): InitGasOptions {
-        try {
-            const sheetName = 'cache'
-            const spreadsheet = SpreadsheetApp.openById(cacheSSId)
-            cacheSheet = spreadsheet.getSheetByName(sheetName) ?? spreadsheet.insertSheet().setName(sheetName)
-        } catch (e) {
-            hCommon.consoleLog.error('init cache spreadsheet error', e)
         }
         return initGasOption
     },
