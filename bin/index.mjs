@@ -175,19 +175,63 @@ export interface GasMethodInterface extends BaseGasMethodInterface {
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'index.ts'), `import {hVue} from 'ham-vue-gas'
 import initVue = hVue.initVue
 import Main from '@V/main.vue'
+import {store, stateKey} from '@V/store'
 import GasClient = hVue.GasClient
 import {GasMethodInterface} from '@C/gasMethodInterface'
+import {ref, watch} from 'vue'
 ${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import * as components from 'vuetify/components'\n" : ""}${v ? "import * as directives from 'vuetify/directives'\n" : ""}
 
 initVue([{
     path: '/',
     component: Main
 }], {
-    ${v ? 'usePlugin: app => app.use(createVuetify({components, directives}))' : ''}
+    usePlugin: app => app.use(createVuetify({components, directives})),
+    vueMailScript() {
+        const isLoading = ref(true)
+        // store.commit(stateKey.sample, )
+        isLoading.value = false
+        return {isLoading}
+    },
+    vueMailTemplate: '<VOverlay v-model="isLoading" presistent class="justify-center align-center"</VOverlay>'
 })
 
 
 export const gasClient = new GasClient<GasMethodInterface>() `)
+
+    fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'store.ts'), `import {InjectionKey} from 'vue'
+import {createStore, Store, useStore} from 'vuex'
+
+interface State {
+    sample: string | undefined
+}
+const stateKeyList = [
+    'sample'
+] as const
+type StateKeyType = typeof stateKeyList[number]
+export const stateKey = stateKeyList.reduce((acc, obj) => {
+    acc[obj] = obj
+    return acc
+},{}) as {[key in StateType]: string}
+const key: InjectionKey<Store<State>> = Symbol()
+function createMutation() {
+    const m = {}
+    for (const value of stateList) {
+        m[value] = (state, it) => {
+          state[value] = it
+        }
+    }
+}
+export const store = createStore<State>({
+    state: {
+        sample: undefined
+    },
+    mutations: createMutation()
+})
+export function getStore() {
+    return useStore<State>(key)
+}
+`)
+
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'main.vue'), `<script setup lang="ts">
 import {gasClient} from '@V/index'
 import {ref} from 'vue'
