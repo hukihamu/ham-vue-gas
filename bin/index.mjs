@@ -248,7 +248,7 @@ function onClickInput(){
 </script>
 
 <template>
-  ${v ? '<v-card>' : ''}
+  <v-card>
   <h1>Welcome HamVueGas</h1>
   <div>
     <input v-model="inputText"><button @click="onClickInput">Input</button>
@@ -256,7 +256,7 @@ function onClickInput(){
   <div v-for="text in dateList">
     <span>{{text}}</span>
   </div>
-  ${v ? '</v-card>' : ''}
+  </v-card>
 </template>`)
     fs.writeFileSync(path.join(rootPath, 'src', 'vue', 'vue.d.ts'),`declare module '*.vue' {
     import type { DefineComponent } from 'vue'
