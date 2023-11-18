@@ -24,8 +24,8 @@
     "node": ">=18.0.0"
   },
   "peerDependencies": {
-    "vue": "<=3.2.47",
-    "vuetify": "3.2.0",
+    "vue": "<=3.3.8",
+    "vuetify": "3.4.2",
     "vuex": "^4.1.0"
   },
   "bin": {
@@ -43,8 +43,8 @@
     "@types/google-apps-script": "~1.0.62",
     "@google/clasp": "~2.4.2",
 
-    "vue": "3.2.47",
-    "vue-router": "~4.1.6",
+    "vue": "3.3.8",
+    "vue-router": "~4.2.5",
 
     "commander": "~10.0.1",
     "read-pkg-up": "~9.1.0",

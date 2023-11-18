@@ -95,10 +95,8 @@ program.command('build')
 
 program.command('init')
   .description('init vue-gas')
-  .option('-v --vuetify', `use vuetify`, false)
   .action(function () {
     const rootPath = path.join(__dirname, '../../../')
-    const v = this.opts().vuetify
 
     // 直下
     fs.writeFileSync(path.join(rootPath, 'tsconfig.json'),`{
@@ -137,7 +135,8 @@ program.command('init')
 <html>
 <head>
     <meta charset="UTF-8">
-    ${v ? '<link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">\n    ' : ''}<link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.2.0/dist/vuetify.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" rel="stylesheet">
     <title></title>
 </head>
 <body>
@@ -179,7 +178,9 @@ import {store, stateKey} from '@V/store'
 import GasClient = hVue.GasClient
 import {GasMethodInterface} from '@C/gasMethodInterface'
 import {ref, watch} from 'vue'
-${v ? "import {createVuetify} from 'vuetify'\n" : ""}${v ? "import * as components from 'vuetify/components'\n" : ""}${v ? "import * as directives from 'vuetify/directives'\n" : ""}
+import {createVuetify} from 'vuetify'
+import * as components from 'vuetify/components'
+import * as directives from 'vuetify/directives'
 
 initVue([{
     path: '/',
