@@ -33,7 +33,7 @@
   "files": [
     "bin",
     "dist/bundle.js",
-    "dist/es/bundle.js",
+    "dist/bundle.esm.js",
     "dist/bundle.d.ts"
   ],
   "dependencies": {
