@@ -27,5 +27,6 @@ module.exports = {
     protectWebpackAssets: false,
     cleanOnceBeforeBuildPatterns: ['!gas.js'],
     cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt', 'gas.js.LICENSE.txt']
-  })], devtool: '${s}',
+  })],
 }
+${s}

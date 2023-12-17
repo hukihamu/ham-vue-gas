@@ -30,5 +30,6 @@ module.exports = {
     extensions: ['.ts'],
   },
   plugins: [new GasWebpackPlugin()],
-  devtool: '${s}',
 }
+
+${s}
