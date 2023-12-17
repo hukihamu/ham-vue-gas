@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@C/*": ["src/common/*"],
+      "@G/*": ["src/gas/*"],
+      "@V/*": ["src/vue/*"]
+    },
+    "removeComments": false,
+    "esModuleInterop": true,
+    "experimentalDecorators": true
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
