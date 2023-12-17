@@ -10,12 +10,12 @@ export default {
   input: 'src/main.ts',
   output: [
     {
-      file: 'dist/es/bundle.js',
-      format: 'es'
-    },
-    {
       file: 'dist/bundle.js',
       format: 'cjs'
+    },
+    {
+      file: 'dist/bundle.esm.js',
+      format: 'esm'
     },
   ],
   plugins: [

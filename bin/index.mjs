@@ -33,6 +33,8 @@ program.command('build')
   .option('-v, --vue <file>', 'client side main file. default: ./src/vue/index.ts', './src/vue/index.ts')
   .option('-o, --output <directory>', 'build file output directory. default: ./dist', './dist')
   .option('-w, --watch', 'build watch', false)
+  .option('-s, --sourcemap', 'inline source map', false)
+  .option('-d, --development', 'webpack development mode', false)
   .action(function () {
     const rootPath = path.join(__dirname, '../../../')
 
@@ -43,6 +45,8 @@ program.command('build')
     const e = path.join(rootPath, this.opts().vue).replaceAll('\\', '\\\\')
     const o = path.join(rootPath, this.opts().output).replaceAll('\\', '\\\\')
     const w = this.opts().watch
+    const s = this.opts().sourcemap
+    const d = this.opts().development
     // 設定値存在確認
     if (!fs.existsSync(a)) throw `nou found appsscript.json. path:${a}`
     if (!fs.existsSync(h)) throw `nou found html. path:${h}`
@@ -56,12 +60,16 @@ program.command('build')
       .replace('${g}', g)
       .replace('${o}', o)
       .replace('${t}', t)
+      .replace('${s}', s ? 'inline-source-map' : '')
+      .replace('${d}', d ? 'development' : 'production')
     const vueWebpackConfig = fs.readFileSync(path.join(__dirname, 'config/webpack.config.vue.js'), {encoding: 'utf8'})
       .replace('${e}', e)
       .replace('${o}', o)
       .replace('${t}', t)
       .replace('${h}', h.replaceAll('\\', '\\\\'))
       .replace('${a}', a.replaceAll('\\', '\\\\'))
+      .replace('${s}', s ? 'inline-source-map' : '')
+      .replace('${d}', d ? 'development' : 'production')
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)

@@ -17,7 +17,7 @@ hVue.initVue([{
         isLoading.value = false
         return {isLoading}
     },
-    vueMainTemplate: '<VOverlay v-model="isLoading" presistent class="justify-center align-center"</VOverlay>'
+    vueMainTemplate: '<VOverlay v-model="isLoading" presistent class="justify-center align-center"><template #activator><router-view/></template></VOverlay>'
 })
 
 

@@ -3,7 +3,7 @@ const GasWebpackPlugin = require('gas-webpack-plugin')
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin')
 
 module.exports = {
-  mode: 'production',
+  mode: '${d}',
   entry: {
     gas: '${g}',
   },
@@ -30,4 +30,5 @@ module.exports = {
     extensions: ['.ts'],
   },
   plugins: [new GasWebpackPlugin()],
+  devtool: '${s}',
 }

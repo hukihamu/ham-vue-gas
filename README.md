@@ -21,9 +21,25 @@
 - `submit`を利用するとエラー
   - `submit.prevent`で`return false`とする
 
+## コマンド
+- init
+- build
+  - `-a, --appsscript <file>`, 'appsscript.json file. default: ./src/public/appsscript.json', './src/public/appsscript.json'
+  - `-h, --html <file>`, 'html file. default: ./src/public/index.html', './src/public/index.html'
+  - `-t, --tsconfig <file>`, 'tsconfig.json file. default: ./tsconfig.json', './tsconfig.json'
+  - `-g, --gas <file>`, 'server side main file. default: ./src/gas/index.ts', './src/gas/index.ts'
+  - `-v, --vue <file>`, 'client side main file. default: ./src/vue/index.ts', './src/vue/index.ts'
+  - `-o, --output <directory>`, 'build file output directory. default: ./dist', './dist'
+  - `-w, --watch`, 'build watch', false
+  - `-s, --sourcemap`, 'inline source map', false
+  - `-d, --development`, 'webpack development mode', false
 ## TODO
 - [ ] 使い方
 - [ ] テスト
 - [ ] サンプル作成
+- [ ] github package
+- [ ] スコープ分割
+  - spreadsheetを未使用の場合関連コードをimportしない 
+- notion対応 
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
