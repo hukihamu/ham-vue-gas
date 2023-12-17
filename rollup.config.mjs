@@ -29,7 +29,6 @@ export default [
     ]
   },
   {
-
     input: 'src/main.ts',
     output: [
       {

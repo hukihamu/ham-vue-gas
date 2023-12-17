@@ -1,6 +1,6 @@
 'use strict';
 
-var vue = require('vue');
+var vue$1 = require('vue');
 var vueRouter = require('vue-router');
 
 function __awaiter(thisArg, _arguments, P, generator) {
@@ -128,199 +128,196 @@ function __spreadArray(to, from, pack) {
   return to.concat(ar || Array.prototype.slice.call(from));
 }
 
-exports.hCommon = void 0;
-(function (hCommon) {
-    /**
-     * Gasの機能「スクリプトプロパティ」をConfigとして利用する<br>
-     * gasInit実行時に必須
-     */
-    var Config = /** @class */ (function () {
-        function Config(commonConfigKeys, gasConfigKeys, vueConfigKeys) {
-            var _a, _b, _c, _d;
-            this.commonConfigKeys = commonConfigKeys;
-            this.gasConfigKeys = gasConfigKeys;
-            this.vueConfigKeys = vueConfigKeys;
-            this.cache = {};
-            // cache生成
-            if (globalThis.PropertiesService) {
-                // gas
-                var config = {};
-                config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
-                for (var _i = 0, _e = this.commonConfigKeys; _i < _e.length; _i++) {
-                    var key = _e[_i];
-                    if (key === '')
-                        continue;
-                    config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
-                }
-                for (var _f = 0, _g = this.gasConfigKeys; _f < _g.length; _f++) {
-                    var key = _g[_f];
-                    if (key === '')
-                        continue;
-                    config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
-                }
-                this.cache = config;
-            }
-            else {
-                // vue
-                var content = (_d = document.getElementById('vue-config')) === null || _d === void 0 ? void 0 : _d.textContent;
-                if (content) {
-                    this.cache = JSON.parse(content);
-                }
-            }
-        }
-        /**
-         * vueサイドでのみ利用可能
-         */
-        Config.prototype.getVueConfig = function (key) {
-            var _a;
-            var cacheResult = this.cache[key];
-            if (cacheResult !== undefined) {
-                return cacheResult;
-            }
-            var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
-            if (!content) {
-                hCommon.consoleLog.error('VueConfigが見つかりません');
-                return undefined;
-            }
-            if (Object.keys(JSON.parse(content)).every(function (it) { return it !== key; }))
-                hCommon.consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
-            return JSON.parse(content)[key];
-        };
-        /**
-         * gasサイドでのみ利用可能
-         */
-        Config.prototype.getGasConfig = function (key) {
-            var _a;
-            var cacheResult = this.cache[key];
-            if (cacheResult !== undefined) {
-                return cacheResult;
-            }
-            if (PropertiesService.getScriptProperties().getKeys().every(function (it) { return it !== key; }))
-                hCommon.consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
-            return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
-        };
-        /**
-         * すべてのVueConfigを取得(gasサイドでのみ利用可能)
-         */
-        Config.prototype.getAllVueConfig = function () {
-            var _a, _b, _c;
+/**
+ * Gasの機能「スクリプトプロパティ」をConfigとして利用する<br>
+ * gasInit実行時に必須
+ */
+var Config = /** @class */ (function () {
+    function Config(commonConfigKeys, gasConfigKeys, vueConfigKeys) {
+        var _a, _b, _c, _d;
+        this.commonConfigKeys = commonConfigKeys;
+        this.gasConfigKeys = gasConfigKeys;
+        this.vueConfigKeys = vueConfigKeys;
+        this.cache = {};
+        // cache生成
+        if (globalThis.PropertiesService) {
+            // gas
             var config = {};
             config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
-            for (var _i = 0, _d = this.commonConfigKeys; _i < _d.length; _i++) {
-                var key = _d[_i];
+            for (var _i = 0, _e = this.commonConfigKeys; _i < _e.length; _i++) {
+                var key = _e[_i];
                 if (key === '')
                     continue;
                 config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
             }
-            for (var _e = 0, _f = this.vueConfigKeys; _e < _f.length; _e++) {
-                var key = _f[_e];
+            for (var _f = 0, _g = this.gasConfigKeys; _f < _g.length; _f++) {
+                var key = _g[_f];
                 if (key === '')
                     continue;
                 config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
             }
-            return config;
-        };
-        return Config;
-    }());
-    hCommon.Config = Config;
-    /**
-     * Vue・Gas共に利用可能なLog出力
-     */
-    hCommon.consoleLog = {
-        info: function (label) {
-            var data = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                data[_i - 1] = arguments[_i];
-            }
-            console.info.apply(console, __spreadArray([label], data, false));
-        },
-        debug: function (label) {
-            var data = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                data[_i - 1] = arguments[_i];
-            }
-            console.log.apply(console, __spreadArray([label], data, false));
-        },
-        warn: function (label) {
-            var data = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                data[_i - 1] = arguments[_i];
-            }
-            console.warn.apply(console, __spreadArray([label], data, false));
-        },
-        error: function (label) {
-            var data = [];
-            for (var _i = 1; _i < arguments.length; _i++) {
-                data[_i - 1] = arguments[_i];
-            }
-            console.error.apply(console, __spreadArray([label], data, false));
-        },
-    };
-})(exports.hCommon || (exports.hCommon = {}));
-
-exports.hVue = void 0;
-(function (hVue) {
-    /**
-     * Vue側entryファイルで実行する関数<br>
-     *
-     * @param app Componentか、Routingを設定可能
-     * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
-     */
-    function initVue(app, option) {
-        var _a;
-        if (option === void 0) { option = {}; }
-        exports.hCommon.consoleLog.debug = function (label, data) {
-            var _a, _b;
-            var content = (_b = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
-            if (JSON.parse(content)['debug'] === 'true')
-                console.log(label, data);
-        };
-        var appElement;
-        if ('length' in app) {
-            // router
-            var router = vueRouter.createRouter({
-                history: vueRouter.createWebHistory(),
-                routes: app
-            });
-            appElement = vue.createApp(rootComponent(router, option.vueMainScript, option.vueMainTemplate)).use(router);
+            this.cache = config;
         }
         else {
-            appElement = vue.createApp(app);
+            // vue
+            var content = (_d = document.getElementById('vue-config')) === null || _d === void 0 ? void 0 : _d.textContent;
+            if (content) {
+                this.cache = JSON.parse(content);
+            }
         }
-        appElement = option.usePlugin ? option.usePlugin(appElement) : appElement;
-        appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
     }
-    hVue.initVue = initVue;
     /**
-     * Vue側からGasで作成したコントローラを呼び出すクラス<br>
-     * Gas側で作成したGasMethodInterfaceをgenerics宣言する
+     * vueサイドでのみ利用可能
      */
-    var GasClient = /** @class */ (function () {
-        function GasClient() {
+    Config.prototype.getVueConfig = function (key) {
+        var _a;
+        var cacheResult = this.cache[key];
+        if (cacheResult !== undefined) {
+            return cacheResult;
         }
-        /**
-         * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
-         * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
-         * @param name GasMethod名
-         * @param args GasMethod引数
-         */
-        GasClient.prototype.send = function (name, args) {
-            return new Promise(function (resolve, reject) {
-                var run = google.script.run
-                    .withSuccessHandler(function (it) { return typeof it === 'string' ? resolve(JSON.parse(it)) : reject(it.e); })
-                    .withFailureHandler(function (error) { return reject(error); })[name];
-                if (run) {
-                    run(args);
-                }
-                else {
-                    reject("not found GasMethod: ".concat(name, " \nset \"useGasMethod\""));
-                }
-            });
-        };
-        return GasClient;
-    }());
-    hVue.GasClient = GasClient;
-})(exports.hVue || (exports.hVue = {}));
+        var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
+        if (!content) {
+            consoleLog$1.error('VueConfigが見つかりません');
+            return undefined;
+        }
+        if (Object.keys(JSON.parse(content)).every(function (it) { return it !== key; }))
+            consoleLog$1.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
+        return JSON.parse(content)[key];
+    };
+    /**
+     * gasサイドでのみ利用可能
+     */
+    Config.prototype.getGasConfig = function (key) {
+        var _a;
+        var cacheResult = this.cache[key];
+        if (cacheResult !== undefined) {
+            return cacheResult;
+        }
+        if (PropertiesService.getScriptProperties().getKeys().every(function (it) { return it !== key; }))
+            consoleLog$1.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
+        return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
+    };
+    /**
+     * すべてのVueConfigを取得(gasサイドでのみ利用可能)
+     */
+    Config.prototype.getAllVueConfig = function () {
+        var _a, _b, _c;
+        var config = {};
+        config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
+        for (var _i = 0, _d = this.commonConfigKeys; _i < _d.length; _i++) {
+            var key = _d[_i];
+            if (key === '')
+                continue;
+            config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
+        }
+        for (var _e = 0, _f = this.vueConfigKeys; _e < _f.length; _e++) {
+            var key = _f[_e];
+            if (key === '')
+                continue;
+            config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
+        }
+        return config;
+    };
+    return Config;
+}());
+/**
+ * Vue・Gas共に利用可能なLog出力
+ */
+var consoleLog$1 = {
+    info: function (label) {
+        var data = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            data[_i - 1] = arguments[_i];
+        }
+        console.info.apply(console, __spreadArray([label], data, false));
+    },
+    debug: function (label) {
+        var data = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            data[_i - 1] = arguments[_i];
+        }
+        console.log.apply(console, __spreadArray([label], data, false));
+    },
+    warn: function (label) {
+        var data = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            data[_i - 1] = arguments[_i];
+        }
+        console.warn.apply(console, __spreadArray([label], data, false));
+    },
+    error: function (label) {
+        var data = [];
+        for (var _i = 1; _i < arguments.length; _i++) {
+            data[_i - 1] = arguments[_i];
+        }
+        console.error.apply(console, __spreadArray([label], data, false));
+    },
+};
+
+var common = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    Config: Config,
+    consoleLog: consoleLog$1
+});
+
+/**
+ * Vue側entryファイルで実行する関数<br>
+ *
+ * @param app Componentか、Routingを設定可能
+ * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
+ */
+function initVue(app, option) {
+    var _a;
+    if (option === void 0) { option = {}; }
+    consoleLog$1.debug = function (label, data) {
+        var _a, _b;
+        var content = (_b = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
+        if (JSON.parse(content)['debug'] === 'true')
+            console.log(label, data);
+    };
+    var appElement;
+    if ('length' in app) {
+        // router
+        var router = vueRouter.createRouter({
+            history: vueRouter.createWebHistory(),
+            routes: app
+        });
+        appElement = vue$1.createApp(rootComponent(router, option.vueMainScript, option.vueMainTemplate)).use(router);
+    }
+    else {
+        appElement = vue$1.createApp(app);
+    }
+    appElement = option.usePlugin ? option.usePlugin(appElement) : appElement;
+    appElement.mount((_a = option.mountContainer) !== null && _a !== void 0 ? _a : '#app');
+}
+/**
+ * Vue側からGasで作成したコントローラを呼び出すクラス<br>
+ * Gas側で作成したGasMethodInterfaceをgenerics宣言する
+ */
+var GasClient = /** @class */ (function () {
+    function GasClient() {
+    }
+    /**
+     * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+     * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+     * @param name GasMethod名
+     * @param args GasMethod引数
+     */
+    GasClient.prototype.send = function (name, args) {
+        return new Promise(function (resolve, reject) {
+            var run = google.script.run
+                .withSuccessHandler(function (it) { return typeof it === 'string' ? resolve(JSON.parse(it)) : reject(it.e); })
+                .withFailureHandler(function (error) { return reject(error); })[name];
+            if (run) {
+                run(args);
+            }
+            else {
+                reject("not found GasMethod: ".concat(name, " \nset \"useGasMethod\""));
+            }
+        });
+    };
+    return GasClient;
+}());
 function rootComponent(router, main, template) {
     if (template === void 0) { template = '<router-view />'; }
     return {
@@ -344,26 +341,12 @@ function rootComponent(router, main, template) {
     };
 }
 
-var consoleLog = exports.hCommon.consoleLog;
-/**
- * Gas側entryファイルで実行する関数<br>
- * @param config インスタンス化したhCommon.Configを入力
- * @param option htmlファイル名を変更したり、htmlを変更する際に利用
- */
-function initGas(config, option) {
-    if (option === void 0) { option = {}; }
-    exports.hCommon.consoleLog.debug = function (label, data) {
-        if (config.getGasConfig('debug') === 'true')
-            console.log(label, data);
-    };
-    global.doGet = function () {
-        var _a;
-        var gasHtml = HtmlService.createHtmlOutputFromFile((_a = option.htmlFileName) !== null && _a !== void 0 ? _a : 'index');
-        gasHtml.setContent(gasHtml.getContent().replace('<body>', "<body><script type='application/json' id=\"vue-config\">".concat(JSON.stringify(config.getAllVueConfig()), "</script>")));
-        return option.editHtmlOutput ? option.editHtmlOutput(gasHtml) : gasHtml;
-    };
-    return initGasOption;
-}
+var vue = /*#__PURE__*/Object.freeze({
+    __proto__: null,
+    GasClient: GasClient,
+    initVue: initVue
+});
+
 /**
  * スプレッドシートをテーブルとしてCRUD操作を行う<br>
  * 本abstract classをextendsして作成する<br>
@@ -599,6 +582,27 @@ var SSRepository = /** @class */ (function () {
     SSRepository.ROW_FUNCTION = '=row()';
     return SSRepository;
 }());
+
+var consoleLog = consoleLog$1;
+/**
+ * Gas側entryファイルで実行する関数<br>
+ * @param config インスタンス化したhCommon.Configを入力
+ * @param option htmlファイル名を変更したり、htmlを変更する際に利用
+ */
+function initGas(config, option) {
+    if (option === void 0) { option = {}; }
+    consoleLog$1.debug = function (label, data) {
+        if (config.getGasConfig('debug') === 'true')
+            console.log(label, data);
+    };
+    global.doGet = function () {
+        var _a;
+        var gasHtml = HtmlService.createHtmlOutputFromFile((_a = option.htmlFileName) !== null && _a !== void 0 ? _a : 'index');
+        gasHtml.setContent(gasHtml.getContent().replace('<body>', "<body><script type='application/json' id=\"vue-config\">".concat(JSON.stringify(config.getAllVueConfig()), "</script>")));
+        return option.editHtmlOutput ? option.editHtmlOutput(gasHtml) : gasHtml;
+    };
+    return initGasOption;
+}
 /**
  * gas側の機能拡張
  */
@@ -658,7 +662,7 @@ var initGasOption = {
                     consoleLog.info('success', name_1);
                 }
                 catch (e) {
-                    exports.hCommon.consoleLog.error('init spreadsheet error', e);
+                    consoleLog$1.error('init spreadsheet error', e);
                 }
             }
         };
@@ -674,7 +678,7 @@ var initGasOption = {
                     consoleLog.info('success', name_2);
                 }
                 catch (e) {
-                    exports.hCommon.consoleLog.error('clear cache table error', e);
+                    consoleLog$1.error('clear cache table error', e);
                 }
             }
         };
@@ -688,4 +692,6 @@ var gas = /*#__PURE__*/Object.freeze({
     initGas: initGas
 });
 
+exports.hCommon = common;
 exports.hGas = gas;
+exports.hVue = vue;

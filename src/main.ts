@@ -1,3 +1,3 @@
-export {hVue} from '@/vue'
-export {hCommon} from '@/common'
+export * as hVue from '@/vue'
+export * as hCommon from '@/common'
 export * as hGas from '@/gas'

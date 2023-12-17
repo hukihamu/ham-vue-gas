@@ -49,54 +49,64 @@ declare namespace google {
 import { Component, App, SetupContext } from 'vue';
 import { RouteRecordRaw } from 'vue-router';
 
-declare namespace hCommon {
+/**
+ * Gasの機能「スクリプトプロパティ」をConfigとして利用する<br>
+ * gasInit実行時に必須
+ */
+declare class Config<C extends string, G extends string, V extends string> {
+    private commonConfigKeys;
+    private gasConfigKeys;
+    private vueConfigKeys;
+    private readonly cache;
+    constructor(commonConfigKeys: NonEmptyArray<C>, gasConfigKeys: NonEmptyArray<G>, vueConfigKeys: NonEmptyArray<V>);
     /**
-     * Gasの機能「スクリプトプロパティ」をConfigとして利用する<br>
-     * gasInit実行時に必須
+     * vueサイドでのみ利用可能
      */
-    class Config<C extends string, G extends string, V extends string> {
-        private commonConfigKeys;
-        private gasConfigKeys;
-        private vueConfigKeys;
-        private readonly cache;
-        constructor(commonConfigKeys: NonEmptyArray<C>, gasConfigKeys: NonEmptyArray<G>, vueConfigKeys: NonEmptyArray<V>);
-        /**
-         * vueサイドでのみ利用可能
-         */
-        getVueConfig(key: Exclude<(V | C | 'debug'), ''>): string | undefined;
-        /**
-         * gasサイドでのみ利用可能
-         */
-        getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined;
-        /**
-         * すべてのVueConfigを取得(gasサイドでのみ利用可能)
-         */
-        getAllVueConfig(): {
-            [key in Exclude<(V | C), ''>]: string | undefined;
-        };
-    }
+    getVueConfig(key: Exclude<(V | C | 'debug'), ''>): string | undefined;
     /**
-     * Vue・Gas共に利用可能なLog出力
+     * gasサイドでのみ利用可能
      */
-    const consoleLog: {
-        info(label: string, ...data: any[]): void;
-        debug(label: string, ...data: any[]): void;
-        warn(label: string, ...data: any[]): void;
-        error(label: string, ...data: any[]): void;
-    };
+    getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined;
     /**
-     * Gasで実行される関数の定義に利用<br>
-     * Interfaceにextendsを行う<br>
-     * 構成: {Method名: {at: 引数型, rt: 戻り値型}}
+     * すべてのVueConfigを取得(gasサイドでのみ利用可能)
      */
-    type BaseGasMethodInterface = {
-        [name: string]: {
-            at: unknown;
-            rt: unknown;
-        };
+    getAllVueConfig(): {
+        [key in Exclude<(V | C), ''>]: string | undefined;
     };
 }
+/**
+ * Vue・Gas共に利用可能なLog出力
+ */
+declare const consoleLog: {
+    info(label: string, ...data: any[]): void;
+    debug(label: string, ...data: any[]): void;
+    warn(label: string, ...data: any[]): void;
+    error(label: string, ...data: any[]): void;
+};
+/**
+ * Gasで実行される関数の定義に利用<br>
+ * Interfaceにextendsを行う<br>
+ * 構成: {Method名: {at: 引数型, rt: 戻り値型}}
+ */
+type BaseGasMethodInterface = {
+    [name: string]: {
+        at: unknown;
+        rt: unknown;
+    };
+};
 type NonEmptyArray<T> = [T, ...T[]];
+
+type common_BaseGasMethodInterface = BaseGasMethodInterface;
+type common_Config<C extends string, G extends string, V extends string> = Config<C, G, V>;
+declare const common_Config: typeof Config;
+declare const common_consoleLog: typeof consoleLog;
+declare namespace common {
+  export {
+    common_BaseGasMethodInterface as BaseGasMethodInterface,
+    common_Config as Config,
+    common_consoleLog as consoleLog,
+  };
+}
 
 type ArgsOption$1 = {
     usePlugin?: (app: App<Element>) => App<Element>;
@@ -104,45 +114,37 @@ type ArgsOption$1 = {
     vueMainScript?: (context: SetupContext) => any;
     vueMainTemplate?: string;
 };
-declare namespace hVue {
+/**
+ * Vue側entryファイルで実行する関数<br>
+ *
+ * @param app Componentか、Routingを設定可能
+ * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
+ */
+declare function initVue(app: Component | RouteRecordRaw[], option?: ArgsOption$1): void;
+/**
+ * Vue側からGasで作成したコントローラを呼び出すクラス<br>
+ * Gas側で作成したGasMethodInterfaceをgenerics宣言する
+ */
+declare class GasClient<C extends BaseGasMethodInterface> {
     /**
-     * Vue側entryファイルで実行する関数<br>
-     *
-     * @param app Componentか、Routingを設定可能
-     * @param option プラグイン追加、Vueで最初に起動するscript、マウントコンテナを設定可能
+     * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
+     * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
+     * @param name GasMethod名
+     * @param args GasMethod引数
      */
-    function initVue(app: Component | RouteRecordRaw[], option?: ArgsOption$1): void;
-    /**
-     * Vue側からGasで作成したコントローラを呼び出すクラス<br>
-     * Gas側で作成したGasMethodInterfaceをgenerics宣言する
-     */
-    class GasClient<C extends hCommon.BaseGasMethodInterface> {
-        /**
-         * GasMethodの名前と引数を渡すと、Gasで処理をされ結果がPromiseで返却される<br>
-         * GasMethodInterfaceを宣言すれば、コード補完で作成している名前が確認できる
-         * @param name GasMethod名
-         * @param args GasMethod引数
-         */
-        send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>;
-    }
+    send<N extends keyof C>(name: Exclude<N, ''>, args?: C[N]['at']): Promise<C[N]['rt']>;
 }
 
-/**
- * GasMethod実装に利用する(全メソッド必須)
- */
-type GasMethodsTypeRequired<C extends hCommon.BaseGasMethodInterface> = {
-    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
-};
-/**
- * GasMethod実装に利用する(任意の複数メソッド)
- */
-type GasMethodsType<C extends hCommon.BaseGasMethodInterface> = Partial<{
-    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
-}>;
-/**
- * GasMethod実装に利用する(1メソッドのみ)
- */
-type GasMethodType<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>;
+type vue_GasClient<C extends BaseGasMethodInterface> = GasClient<C>;
+declare const vue_GasClient: typeof GasClient;
+declare const vue_initVue: typeof initVue;
+declare namespace vue {
+  export {
+    vue_GasClient as GasClient,
+    vue_initVue as initVue,
+  };
+}
+
 /**
  * SSRepositoryのinitData、columnListの宣言に使用
  */
@@ -153,16 +155,6 @@ type InitEntity<E extends SSEntity> = Omit<E, 'row'>;
 type SSEntity = {
     row: number;
 };
-type ArgsOption = {
-    htmlFileName?: string;
-    editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
-};
-/**
- * Gas側entryファイルで実行する関数<br>
- * @param config インスタンス化したhCommon.Configを入力
- * @param option htmlファイル名を変更したり、htmlを変更する際に利用
- */
-declare function initGas<C extends string, G extends string, V extends string>(config: hCommon.Config<C, G, V>, option?: ArgsOption): InitGasOptions;
 /**
  * スプレッドシートをテーブルとしてCRUD操作を行う<br>
  * 本abstract classをextendsして作成する<br>
@@ -248,7 +240,34 @@ declare abstract class SSRepository<E extends SSEntity> {
     delete(row: number): void;
 }
 type LockType = 'user' | 'script' | 'none';
-type WrapperMethod<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {
+
+/**
+ * GasMethod実装に利用する(全メソッド必須)
+ */
+type GasMethodsTypeRequired<C extends BaseGasMethodInterface> = {
+    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
+};
+/**
+ * GasMethod実装に利用する(任意の複数メソッド)
+ */
+type GasMethodsType<C extends BaseGasMethodInterface> = Partial<{
+    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
+}>;
+/**
+ * GasMethod実装に利用する(1メソッドのみ)
+ */
+type GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>;
+type ArgsOption = {
+    htmlFileName?: string;
+    editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
+};
+/**
+ * Gas側entryファイルで実行する関数<br>
+ * @param config インスタンス化したhCommon.Configを入力
+ * @param option htmlファイル名を変更したり、htmlを変更する際に利用
+ */
+declare function initGas<C extends string, G extends string, V extends string>(config: Config<C, G, V>, option?: ArgsOption): InitGasOptions;
+type WrapperMethod<C extends BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {
     e: any;
 }>;
 interface InitGasOptions {
@@ -273,9 +292,9 @@ interface InitGasOptions {
     }[]): InitGasOptions;
 }
 
-type gas_GasMethodType<C extends hCommon.BaseGasMethodInterface, K extends keyof C> = GasMethodType<C, K>;
-type gas_GasMethodsType<C extends hCommon.BaseGasMethodInterface> = GasMethodsType<C>;
-type gas_GasMethodsTypeRequired<C extends hCommon.BaseGasMethodInterface> = GasMethodsTypeRequired<C>;
+type gas_GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = GasMethodType<C, K>;
+type gas_GasMethodsType<C extends BaseGasMethodInterface> = GasMethodsType<C>;
+type gas_GasMethodsTypeRequired<C extends BaseGasMethodInterface> = GasMethodsTypeRequired<C>;
 type gas_InitEntity<E extends SSEntity> = InitEntity<E>;
 type gas_SSEntity = SSEntity;
 type gas_SSRepository<E extends SSEntity> = SSRepository<E>;
@@ -293,4 +312,4 @@ declare namespace gas {
   };
 }
 
-export { hCommon, gas as hGas, hVue };
+export { common as hCommon, gas as hGas, vue as hVue };

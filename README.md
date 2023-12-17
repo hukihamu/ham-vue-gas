@@ -27,8 +27,8 @@
   - `-a, --appsscript <file>`, 'appsscript.json file. default: ./src/public/appsscript.json', './src/public/appsscript.json'
   - `-h, --html <file>`, 'html file. default: ./src/public/index.html', './src/public/index.html'
   - `-t, --tsconfig <file>`, 'tsconfig.json file. default: ./tsconfig.json', './tsconfig.json'
-  - `-g, --gas <file>`, 'server side main file. default: ./src/gas/index.ts', './src/gas/index.ts'
-  - `-v, --vue <file>`, 'client side main file. default: ./src/vue/index.ts', './src/vue/index.ts'
+  - `-g, --gas <file>`, 'server side main file. default: ./src/gas/gas.ts', './src/gas/gas.ts'
+  - `-v, --vue <file>`, 'client side main file. default: ./src/vue/gas.ts', './src/vue/gas.ts'
   - `-o, --output <directory>`, 'build file output directory. default: ./dist', './dist'
   - `-w, --watch`, 'build watch', false
   - `-s, --sourcemap`, 'inline source map', false
