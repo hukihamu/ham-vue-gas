@@ -14,8 +14,8 @@
     "type": "git",
     "url": "https://github.com/hukihamu/ham-vue-gas"
   },
-  "author": {
-    "name": "hukihamu"
+  "publishConfig": {
+    "@hukihamu:registry": "https://npm.pkg.github.com"
   },
   "bugs": {
     "url": "https://github.com/hukihamu/ham-vue-gas/issues"
