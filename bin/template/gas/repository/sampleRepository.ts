@@ -7,4 +7,5 @@ export class SampleRepository extends hGas.SSRepository<SampleEntity> {
     protected readonly spreadsheetId: string = config.getGasConfig('spreadsheetId')
     protected readonly tableName: string = 'SampleTable'
     protected readonly tableVersion: number = 1
+    protected readonly spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp = SpreadsheetApp
 }

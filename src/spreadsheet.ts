@@ -22,7 +22,7 @@ export abstract class SSRepository<E extends SSEntity> {
 
     private _sheet: GoogleAppsScript.Spreadsheet.Sheet | undefined
     private importSheet(): GoogleAppsScript.Spreadsheet.Sheet | undefined{
-        const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
+        const spreadsheet = this.spreadSheetApp.openById(this.spreadsheetId)
         return spreadsheet.getSheetByName(this.tableName) ?? undefined
     }
 
@@ -73,6 +73,11 @@ export abstract class SSRepository<E extends SSEntity> {
      */
     protected abstract readonly tableName: string
     /**
+     * SpreadsheetApp(OAuth スコープ回避のため)
+     * @protected
+     */
+    protected abstract readonly spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp
+    /**
      * トランザクションタイプ(LockService参照) default: user
      */
     lockType: LockType = 'user'
@@ -89,7 +94,7 @@ export abstract class SSRepository<E extends SSEntity> {
         // DataRangeが1行より多い場合、データはあると判断
         if (sheet.getDataRange().getValues().length > 1) {
             const oldVersion = sheet.getRange(1, 1, 1, 1).getValue()
-            const oldSheet = sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId))
+            const oldSheet = sheet.copyTo(this.spreadSheetApp.openById(this.spreadsheetId))
             const oldName = sheet.getName() + ' version:' + oldVersion
             oldSheet.setName(oldName)
             sheet.clear()
@@ -136,7 +141,7 @@ export abstract class SSRepository<E extends SSEntity> {
         try {
             lock.waitLock(this.lockWaitMSec)
             const result = runningInLock()
-            SpreadsheetApp.flush()
+            this.spreadSheetApp.flush()
             return result
         } finally {
             lock.releaseLock()
@@ -148,7 +153,7 @@ export abstract class SSRepository<E extends SSEntity> {
      */
     initTable(): void {
         // シートがない場合生成する必要がある
-        const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId)
+        const spreadsheet = this.spreadSheetApp.openById(this.spreadsheetId)
         const sheet = spreadsheet.getSheetByName(this.tableName)
         this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName)
 

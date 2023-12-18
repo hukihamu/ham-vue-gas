@@ -246,7 +246,7 @@ class SSRepository {
     }
     importSheet() {
         var _a;
-        const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
+        const spreadsheet = this.spreadSheetApp.openById(this.spreadsheetId);
         return (_a = spreadsheet.getSheetByName(this.tableName)) !== null && _a !== void 0 ? _a : undefined;
     }
     get sheet() {
@@ -273,7 +273,7 @@ class SSRepository {
         // DataRangeが1行より多い場合、データはあると判断
         if (sheet.getDataRange().getValues().length > 1) {
             const oldVersion = sheet.getRange(1, 1, 1, 1).getValue();
-            const oldSheet = sheet.copyTo(SpreadsheetApp.openById(this.spreadsheetId));
+            const oldSheet = sheet.copyTo(this.spreadSheetApp.openById(this.spreadsheetId));
             const oldName = sheet.getName() + ' version:' + oldVersion;
             oldSheet.setName(oldName);
             sheet.clear();
@@ -318,7 +318,7 @@ class SSRepository {
         try {
             lock.waitLock(this.lockWaitMSec);
             const result = runningInLock();
-            SpreadsheetApp.flush();
+            this.spreadSheetApp.flush();
             return result;
         }
         finally {
@@ -330,7 +330,7 @@ class SSRepository {
      */
     initTable() {
         // シートがない場合生成する必要がある
-        const spreadsheet = SpreadsheetApp.openById(this.spreadsheetId);
+        const spreadsheet = this.spreadSheetApp.openById(this.spreadsheetId);
         const sheet = spreadsheet.getSheetByName(this.tableName);
         this._sheet = sheet ? sheet : spreadsheet.insertSheet().setName(this.tableName);
         if (this.checkRequiredUpdate(this._sheet)) {

@@ -196,6 +196,11 @@ declare abstract class SSRepository<E extends SSEntity> {
      */
     protected abstract readonly tableName: string;
     /**
+     * SpreadsheetApp(OAuth スコープ回避のため)
+     * @protected
+     */
+    protected abstract readonly spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp;
+    /**
      * トランザクションタイプ(LockService参照) default: user
      */
     lockType: LockType;
