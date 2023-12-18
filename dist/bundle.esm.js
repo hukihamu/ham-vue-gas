@@ -503,7 +503,7 @@ var SSRepository = /** @class */ (function () {
     SSRepository.prototype.getAll = function () {
         var _this = this;
         var cache = CacheService.getScriptCache().get(this.tableName);
-        var values = [];
+        var values;
         if (cache) {
             values = JSON.parse(cache);
         }
@@ -599,95 +599,89 @@ function initGas(config, option) {
         gasHtml.setContent(gasHtml.getContent().replace('<body>', "<body><script type='application/json' id=\"vue-config\">".concat(JSON.stringify(config.getAllVueConfig()), "</script>")));
         return option.editHtmlOutput ? option.editHtmlOutput(gasHtml) : gasHtml;
     };
-    return initGasOption;
 }
 /**
- * gas側の機能拡張
+ * Gasで実行される関数を登録する<br>
+ * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
+ * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
+ * globalへ代入前に"wrapperMethod"を利用する<br>
+ * GasMethodInterfaceをGenerics宣言すると、コード補完される
  */
-var initGasOption = {
-    /**
-     * Gasで実行される関数を登録する<br>
-     * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
-     * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
-     * globalへ代入前に"wrapperMethod"を利用する<br>
-     * GasMethodInterfaceをGenerics宣言すると、コード補完される
-     */
-    useGasMethod: function (gasMethod, initGlobal) {
-        function wrapperMethod(name) {
-            var _this = this;
-            return function (args) { return __awaiter(_this, void 0, void 0, function () {
-                var returnValue;
-                return __generator(this, function (_a) {
-                    switch (_a.label) {
-                        case 0:
-                            if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
-                            console.log('arg: ', args);
-                            return [4 /*yield*/, gasMethod[name](args)];
-                        case 1:
-                            returnValue = _a.sent();
-                            console.log('return: ', returnValue);
-                            return [3 /*break*/, 4];
-                        case 2: return [4 /*yield*/, gasMethod[name](args)];
-                        case 3:
-                            returnValue = _a.sent();
-                            _a.label = 4;
-                        case 4: return [2 /*return*/, JSON.stringify(returnValue)];
-                    }
-                });
-            }); };
-        }
-        initGlobal(global, wrapperMethod);
-        return initGasOption;
-    },
-    /**
-     * SpreadsheetをDBとして利用する<br>
-     * 作成したRepositoryを登録する
-     */
-    useSpreadsheetDB: function () {
-        var repositoryList = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            repositoryList[_i] = arguments[_i];
-        }
-        global.initTables = function () {
-            for (var _i = 0, repositoryList_1 = repositoryList; _i < repositoryList_1.length; _i++) {
-                var repository = repositoryList_1[_i];
-                try {
-                    consoleLog.info('create instances');
-                    var r = new repository();
-                    var name_1 = r['tableName'];
-                    consoleLog.info('start', name_1);
-                    r.initTable();
-                    consoleLog.info('success', name_1);
+function useGasMethod(gasMethod, initGlobal) {
+    function wrapperMethod(name) {
+        var _this = this;
+        return function (args) { return __awaiter(_this, void 0, void 0, function () {
+            var returnValue;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        if (!(PropertiesService.getScriptProperties().getProperty('debug') === 'true')) return [3 /*break*/, 2];
+                        console.log('arg: ', args);
+                        return [4 /*yield*/, gasMethod[name](args)];
+                    case 1:
+                        returnValue = _a.sent();
+                        console.log('return: ', returnValue);
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, gasMethod[name](args)];
+                    case 3:
+                        returnValue = _a.sent();
+                        _a.label = 4;
+                    case 4: return [2 /*return*/, JSON.stringify(returnValue)];
                 }
-                catch (e) {
-                    consoleLog$1.error('init spreadsheet error', e);
-                }
+            });
+        }); };
+    }
+    initGlobal(global, wrapperMethod);
+}
+/**
+ * SpreadsheetをDBとして利用する<br>
+ * 作成したRepositoryを登録する
+ */
+function useSpreadsheetDB() {
+    var repositoryList = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        repositoryList[_i] = arguments[_i];
+    }
+    global.initTables = function () {
+        for (var _i = 0, repositoryList_1 = repositoryList; _i < repositoryList_1.length; _i++) {
+            var repository = repositoryList_1[_i];
+            try {
+                consoleLog.info('create instances');
+                var r = new repository();
+                var name_1 = r['tableName'];
+                consoleLog.info('start', name_1);
+                r.initTable();
+                consoleLog.info('success', name_1);
             }
-        };
-        global.clearCacheTable = function () {
-            for (var _i = 0, repositoryList_2 = repositoryList; _i < repositoryList_2.length; _i++) {
-                var repository = repositoryList_2[_i];
-                try {
-                    consoleLog.info('cache clear');
-                    var r = new repository();
-                    var name_2 = r['tableName'];
-                    consoleLog.info('start', name_2);
-                    CacheService.getScriptCache().remove(name_2);
-                    consoleLog.info('success', name_2);
-                }
-                catch (e) {
-                    consoleLog$1.error('clear cache table error', e);
-                }
+            catch (e) {
+                consoleLog$1.error('init spreadsheet error', e);
             }
-        };
-        return initGasOption;
-    },
-};
+        }
+    };
+    global.clearCacheTable = function () {
+        for (var _i = 0, repositoryList_2 = repositoryList; _i < repositoryList_2.length; _i++) {
+            var repository = repositoryList_2[_i];
+            try {
+                consoleLog.info('cache clear');
+                var r = new repository();
+                var name_2 = r['tableName'];
+                consoleLog.info('start', name_2);
+                CacheService.getScriptCache().remove(name_2);
+                consoleLog.info('success', name_2);
+            }
+            catch (e) {
+                consoleLog$1.error('clear cache table error', e);
+            }
+        }
+    };
+}
 
 var gas = /*#__PURE__*/Object.freeze({
     __proto__: null,
     SSRepository: SSRepository,
-    initGas: initGas
+    initGas: initGas,
+    useGasMethod: useGasMethod,
+    useSpreadsheetDB: useSpreadsheetDB
 });
 
 export { common as hCommon, gas as hGas, vue as hVue };
