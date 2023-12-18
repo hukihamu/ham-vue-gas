@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "es2015",
     "target": "es6",
     "sourceMap": true,
     "baseUrl": ".",
@@ -11,7 +11,8 @@
     },
     "removeComments": false,
     "esModuleInterop": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "moduleResolution": "Node"
   },
   "include": [
     "src"
