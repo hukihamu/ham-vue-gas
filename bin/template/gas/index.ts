@@ -10,4 +10,7 @@ hGas.initGas(config,
 hGas.useGasMethod(sampleMethod, (global, wrapperMethod) => {
     global.insertData = wrapperMethod('insertData')
 })
-hGas.useSpreadsheetDB(SampleRepository,)
+hGas.useSpreadsheetDB((global, initTables, clearCacheTable) => {
+    global.initTables = initTables
+    global.clearCacheTable = clearCacheTable
+}, SampleRepository,)

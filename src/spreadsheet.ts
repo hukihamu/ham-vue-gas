@@ -260,13 +260,17 @@ export abstract class SSRepository<E extends SSEntity> {
 }
 
 type LockType = 'user' | 'script' | 'none'
-declare let global: { [name: string]: unknown }
+declare let global: {initTables: () => void, clearCacheTable: () => void}
 /**
  * SpreadsheetをDBとして利用する<br>
  * 作成したRepositoryを登録する
  */
-export function useSpreadsheetDB(...repositoryList: { new (): SSRepository<any> }[]) {
-    global.initTables = () => {
+export function useSpreadsheetDB(initGlobal: (
+    global: {initTables: () => void, clearCacheTable: () => void},
+    initTables: ()=>void,
+    clearCacheTable: () => void) => void,
+                                 ...repositoryList: { new (): SSRepository<any> }[]) {
+    const initTables = () => {
         for (const repository of repositoryList) {
             try {
                 consoleLog.info('create instances')
@@ -280,7 +284,7 @@ export function useSpreadsheetDB(...repositoryList: { new (): SSRepository<any> 
             }
         }
     }
-    global.clearCacheTable = () => {
+    const clearCacheTable = () => {
         for (const repository of repositoryList) {
             try {
                 consoleLog.info('cache clear')
@@ -295,4 +299,5 @@ export function useSpreadsheetDB(...repositoryList: { new (): SSRepository<any> 
             }
         }
     }
+    initGlobal(global, initTables, clearCacheTable)
 }

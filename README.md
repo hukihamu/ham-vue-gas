@@ -39,7 +39,7 @@
 - [ ] サンプル作成
 - [ ] github package
 - [ ] スコープ分割
-  - spreadsheetを未使用の場合関連コードをimportしない 
+  - spreadsheetを未使用の場合関連コードをimportしない →別package扱いで対応
 - notion対応 
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
