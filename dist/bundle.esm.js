@@ -175,11 +175,11 @@ var Config = /** @class */ (function () {
         }
         var content = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent;
         if (!content) {
-            consoleLog$1.error('VueConfigが見つかりません');
+            consoleLog.error('VueConfigが見つかりません');
             return undefined;
         }
         if (Object.keys(JSON.parse(content)).every(function (it) { return it !== key; }))
-            consoleLog$1.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
+            consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
         return JSON.parse(content)[key];
     };
     /**
@@ -192,7 +192,7 @@ var Config = /** @class */ (function () {
             return cacheResult;
         }
         if (PropertiesService.getScriptProperties().getKeys().every(function (it) { return it !== key; }))
-            consoleLog$1.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
+            consoleLog.warn("key\"".concat(key, "\" \u306Econfig\u304C\u898B\u3064\u304B\u308A\u307E\u305B\u3093"));
         return (_a = PropertiesService.getScriptProperties().getProperty(key)) !== null && _a !== void 0 ? _a : undefined;
     };
     /**
@@ -221,7 +221,7 @@ var Config = /** @class */ (function () {
 /**
  * Vue・Gas共に利用可能なLog出力
  */
-var consoleLog$1 = {
+var consoleLog = {
     info: function (label) {
         var data = [];
         for (var _i = 1; _i < arguments.length; _i++) {
@@ -255,7 +255,7 @@ var consoleLog$1 = {
 var common = /*#__PURE__*/Object.freeze({
     __proto__: null,
     Config: Config,
-    consoleLog: consoleLog$1
+    consoleLog: consoleLog
 });
 
 /**
@@ -267,7 +267,7 @@ var common = /*#__PURE__*/Object.freeze({
 function initVue(app, option) {
     var _a;
     if (option === void 0) { option = {}; }
-    consoleLog$1.debug = function (label, data) {
+    consoleLog.debug = function (label, data) {
         var _a, _b;
         var content = (_b = (_a = document.getElementById('vue-config')) === null || _a === void 0 ? void 0 : _a.textContent) !== null && _b !== void 0 ? _b : '';
         if (JSON.parse(content)['debug'] === 'true')
@@ -580,8 +580,49 @@ var SSRepository = /** @class */ (function () {
     SSRepository.ROW_FUNCTION = '=row()';
     return SSRepository;
 }());
+/**
+ * SpreadsheetをDBとして利用する<br>
+ * 作成したRepositoryを登録する
+ */
+function useSpreadsheetDB() {
+    var repositoryList = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        repositoryList[_i] = arguments[_i];
+    }
+    global.initTables = function () {
+        for (var _i = 0, repositoryList_1 = repositoryList; _i < repositoryList_1.length; _i++) {
+            var repository = repositoryList_1[_i];
+            try {
+                consoleLog.info('create instances');
+                var r = new repository();
+                var name_1 = r['tableName'];
+                consoleLog.info('start', name_1);
+                r.initTable();
+                consoleLog.info('success', name_1);
+            }
+            catch (e) {
+                consoleLog.error('init spreadsheet error', e);
+            }
+        }
+    };
+    global.clearCacheTable = function () {
+        for (var _i = 0, repositoryList_2 = repositoryList; _i < repositoryList_2.length; _i++) {
+            var repository = repositoryList_2[_i];
+            try {
+                consoleLog.info('cache clear');
+                var r = new repository();
+                var name_2 = r['tableName'];
+                consoleLog.info('start', name_2);
+                CacheService.getScriptCache().remove(name_2);
+                consoleLog.info('success', name_2);
+            }
+            catch (e) {
+                consoleLog.error('clear cache table error', e);
+            }
+        }
+    };
+}
 
-var consoleLog = consoleLog$1;
 /**
  * Gas側entryファイルで実行する関数<br>
  * @param config インスタンス化したhCommon.Configを入力
@@ -589,7 +630,7 @@ var consoleLog = consoleLog$1;
  */
 function initGas(config, option) {
     if (option === void 0) { option = {}; }
-    consoleLog$1.debug = function (label, data) {
+    consoleLog.debug = function (label, data) {
         if (config.getGasConfig('debug') === 'true')
             console.log(label, data);
     };
@@ -632,48 +673,6 @@ function useGasMethod(gasMethod, initGlobal) {
         }); };
     }
     initGlobal(global, wrapperMethod);
-}
-/**
- * SpreadsheetをDBとして利用する<br>
- * 作成したRepositoryを登録する
- */
-function useSpreadsheetDB() {
-    var repositoryList = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        repositoryList[_i] = arguments[_i];
-    }
-    global.initTables = function () {
-        for (var _i = 0, repositoryList_1 = repositoryList; _i < repositoryList_1.length; _i++) {
-            var repository = repositoryList_1[_i];
-            try {
-                consoleLog.info('create instances');
-                var r = new repository();
-                var name_1 = r['tableName'];
-                consoleLog.info('start', name_1);
-                r.initTable();
-                consoleLog.info('success', name_1);
-            }
-            catch (e) {
-                consoleLog$1.error('init spreadsheet error', e);
-            }
-        }
-    };
-    global.clearCacheTable = function () {
-        for (var _i = 0, repositoryList_2 = repositoryList; _i < repositoryList_2.length; _i++) {
-            var repository = repositoryList_2[_i];
-            try {
-                consoleLog.info('cache clear');
-                var r = new repository();
-                var name_2 = r['tableName'];
-                consoleLog.info('start', name_2);
-                CacheService.getScriptCache().remove(name_2);
-                consoleLog.info('success', name_2);
-            }
-            catch (e) {
-                consoleLog$1.error('clear cache table error', e);
-            }
-        }
-    };
 }
 
 var gas = /*#__PURE__*/Object.freeze({

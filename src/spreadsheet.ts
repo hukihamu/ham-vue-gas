@@ -1,3 +1,6 @@
+import * as hCommon from '@/common'
+import {consoleLog} from '@/common'
+
 /**
  * SSRepositoryのinitData、columnListの宣言に使用
  */
@@ -257,3 +260,39 @@ export abstract class SSRepository<E extends SSEntity> {
 }
 
 type LockType = 'user' | 'script' | 'none'
+declare let global: { [name: string]: unknown }
+/**
+ * SpreadsheetをDBとして利用する<br>
+ * 作成したRepositoryを登録する
+ */
+export function useSpreadsheetDB(...repositoryList: { new (): SSRepository<any> }[]) {
+    global.initTables = () => {
+        for (const repository of repositoryList) {
+            try {
+                consoleLog.info('create instances')
+                const r = new repository()
+                const name = r['tableName']
+                consoleLog.info('start', name)
+                r.initTable()
+                consoleLog.info('success', name)
+            }catch (e) {
+                hCommon.consoleLog.error('init spreadsheet error', e)
+            }
+        }
+    }
+    global.clearCacheTable = () => {
+        for (const repository of repositoryList) {
+            try {
+                consoleLog.info('cache clear')
+                const r = new repository()
+                const name = r['tableName']
+                consoleLog.info('start', name)
+                CacheService.getScriptCache().remove(name)
+
+                consoleLog.info('success', name)
+            }catch (e) {
+                hCommon.consoleLog.error('clear cache table error', e)
+            }
+        }
+    }
+}

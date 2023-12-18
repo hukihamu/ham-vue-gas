@@ -240,6 +240,13 @@ declare abstract class SSRepository<E extends SSEntity> {
     delete(row: number): void;
 }
 type LockType = 'user' | 'script' | 'none';
+/**
+ * SpreadsheetをDBとして利用する<br>
+ * 作成したRepositoryを登録する
+ */
+declare function useSpreadsheetDB(...repositoryList: {
+    new (): SSRepository<any>;
+}[]): void;
 
 /**
  * GasMethod実装に利用する(全メソッド必須)
@@ -280,13 +287,6 @@ type WrapperMethod<C extends BaseGasMethodInterface, K extends keyof C> = (args:
 declare function useGasMethod<C extends BaseGasMethodInterface>(gasMethod: GasMethodsTypeRequired<C>, initGlobal: (global: {
     [K in keyof C]: WrapperMethod<C, K>;
 }, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): void;
-/**
- * SpreadsheetをDBとして利用する<br>
- * 作成したRepositoryを登録する
- */
-declare function useSpreadsheetDB(...repositoryList: {
-    new (): SSRepository<any>;
-}[]): void;
 
 type gas_GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = GasMethodType<C, K>;
 type gas_GasMethodsType<C extends BaseGasMethodInterface> = GasMethodsType<C>;

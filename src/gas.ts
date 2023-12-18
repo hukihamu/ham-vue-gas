@@ -1,6 +1,4 @@
 import * as hCommon from '@/common'
-import consoleLog = hCommon.consoleLog
-import {SSRepository} from '@/spreadsheet'
 export * from '@/spreadsheet'
 /**
  * GasMethod実装に利用する(全メソッド必須)
@@ -71,39 +69,3 @@ export function useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod
 
     initGlobal(global as any, wrapperMethod)
 }
-/**
- * SpreadsheetをDBとして利用する<br>
- * 作成したRepositoryを登録する
- */
-export function useSpreadsheetDB(...repositoryList: { new (): SSRepository<any> }[]) {
-    global.initTables = () => {
-        for (const repository of repositoryList) {
-            try {
-                consoleLog.info('create instances')
-                const r = new repository()
-                const name = r['tableName']
-                consoleLog.info('start', name)
-                r.initTable()
-                consoleLog.info('success', name)
-            }catch (e) {
-                hCommon.consoleLog.error('init spreadsheet error', e)
-            }
-        }
-    }
-    global.clearCacheTable = () => {
-        for (const repository of repositoryList) {
-            try {
-                consoleLog.info('cache clear')
-                const r = new repository()
-                const name = r['tableName']
-                consoleLog.info('start', name)
-                CacheService.getScriptCache().remove(name)
-
-                consoleLog.info('success', name)
-            }catch (e) {
-                hCommon.consoleLog.error('clear cache table error', e)
-            }
-        }
-    }
-}
-
