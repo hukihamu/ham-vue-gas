@@ -1,5 +1,4 @@
 import * as hCommon from '@/common'
-export * from '@/spreadsheet'
 /**
  * GasMethod実装に利用する(全メソッド必須)
  */

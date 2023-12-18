@@ -146,6 +146,61 @@ declare namespace vue {
 }
 
 /**
+ * GasMethod実装に利用する(全メソッド必須)
+ */
+type GasMethodsTypeRequired<C extends BaseGasMethodInterface> = {
+    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
+};
+/**
+ * GasMethod実装に利用する(任意の複数メソッド)
+ */
+type GasMethodsType<C extends BaseGasMethodInterface> = Partial<{
+    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
+}>;
+/**
+ * GasMethod実装に利用する(1メソッドのみ)
+ */
+type GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>;
+type ArgsOption = {
+    htmlFileName?: string;
+    editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
+};
+/**
+ * Gas側entryファイルで実行する関数<br>
+ * @param config インスタンス化したhCommon.Configを入力
+ * @param option htmlファイル名を変更したり、htmlを変更する際に利用
+ */
+declare function initGas<C extends string, G extends string, V extends string>(config: Config<C, G, V>, option?: ArgsOption): void;
+type WrapperMethod<C extends BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {
+    e: any;
+}>;
+/**
+ * Gasで実行される関数を登録する<br>
+ * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
+ * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
+ * globalへ代入前に"wrapperMethod"を利用する<br>
+ * GasMethodInterfaceをGenerics宣言すると、コード補完される
+ */
+declare function useGasMethod<C extends BaseGasMethodInterface>(gasMethod: GasMethodsTypeRequired<C>, initGlobal: (global: {
+    [K in keyof C]: WrapperMethod<C, K>;
+}, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): void;
+
+type gas_GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = GasMethodType<C, K>;
+type gas_GasMethodsType<C extends BaseGasMethodInterface> = GasMethodsType<C>;
+type gas_GasMethodsTypeRequired<C extends BaseGasMethodInterface> = GasMethodsTypeRequired<C>;
+declare const gas_initGas: typeof initGas;
+declare const gas_useGasMethod: typeof useGasMethod;
+declare namespace gas {
+  export {
+    gas_GasMethodType as GasMethodType,
+    gas_GasMethodsType as GasMethodsType,
+    gas_GasMethodsTypeRequired as GasMethodsTypeRequired,
+    gas_initGas as initGas,
+    gas_useGasMethod as useGasMethod,
+  };
+}
+
+/**
  * SSRepositoryのinitData、columnListの宣言に使用
  */
 type InitEntity<E extends SSEntity> = Omit<E, 'row'>;
@@ -248,68 +303,18 @@ declare function useSpreadsheetDB(...repositoryList: {
     new (): SSRepository<any>;
 }[]): void;
 
-/**
- * GasMethod実装に利用する(全メソッド必須)
- */
-type GasMethodsTypeRequired<C extends BaseGasMethodInterface> = {
-    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
-};
-/**
- * GasMethod実装に利用する(任意の複数メソッド)
- */
-type GasMethodsType<C extends BaseGasMethodInterface> = Partial<{
-    [K in keyof C]: (args?: C[K]['at']) => Promise<C[K]['rt']>;
-}>;
-/**
- * GasMethod実装に利用する(1メソッドのみ)
- */
-type GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = (args?: C[K]['at']) => Promise<C[K]['rt']>;
-type ArgsOption = {
-    htmlFileName?: string;
-    editHtmlOutput?: (output: GoogleAppsScript.HTML.HtmlOutput) => GoogleAppsScript.HTML.HtmlOutput;
-};
-/**
- * Gas側entryファイルで実行する関数<br>
- * @param config インスタンス化したhCommon.Configを入力
- * @param option htmlファイル名を変更したり、htmlを変更する際に利用
- */
-declare function initGas<C extends string, G extends string, V extends string>(config: Config<C, G, V>, option?: ArgsOption): void;
-type WrapperMethod<C extends BaseGasMethodInterface, K extends keyof C> = (args: C[K]['at']) => Promise<string | {
-    e: any;
-}>;
-/**
- * Gasで実行される関数を登録する<br>
- * 変数"global[{Method名}]"に代入することで、gasに適用される(globalでないと利用できない)<br>
- * 名前の重複は不可(あとから入れた関数に上書きされる)<br>
- * globalへ代入前に"wrapperMethod"を利用する<br>
- * GasMethodInterfaceをGenerics宣言すると、コード補完される
- */
-declare function useGasMethod<C extends BaseGasMethodInterface>(gasMethod: GasMethodsTypeRequired<C>, initGlobal: (global: {
-    [K in keyof C]: WrapperMethod<C, K>;
-}, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): void;
-
-type gas_GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = GasMethodType<C, K>;
-type gas_GasMethodsType<C extends BaseGasMethodInterface> = GasMethodsType<C>;
-type gas_GasMethodsTypeRequired<C extends BaseGasMethodInterface> = GasMethodsTypeRequired<C>;
-type gas_InitEntity<E extends SSEntity> = InitEntity<E>;
-type gas_SSEntity = SSEntity;
-type gas_SSRepository<E extends SSEntity> = SSRepository<E>;
-declare const gas_SSRepository: typeof SSRepository;
-declare const gas_initGas: typeof initGas;
-declare const gas_useGasMethod: typeof useGasMethod;
-declare const gas_useSpreadsheetDB: typeof useSpreadsheetDB;
-declare namespace gas {
+type spreadsheet_InitEntity<E extends SSEntity> = InitEntity<E>;
+type spreadsheet_SSEntity = SSEntity;
+type spreadsheet_SSRepository<E extends SSEntity> = SSRepository<E>;
+declare const spreadsheet_SSRepository: typeof SSRepository;
+declare const spreadsheet_useSpreadsheetDB: typeof useSpreadsheetDB;
+declare namespace spreadsheet {
   export {
-    gas_GasMethodType as GasMethodType,
-    gas_GasMethodsType as GasMethodsType,
-    gas_GasMethodsTypeRequired as GasMethodsTypeRequired,
-    gas_InitEntity as InitEntity,
-    gas_SSEntity as SSEntity,
-    gas_SSRepository as SSRepository,
-    gas_initGas as initGas,
-    gas_useGasMethod as useGasMethod,
-    gas_useSpreadsheetDB as useSpreadsheetDB,
+    spreadsheet_InitEntity as InitEntity,
+    spreadsheet_SSEntity as SSEntity,
+    spreadsheet_SSRepository as SSRepository,
+    spreadsheet_useSpreadsheetDB as useSpreadsheetDB,
   };
 }
 
-export { common as hCommon, gas as hGas, vue as hVue };
+export { common as hCommon, gas as hGas, spreadsheet as hSS, vue as hVue };

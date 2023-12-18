@@ -4,7 +4,6 @@
   "description": "google apps script + vue.js web system template",
   "main": "dist/bundle.js",
   "module": "dist/bundle.esm.js",
-  "sideEffects": false,
   "types": "dist/bundle.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
