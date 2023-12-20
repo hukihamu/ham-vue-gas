@@ -100,38 +100,38 @@ program.command('init')
     const rootPath = path.join(__dirname, '../../../')
 
     // 直下
-    fs.cpSync('template/tsconfig.json', path.join(rootPath, 'tsconfig.json'))
-    fs.cpSync('template/.clasp.json', path.join(rootPath, '.clasp.json'))
+    fs.cpSync(path.join(__dirname, 'template/tsconfig.json'), path.join(rootPath, 'tsconfig.json'))
+    fs.cpSync(path.join(__dirname, 'template/.clasp.json'), path.join(rootPath, '.clasp.json'))
 
     // src
     if (!fs.existsSync(path.join(rootPath, 'src'))) fs.mkdirSync(path.join(rootPath, 'src'))
 
     //public
     if (!fs.existsSync(path.join(rootPath, 'src', 'public'))) fs.mkdirSync(path.join(rootPath, 'src', 'public'))
-    fs.cpSync('template/public/index.html', path.join(rootPath, 'src', 'public', 'index.html'))
-    fs.cpSync('template/public/appsscript.json', path.join(rootPath, 'src', 'public', 'appsscript.json'))
+    fs.cpSync(path.join(__dirname, 'template/public/index.html'), path.join(rootPath, 'src', 'public', 'index.html'))
+    fs.cpSync(path.join(__dirname, 'template/public/appsscript.json'), path.join(rootPath, 'src', 'public', 'appsscript.json'))
 
     // common
     if (!fs.existsSync(path.join(rootPath, 'src', 'common'))) fs.mkdirSync(path.join(rootPath, 'src', 'common'))
-    fs.cpSync('template/common/config.ts', path.join(rootPath, 'src', 'common', 'config.ts'))
-    fs.cpSync('template/common/gasMethodInterface.ts', path.join(rootPath, 'src', 'common', 'gasMethodInterface.ts'))
+    fs.cpSync(path.join(__dirname, 'template/common/config.ts'), path.join(rootPath, 'src', 'common', 'config.ts'))
+    fs.cpSync(path.join(__dirname, 'template/common/gasMethodInterface.ts'), path.join(rootPath, 'src', 'common', 'gasMethodInterface.ts'))
 
     // vue
     if (!fs.existsSync(path.join(rootPath, 'src', 'vue'))) fs.mkdirSync(path.join(rootPath, 'src', 'vue'))
-    fs.cpSync('template/vue/index.ts', path.join(rootPath, 'src', 'vue', 'index.ts'))
+    fs.cpSync(path.join(__dirname, 'template/vue/index.ts'), path.join(rootPath, 'src', 'vue', 'index.ts'))
 
-    fs.cpSync('template/vue/main.vue', path.join(rootPath, 'src', 'vue', 'main.vue'))
-    fs.cpSync('template/vue/vue.d.ts', path.join(rootPath, 'src', 'vue', 'vue.d.ts'))
+    fs.cpSync(path.join(__dirname, 'template/vue/main.vue'), path.join(rootPath, 'src', 'vue', 'main.vue'))
+    fs.cpSync(path.join(__dirname, 'template/vue/vue.d.ts'), path.join(rootPath, 'src', 'vue', 'vue.d.ts'))
 
     // gas
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas'))
-    fs.cpSync('template/gas/index.ts', path.join(rootPath, 'src', 'gas', 'index.ts'), ``)
+    fs.cpSync(path.join(__dirname, 'template/gas/index.ts'), path.join(rootPath, 'src', 'gas', 'index.ts'), ``)
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'methods'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'methods'))
-    fs.cpSync('template/gas/methods/sampleMethod.ts', path.join(rootPath, 'src', 'gas', 'methods', 'sampleMethod.ts'), )
+    fs.cpSync(path.join(__dirname, 'template/gas/methods/sampleMethod.ts'), path.join(rootPath, 'src', 'gas', 'methods', 'sampleMethod.ts'), )
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'entity'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'entity'))
-    fs.cpSync('template/gas/entity/sampleEntity.ts', path.join(rootPath, 'src', 'gas', 'entity', 'sampleEntity.ts'))
+    fs.cpSync(path.join(__dirname, 'template/gas/entity/sampleEntity.ts'), path.join(rootPath, 'src', 'gas', 'entity', 'sampleEntity.ts'))
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'repository'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'repository'))
-    fs.cpSync('template/gas/repository/sampleRepository.ts', path.join(rootPath, 'src', 'gas', 'repository', 'sampleRepository.ts'))
+    fs.cpSync(path.join(__dirname, 'template/gas/repository/sampleRepository.ts'), path.join(rootPath, 'src', 'gas', 'repository', 'sampleRepository.ts'))
   })
 
 program.command('serve')
@@ -143,7 +143,7 @@ program.command('serve')
         const o = path.join(rootPath, options.output ?? './dist').replaceAll('\\', '\\\\')
         let json = '{}'
         if (options.properties) {
-            const p = path.join(rootPath, options.properties).replaceAll('\\', '\\\\')
+            // const p = path.join(rootPath, options.properties).replaceAll('\\', '\\\\')
             json = fs.readFileSync(path.join(__dirname, 'properties.json')).toString()
         }
 
@@ -158,7 +158,8 @@ program.command('serve')
             gasMock = gasMock.replace('{/**/}', json)
             let gas = fs.readFileSync(path.join(o, 'gas.js'))
             let html = fs.readFileSync(path.join(o, 'index.html')).toString()
-            html = html.replace('<head>', `<head><script>${gasMock}</script><script>${gas}</script><script>${vueMock}</script>`)
+            // noinspection HtmlRequiredTitleElement
+          html = html.replace('<head>', `<head><script>${gasMock}</script><script>${gas}</script><script>${vueMock}</script>`)
             res.writeHead(200, {'Content-Type': 'text/html'})
             res.write(html)
             res.end()
