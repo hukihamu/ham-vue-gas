@@ -125,7 +125,7 @@ program.command('init')
 
     // gas
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas'))
-    fs.cpSync(path.join(__dirname, 'template/gas/index.ts'), path.join(rootPath, 'src', 'gas', 'index.ts'), ``)
+    fs.cpSync(path.join(__dirname, 'template/gas/index.ts'), path.join(rootPath, 'src', 'gas', 'index.ts'))
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'methods'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'methods'))
     fs.cpSync(path.join(__dirname, 'template/gas/methods/sampleMethod.ts'), path.join(rootPath, 'src', 'gas', 'methods', 'sampleMethod.ts'), )
     if (!fs.existsSync(path.join(rootPath, 'src', 'gas', 'entity'))) fs.mkdirSync(path.join(rootPath, 'src', 'gas', 'entity'))
