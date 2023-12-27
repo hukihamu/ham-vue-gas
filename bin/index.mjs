@@ -35,6 +35,8 @@ program.command('build')
   .option('-w, --watch', 'build watch', false)
   .option('-s, --sourcemap', 'inline source map', false)
   .option('-d, --development', 'webpack development mode', false)
+  .option('-vo, --vueonly', 'webpack build vue only', false)
+  .option('-go, --gasonly', 'webpack build gas only', false)
   .action(function () {
     const rootPath = path.join(__dirname, '../../../')
 
@@ -47,6 +49,8 @@ program.command('build')
     const w = this.opts().watch
     const s = this.opts().sourcemap
     const d = this.opts().development
+    const vo = this.opts().vueonly
+    const go = this.opts().gasonly
     // 設定値存在確認
     if (!fs.existsSync(a)) throw `nou found appsscript.json. path:${a}`
     if (!fs.existsSync(h)) throw `nou found html. path:${h}`
@@ -89,8 +93,12 @@ program.command('build')
         console.error('Exec error: ', error);
       }
     }
-    if (existsVueFile) exec(`npx webpack --config ${vueConfigPath} ${w ? '-w': ''}`, execResult)
-    exec(`npx webpack --config ${gasConfigPath} ${w ? '-w': ''}`, execResult)
+    if (!vo) {
+      if (existsVueFile) exec(`npx webpack --config ${vueConfigPath} ${w ? '-w': ''}`, execResult)
+    }
+    if (!go) {
+      exec(`npx webpack --config ${gasConfigPath} ${w ? '-w': ''}`, execResult)
+    }
   })
 
 

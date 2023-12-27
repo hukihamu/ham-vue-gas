@@ -33,13 +33,13 @@
   - `-w, --watch`, 'build watch', false
   - `-s, --sourcemap`, 'inline source map', false
   - `-d, --development`, 'webpack development mode', false
+  - `-vo, --vueonly`, 'webpack build vue only', false
+  - `-go, --gasonly`, 'webpack build gas only', false
 ## TODO
 - [ ] 使い方
 - [ ] テスト
 - [ ] サンプル作成
 - [ ] github package
-- [ ] スコープ分割
-  - spreadsheetを未使用の場合関連コードをimportしない →別package扱いで対応
 - notion対応 
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
