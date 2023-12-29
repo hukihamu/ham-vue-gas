@@ -310,7 +310,7 @@ declare class NotionClient {
          * @param {DatabaseQueryParams} body - The parameters for the query.
          * @returns {Promise<any>} - The response from the query.
          */
-        query: (databaseId: string, body: DatabaseQueryParams) => Promise<any>;
+        query: (databaseId: string, body?: DatabaseQueryParams) => Promise<any>;
         get(): void;
         update(): void;
         updateProperty(): void;

@@ -97,7 +97,7 @@ export class NotionClient {
              * @param {DatabaseQueryParams} body - The parameters for the query.
              * @returns {Promise<any>} - The response from the query.
              */
-            query: async (databaseId: string, body: DatabaseQueryParams): Promise<any> => {
+            query: async (databaseId: string, body?: DatabaseQueryParams): Promise<any> => {
                 return this.fetch(`/databases/${databaseId}/query`, {
                     headers: this.createHeaders(),
                     method: 'post',
