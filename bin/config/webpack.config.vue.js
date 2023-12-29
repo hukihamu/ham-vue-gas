@@ -28,5 +28,6 @@ module.exports = {
     cleanOnceBeforeBuildPatterns: ['!gas.js'],
     cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt', 'gas.js.LICENSE.txt']
   })],
+  watch: '${w}'
 }
 ${s}

@@ -66,6 +66,7 @@ program.command('build')
       .replace('${t}', t)
       .replace('${s}', s ? `module.exports.devtool = 'inline-source-map'` : '')
       .replace('${d}', d ? 'development' : 'production')
+      .replace("'${w}'", w ? 'true' : 'false')
     const vueWebpackConfig = fs.readFileSync(path.join(__dirname, 'config/webpack.config.vue.js'), {encoding: 'utf8'})
       .replace('${e}', e)
       .replace('${o}', o)
@@ -74,6 +75,7 @@ program.command('build')
       .replace('${a}', a.replaceAll('\\', '\\\\'))
       .replace('${s}', s ? `module.exports.devtool = 'inline-source-map'` : '')
       .replace('${d}', d ? 'development' : 'production')
+      .replace("'${w}'", w ? 'true' : 'false')
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -94,10 +96,10 @@ program.command('build')
       }
     }
     if (!vo) {
-      if (existsVueFile) exec(`npx webpack --config ${vueConfigPath} ${w ? '-w': ''}`, execResult)
+      if (existsVueFile) exec(`npx webpack --config ${vueConfigPath}`, execResult)
     }
     if (!go) {
-      exec(`npx webpack --config ${gasConfigPath} ${w ? '-w': ''}`, execResult)
+      exec(`npx webpack --config ${gasConfigPath}`, execResult)
     }
   })
 
