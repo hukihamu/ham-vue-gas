@@ -613,6 +613,9 @@ function ssCache(spreadSheetApp, spreadsheetId, expirationInSeconds) {
             }
             const range = sheet.getRange(rowNumber, 1, 1, chunks.length);
             range.setValues([chunks]);
+        },
+        clear: (rowNumber) => {
+            sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).clear();
         }
     };
 }

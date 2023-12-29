@@ -41,6 +41,9 @@ export function ssCache(spreadSheetApp: GoogleAppsScript.Spreadsheet.Spreadsheet
             }
             const range = sheet.getRange(rowNumber, 1, 1, chunks.length)
             range.setValues([chunks])
+        },
+        clear: (rowNumber: number) => {
+            sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).clear()
         }
     }
 }
