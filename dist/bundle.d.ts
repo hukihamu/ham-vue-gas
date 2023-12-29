@@ -256,6 +256,79 @@ declare function useSpreadsheetDB(initGlobal: (global: {
     new (): SSRepository<any>;
 }[]): void;
 
+type DatabaseQueryParams = {
+    filter: any;
+    sorts: any[];
+    start_cursor: string;
+    page_size: number;
+};
+type PageCreateParams = {
+    parent: {
+        page_id: string;
+    } | {
+        database_id: string;
+    };
+    properties: any;
+    children: any[] | string;
+    icon: any;
+    cover: any;
+};
+type PageUpdatePropertiesParams = {
+    properties: any;
+    archived: boolean;
+    icon: any;
+    cover: any;
+};
+declare class NotionClient {
+    private readonly _urlFetchApp;
+    private readonly _apiBaseUrl;
+    private readonly _authToken;
+    constructor(urlFetchApp: GoogleAppsScript.URL_Fetch.UrlFetchApp, authToken: string);
+    static createToken(): string;
+    private createHeaders;
+    private fetch;
+    get blocks(): {
+        append(): void;
+        get(): void;
+        list(): void;
+        update(): void;
+        delete(): void;
+    };
+    get pages(): {
+        create: (body: PageCreateParams) => Promise<any>;
+        get(): void;
+        getProperty(): void;
+        updateProperty: (pageId: string, body: PageUpdatePropertiesParams) => Promise<any>;
+        archive(): void;
+    };
+    get databases(): {
+        create(): void;
+        /**
+         * 特定のデータベースに対してクエリを実行します。
+         *
+         * @param {string} databaseId - The ID of the database to query.
+         * @param {DatabaseQueryParams} body - The parameters for the query.
+         * @returns {Promise<any>} - The response from the query.
+         */
+        query: (databaseId: string, body: DatabaseQueryParams) => Promise<any>;
+        get(): void;
+        update(): void;
+        updateProperty(): void;
+    };
+    get users(): {
+        get(): void;
+        list(): void;
+        getBot(): void;
+    };
+    get comments(): {
+        create(): void;
+        get(): void;
+    };
+    get search(): {
+        searchByTitle(): void;
+    };
+}
+
 /**
  * GasMethod実装に利用する(全メソッド必須)
  */
@@ -300,6 +373,8 @@ type gas_GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = Ga
 type gas_GasMethodsType<C extends BaseGasMethodInterface> = GasMethodsType<C>;
 type gas_GasMethodsTypeRequired<C extends BaseGasMethodInterface> = GasMethodsTypeRequired<C>;
 type gas_InitEntity<E extends SSEntity> = InitEntity<E>;
+type gas_NotionClient = NotionClient;
+declare const gas_NotionClient: typeof NotionClient;
 type gas_SSEntity = SSEntity;
 type gas_SSRepository<E extends SSEntity> = SSRepository<E>;
 declare const gas_SSRepository: typeof SSRepository;
@@ -312,6 +387,7 @@ declare namespace gas {
     gas_GasMethodsType as GasMethodsType,
     gas_GasMethodsTypeRequired as GasMethodsTypeRequired,
     gas_InitEntity as InitEntity,
+    gas_NotionClient as NotionClient,
     gas_SSEntity as SSEntity,
     gas_SSRepository as SSRepository,
     gas_initGas as initGas,

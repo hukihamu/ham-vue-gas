@@ -482,6 +482,116 @@ function useSpreadsheetDB(initGlobal, ...repositoryList) {
     initGlobal(global, initTables, clearCacheTable);
 }
 
+class NotionClient {
+    constructor(urlFetchApp, authToken) {
+        this._apiBaseUrl = 'https://api.notion.com/v1';
+        this._urlFetchApp = urlFetchApp;
+        this._authToken = authToken;
+    }
+    static createToken() {
+        // TODO GAS Oauth2を利用する
+        return '';
+    }
+    createHeaders() {
+        return {
+            Authorization: `Bearer ${this._authToken}`,
+            'Notion-Version': '2022-06-28',
+            'Content-Type': 'application/json'
+        };
+    }
+    fetch(url, options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let resp = this._urlFetchApp.fetch(this._apiBaseUrl + url, options);
+            if (resp.getResponseCode() === 429) {
+                yield new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve();
+                    }, 2000);
+                });
+                resp = this._urlFetchApp.fetch(this._apiBaseUrl + url, options);
+            }
+            if (resp.getResponseCode() === 200) {
+                return JSON.parse(resp.getContentText());
+            }
+            throw resp.getContentText();
+        });
+    }
+    get blocks() {
+        return {
+            append() { },
+            get() { },
+            list() { },
+            update() { },
+            delete() { },
+        };
+    }
+    get pages() {
+        return {
+            create: (body) => __awaiter(this, void 0, void 0, function* () {
+                return this.fetch('/pages', {
+                    headers: this.createHeaders(),
+                    method: 'post',
+                    payload: JSON.stringify(body)
+                });
+            }),
+            get() { },
+            getProperty() { },
+            updateProperty: (pageId, body) => __awaiter(this, void 0, void 0, function* () {
+                return this.fetch(`/pages/${pageId}`, {
+                    headers: this.createHeaders(),
+                    method: 'patch',
+                    payload: JSON.stringify(body)
+                });
+            }),
+            archive() { },
+        };
+    }
+    get databases() {
+        return {
+            create() {
+            },
+            /**
+             * 特定のデータベースに対してクエリを実行します。
+             *
+             * @param {string} databaseId - The ID of the database to query.
+             * @param {DatabaseQueryParams} body - The parameters for the query.
+             * @returns {Promise<any>} - The response from the query.
+             */
+            query: (databaseId, body) => __awaiter(this, void 0, void 0, function* () {
+                return this.fetch(`/databases/${databaseId}/query`, {
+                    headers: this.createHeaders(),
+                    method: 'post',
+                    payload: JSON.stringify(body)
+                });
+            }),
+            get() {
+            },
+            update() {
+            },
+            updateProperty() {
+            },
+        };
+    }
+    get users() {
+        return {
+            get() { },
+            list() { },
+            getBot() { },
+        };
+    }
+    get comments() {
+        return {
+            create() { },
+            get() { },
+        };
+    }
+    get search() {
+        return {
+            searchByTitle() { },
+        };
+    }
+}
+
 /**
  * Gas側entryファイルで実行する関数<br>
  * @param config インスタンス化したhCommon.Configを入力
@@ -526,6 +636,7 @@ function useGasMethod(gasMethod, initGlobal) {
 
 var gas = /*#__PURE__*/Object.freeze({
     __proto__: null,
+    NotionClient: NotionClient,
     SSRepository: SSRepository,
     initGas: initGas,
     useGasMethod: useGasMethod,
