@@ -1,3 +1,4 @@
+import {consoleLog} from '@/common'
 
 export function ssCache(spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp,
                         spreadsheetId: string,
@@ -8,7 +9,12 @@ export function ssCache(spreadSheetApp: GoogleAppsScript.Spreadsheet.Spreadsheet
     return {
         get: (rowNumber: number) => {
             const expiration = Number.parseInt(sheet.getRange(rowNumber, 2, 1, 1).getValue(), 10)
-            if (!expiration || expirationInSeconds && (Date.now() - expiration) /1000 > expirationInSeconds) {
+            if (!expiration) {
+                consoleLog.debug(`row:${rowNumber}`, 'cacheが見つからない')
+                return null
+            }
+            if (expirationInSeconds && (Date.now() - expiration) /1000 > expirationInSeconds) {
+                consoleLog.debug(`row:${rowNumber}`, 'expirationInSecondsを過ぎている')
                 return null
             }
             const table = sheet.getRange(rowNumber, 2, 1, sheet.getLastColumn()).getValues()
@@ -22,6 +28,7 @@ export function ssCache(spreadSheetApp: GoogleAppsScript.Spreadsheet.Spreadsheet
                     }
                 }
             }
+            consoleLog.debug(`row:${rowNumber}`, 'success')
             return JSON.parse(text)
         },
         set: (rowNumber: number, data: any) => {

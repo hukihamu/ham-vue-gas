@@ -582,7 +582,12 @@ function ssCache(spreadSheetApp, spreadsheetId, expirationInSeconds) {
     return {
         get: (rowNumber) => {
             const expiration = Number.parseInt(sheet.getRange(rowNumber, 2, 1, 1).getValue(), 10);
-            if (!expiration || expirationInSeconds && (Date.now() - expiration) / 1000 > expirationInSeconds) {
+            if (!expiration) {
+                consoleLog.debug(`row:${rowNumber}`, 'cacheが見つからない');
+                return null;
+            }
+            if (expirationInSeconds && (Date.now() - expiration) / 1000 > expirationInSeconds) {
+                consoleLog.debug(`row:${rowNumber}`, 'expirationInSecondsを過ぎている');
                 return null;
             }
             const table = sheet.getRange(rowNumber, 2, 1, sheet.getLastColumn()).getValues();
@@ -597,6 +602,7 @@ function ssCache(spreadSheetApp, spreadsheetId, expirationInSeconds) {
                     }
                 }
             }
+            consoleLog.debug(`row:${rowNumber}`, 'success');
             return JSON.parse(text);
         },
         set: (rowNumber, data) => {
