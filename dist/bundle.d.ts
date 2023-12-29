@@ -257,10 +257,10 @@ declare function useSpreadsheetDB(initGlobal: (global: {
 }[]): void;
 
 type DatabaseQueryParams = {
-    filter: any;
-    sorts: any[];
-    start_cursor: string;
-    page_size: number;
+    filter?: any;
+    sorts?: any[];
+    start_cursor?: string;
+    page_size?: number;
 };
 type PageCreateParams = {
     parent: {
@@ -269,15 +269,15 @@ type PageCreateParams = {
         database_id: string;
     };
     properties: any;
-    children: any[] | string;
-    icon: any;
-    cover: any;
+    children?: any[] | string;
+    icon?: any;
+    cover?: any;
 };
 type PageUpdatePropertiesParams = {
-    properties: any;
-    archived: boolean;
-    icon: any;
-    cover: any;
+    properties?: any;
+    archived?: boolean;
+    icon?: any;
+    cover?: any;
 };
 declare class NotionClient {
     private readonly _urlFetchApp;

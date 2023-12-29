@@ -1,23 +1,23 @@
 type DatabaseQueryParams = {
     // https://developers.notion.com/reference/post-database-query-filter
-    filter: any
+    filter?: any
     // https://developers.notion.com/reference/post-database-query-sort
-    sorts: any[]
-    start_cursor: string
-    page_size: number
+    sorts?: any[]
+    start_cursor?: string
+    page_size?: number
 }
 type PageCreateParams = {
     parent: {page_id: string} | {database_id: string}
     properties: any
-    children: any[] | string
-    icon: any
-    cover: any
+    children?: any[] | string
+    icon?: any
+    cover?: any
 }
 type PageUpdatePropertiesParams = {
-    properties: any
-    archived: boolean
-    icon: any
-    cover: any
+    properties?: any
+    archived?: boolean
+    icon?: any
+    cover?: any
 }
 
 export class NotionClient {
@@ -97,7 +97,7 @@ export class NotionClient {
              * @param {DatabaseQueryParams} body - The parameters for the query.
              * @returns {Promise<any>} - The response from the query.
              */
-            query: async (databaseId: string, body?: DatabaseQueryParams): Promise<any> => {
+            query: async (databaseId: string, body: DatabaseQueryParams = {}): Promise<any> => {
                 return this.fetch(`/databases/${databaseId}/query`, {
                     headers: this.createHeaders(),
                     method: 'post',
