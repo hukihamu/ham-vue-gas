@@ -66,7 +66,7 @@ declare class Config<C extends string, G extends string, V extends string> {
     /**
      * gasサイドでのみ利用可能
      */
-    getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined;
+    getGasConfig(key: Exclude<(G | C | 'debug' | 'CountUrlFetchApp'), ''>): string | undefined;
     /**
      * すべてのVueConfigを取得(gasサイドでのみ利用可能)
      */
@@ -251,8 +251,7 @@ type LockType = 'user' | 'script' | 'none';
  */
 declare function useSpreadsheetDB(initGlobal: (global: {
     initTables: () => void;
-    clearCacheTable: () => void;
-}, initTables: () => void, clearCacheTable: () => void) => void, ...repositoryList: {
+}, initTables: () => void) => void, ...repositoryList: {
     new (): SSRepository<any>;
 }[]): void;
 
@@ -321,6 +320,11 @@ declare class NotionClient {
     };
 }
 
+declare function ssCache(spreadSheetApp: GoogleAppsScript.Spreadsheet.SpreadsheetApp, spreadsheetId: string): {
+    get: (rowNumber: number) => any;
+    set: (rowNumber: number, data: any) => void;
+};
+
 /**
  * GasMethod実装に利用する(全メソッド必須)
  */
@@ -377,6 +381,7 @@ type gas_SSEntity = SSEntity;
 type gas_SSRepository<E extends SSEntity> = SSRepository<E>;
 declare const gas_SSRepository: typeof SSRepository;
 declare const gas_initGas: typeof initGas;
+declare const gas_ssCache: typeof ssCache;
 declare const gas_useGasMethod: typeof useGasMethod;
 declare const gas_useSpreadsheetDB: typeof useSpreadsheetDB;
 declare const gas_wrapperUrlFetchApp: typeof wrapperUrlFetchApp;
@@ -390,6 +395,7 @@ declare namespace gas {
     gas_SSEntity as SSEntity,
     gas_SSRepository as SSRepository,
     gas_initGas as initGas,
+    gas_ssCache as ssCache,
     gas_useGasMethod as useGasMethod,
     gas_useSpreadsheetDB as useSpreadsheetDB,
     gas_wrapperUrlFetchApp as wrapperUrlFetchApp,

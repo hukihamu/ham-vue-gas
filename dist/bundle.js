@@ -9,7 +9,7 @@ var vueRouter = require('vue-router');
  */
 class Config {
     constructor(commonConfigKeys, gasConfigKeys, vueConfigKeys) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         this.commonConfigKeys = commonConfigKeys;
         this.gasConfigKeys = gasConfigKeys;
         this.vueConfigKeys = vueConfigKeys;
@@ -19,21 +19,22 @@ class Config {
             // gas
             let config = {};
             config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
+            config['CountUrlFetchApp'] = (_b = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp')) !== null && _b !== void 0 ? _b : '{count: 0, date: null}';
             for (const key of this.commonConfigKeys) {
                 if (key === '')
                     continue;
-                config[key] = (_b = PropertiesService.getScriptProperties().getProperty(key)) !== null && _b !== void 0 ? _b : undefined;
+                config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
             }
             for (const key of this.gasConfigKeys) {
                 if (key === '')
                     continue;
-                config[key] = (_c = PropertiesService.getScriptProperties().getProperty(key)) !== null && _c !== void 0 ? _c : undefined;
+                config[key] = (_d = PropertiesService.getScriptProperties().getProperty(key)) !== null && _d !== void 0 ? _d : undefined;
             }
             this.cache = config;
         }
         else {
             // vue
-            const content = (_d = document.getElementById('vue-config')) === null || _d === void 0 ? void 0 : _d.textContent;
+            const content = (_e = document.getElementById('vue-config')) === null || _e === void 0 ? void 0 : _e.textContent;
             if (content) {
                 this.cache = JSON.parse(content);
             }
@@ -347,7 +348,6 @@ class SSRepository {
     insert(entity) {
         return this.onLock(() => {
             var _a;
-            CacheService.getScriptCache().remove(this.tableName);
             let insertRowNumber = -1;
             const values = this.sheet.getDataRange().getValues();
             for (let i = 1; i < values.length; i++) {
@@ -373,23 +373,15 @@ class SSRepository {
      * 全件取得(フィルターなどはJSで実施)
      */
     getAll() {
-        const cache = CacheService.getScriptCache().get(this.tableName);
         let values;
-        if (cache) {
-            values = JSON.parse(cache);
-        }
-        else {
-            values = this.onLock(() => {
-                const lastRow = this.sheet.getLastRow();
-                if (lastRow <= 1) {
-                    // 0件の場合は取得しない
-                    return [];
-                }
-                const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues();
-                CacheService.getScriptCache().put(this.tableName, JSON.stringify(values), 21600);
-                return values;
-            });
-        }
+        values = this.onLock(() => {
+            const lastRow = this.sheet.getLastRow();
+            if (lastRow <= 1) {
+                // 0件の場合は取得しない
+                return [];
+            }
+            return this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues();
+        });
         const entities = [];
         for (const value of values) {
             if (!value[0])
@@ -405,17 +397,11 @@ class SSRepository {
      * @param row 取得するrow(rowは自動で付与され、不定一意)
      */
     getByRow(row) {
-        const cache = CacheService.getScriptCache().get(this.tableName);
         let stringList = [];
-        if (cache) {
-            stringList = JSON.parse(cache)[row - 2];
-        }
-        else {
-            this.onLock(() => {
-                var _a;
-                stringList = (_a = this.getRowRange(row).getValues()[0]) !== null && _a !== void 0 ? _a : [];
-            });
-        }
+        this.onLock(() => {
+            var _a;
+            stringList = (_a = this.getRowRange(row).getValues()[0]) !== null && _a !== void 0 ? _a : [];
+        });
         return this.toEntity(stringList);
     }
     /**
@@ -424,7 +410,6 @@ class SSRepository {
      */
     update(entity) {
         this.onLock(() => {
-            CacheService.getScriptCache().remove(this.tableName);
             this.getRowRange(entity.row).setValues([this.toStringList(entity)]);
         });
     }
@@ -434,7 +419,6 @@ class SSRepository {
      */
     delete(row) {
         this.onLock(() => {
-            CacheService.getScriptCache().remove(this.tableName);
             const range = this.getRowRange(row);
             range.clear();
             const d = new Array(this.columnOrder.length + 1);
@@ -466,22 +450,7 @@ function useSpreadsheetDB(initGlobal, ...repositoryList) {
             }
         }
     };
-    const clearCacheTable = () => {
-        for (const repository of repositoryList) {
-            try {
-                consoleLog.info('cache clear');
-                const r = new repository();
-                const name = r['tableName'];
-                consoleLog.info('start', name);
-                CacheService.getScriptCache().remove(name);
-                consoleLog.info('success', name);
-            }
-            catch (e) {
-                consoleLog.error('clear cache table error', e);
-            }
-        }
-    };
-    initGlobal(global, initTables, clearCacheTable);
+    initGlobal(global, initTables);
 }
 
 class NotionClient {
@@ -604,6 +573,40 @@ class NotionClient {
     }
 }
 
+function ssCache(spreadSheetApp, spreadsheetId) {
+    const spreadsheet = spreadSheetApp.openById(spreadsheetId);
+    const tempSheet = spreadsheet.getSheetByName('cache');
+    const sheet = tempSheet ? tempSheet : spreadsheet.insertSheet().setName('cache');
+    return {
+        get: (rowNumber) => {
+            const table = sheet.getRange(rowNumber, 1, 1, sheet.getLastColumn()).getValues();
+            let text = '';
+            for (const row of table) {
+                for (const col of row) {
+                    if (col) {
+                        text += col.toString();
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            return JSON.parse(text);
+        },
+        set: (rowNumber, data) => {
+            // ※1セル50000文字制限のため、余裕を持って45000
+            let json = JSON.stringify(data);
+            const chunks = [];
+            while (json.length > 0) {
+                chunks.push(json.substring(0, 45000));
+                json = json.substring(45000);
+            }
+            const range = sheet.getRange(rowNumber, 1, 1, chunks.length);
+            range.setValues([chunks]);
+        }
+    };
+}
+
 /**
  * Gas側entryファイルで実行する関数<br>
  * @param config インスタンス化したhCommon.Configを入力
@@ -676,6 +679,7 @@ var gas = /*#__PURE__*/Object.freeze({
     NotionClient: NotionClient,
     SSRepository: SSRepository,
     initGas: initGas,
+    ssCache: ssCache,
     useGasMethod: useGasMethod,
     useSpreadsheetDB: useSpreadsheetDB,
     wrapperUrlFetchApp: wrapperUrlFetchApp

@@ -1,6 +1,7 @@
 import * as hCommon from '@/common'
 export * from '@/spreadsheet'
 export * from '@/notion'
+export * from '@/ssCache'
 /**
  * GasMethod実装に利用する(全メソッド必須)
  */

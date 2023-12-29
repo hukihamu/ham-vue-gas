@@ -8,14 +8,15 @@
 
 ## メモ
 - 動作保証
-  - vue: 3.2.47
-  - vuetify: 3.2.0
+  - vue: 3.3.8
+  - vuetify: 3.4.2
   - vuex: 4.1.0
 - 各モジュールは以下に格納
   - hVue: クライアント系
   - hGas: サーバ系
   - hCommon: クライアント・サーバ共通系
 - configはgasのスクリプト プロパティに設定
+  - `CountUrlFetchApp`と`debug`は予約済み
 - gas環境のルーティングはハッシュ`#/`がパス
 - SpreadsheetのDB化時、rowは生きている間一意を担保するが、delete後の担保はされない(rowの再利用をするため)
 - `submit`を利用するとエラー
@@ -40,6 +41,13 @@
 - [ ] テスト
 - [ ] サンプル作成
 - [ ] github package
-- notion対応 
+- [x] SS利用のcache
+- notion対応
+  - pages
+    - [x] create 
+    - [x] updateProperty
+  - database
+    - [x] query 
 - ローカルで実行できるようなgasMock
   - [ ] spreadsheetのmock
+  - [ ] urlFetchAppのmock

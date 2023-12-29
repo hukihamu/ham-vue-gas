@@ -10,6 +10,7 @@ export class Config<C extends string, G extends string, V extends string> {
             // gas
             let config: {[key: string]: string | undefined} = { }
             config['debug'] = PropertiesService.getScriptProperties().getProperty('debug') ?? undefined
+            config['CountUrlFetchApp'] = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp') ?? '{count: 0, date: null}'
             for (const key of this.commonConfigKeys) {
                 if (key === '') continue
                 config[key] = PropertiesService.getScriptProperties().getProperty(key as string) ?? undefined
@@ -48,7 +49,7 @@ export class Config<C extends string, G extends string, V extends string> {
     /**
      * gasサイドでのみ利用可能
      */
-    getGasConfig(key: Exclude<(G | C | 'debug'), ''>): string | undefined {
+    getGasConfig(key: Exclude<(G | C | 'debug' | 'CountUrlFetchApp'), ''>): string | undefined {
         const cacheResult = this.cache[key]
         if (cacheResult !== undefined) {
             return cacheResult

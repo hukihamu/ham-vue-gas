@@ -169,7 +169,6 @@ export abstract class SSRepository<E extends SSEntity> {
      */
     insert(entity: E | InitEntity<E>): number {
         return this.onLock(() => {
-            CacheService.getScriptCache().remove(this.tableName)
             let insertRowNumber = -1
             const values = this.sheet.getDataRange().getValues()
             for (let i = 1; i < values.length; i++) {
@@ -195,22 +194,15 @@ export abstract class SSRepository<E extends SSEntity> {
      * 全件取得(フィルターなどはJSで実施)
      */
     getAll(): E[] {
-        const cache = CacheService.getScriptCache().get(this.tableName)
         let values: any[][]
-        if (cache){
-            values = JSON.parse(cache)
-        } else {
-            values = this.onLock(() => {
-                const lastRow = this.sheet.getLastRow()
-                if (lastRow <= 1) {
-                    // 0件の場合は取得しない
-                    return []
-                }
-                const values = this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
-                CacheService.getScriptCache().put(this.tableName, JSON.stringify(values), 21600)
-                return values
-            })
-        }
+        values = this.onLock(() => {
+            const lastRow = this.sheet.getLastRow()
+            if (lastRow <= 1) {
+                // 0件の場合は取得しない
+                return []
+            }
+            return this.sheet.getRange(2, 1, this.sheet.getLastRow() - 1, this.columnOrder.length + 1).getValues()
+        })
         const entities: E[] = []
         for (const value of values) {
             if (!value[0]) break
@@ -225,15 +217,10 @@ export abstract class SSRepository<E extends SSEntity> {
      * @param row 取得するrow(rowは自動で付与され、不定一意)
      */
     getByRow(row: number): E {
-        const cache = CacheService.getScriptCache().get(this.tableName)
-        let stringList = []
-        if (cache){
-            stringList = JSON.parse(cache)[row - 2]
-        } else {
-            this.onLock(() => {
-                stringList = this.getRowRange(row).getValues()[0] ?? []
-            })
-        }
+        let stringList: string[] = []
+        this.onLock(() => {
+            stringList = this.getRowRange(row).getValues()[0] ?? []
+        })
         return this.toEntity(stringList)
     }
 
@@ -243,7 +230,6 @@ export abstract class SSRepository<E extends SSEntity> {
      */
     update(entity: E): void {
         this.onLock(() => {
-            CacheService.getScriptCache().remove(this.tableName)
             this.getRowRange(entity.row).setValues([this.toStringList(entity)])
         })
     }
@@ -254,7 +240,6 @@ export abstract class SSRepository<E extends SSEntity> {
      */
     delete(row: number): void {
         this.onLock(() => {
-            CacheService.getScriptCache().remove(this.tableName)
             const range = this.getRowRange(row)
             range.clear()
             const d = new Array(this.columnOrder.length + 1)
@@ -265,15 +250,14 @@ export abstract class SSRepository<E extends SSEntity> {
 }
 
 type LockType = 'user' | 'script' | 'none'
-declare let global: {initTables: () => void, clearCacheTable: () => void}
+declare let global: {initTables: () => void}
 /**
  * SpreadsheetをDBとして利用する<br>
  * 作成したRepositoryを登録する
  */
 export function useSpreadsheetDB(initGlobal: (
-    global: {initTables: () => void, clearCacheTable: () => void},
-    initTables: ()=>void,
-    clearCacheTable: () => void) => void,
+    global: {initTables: () => void},
+    initTables: ()=>void) => void,
                                  ...repositoryList: { new (): SSRepository<any> }[]) {
     const initTables = () => {
         for (const repository of repositoryList) {
@@ -289,20 +273,5 @@ export function useSpreadsheetDB(initGlobal: (
             }
         }
     }
-    const clearCacheTable = () => {
-        for (const repository of repositoryList) {
-            try {
-                consoleLog.info('cache clear')
-                const r = new repository()
-                const name = r['tableName']
-                consoleLog.info('start', name)
-                CacheService.getScriptCache().remove(name)
-
-                consoleLog.info('success', name)
-            }catch (e) {
-                hCommon.consoleLog.error('clear cache table error', e)
-            }
-        }
-    }
-    initGlobal(global, initTables, clearCacheTable)
+    initGlobal(global, initTables)
 }
