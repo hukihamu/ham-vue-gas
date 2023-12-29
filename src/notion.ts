@@ -31,6 +31,8 @@ export class NotionClient {
     }
     static createToken(): string{
         // TODO GAS Oauth2を利用する
+        //  https://qiita.com/Qnoir/items/98741f6b4266e6960b9d
+        //  https://developers.notion.com/reference/create-a-token
         return ''
     }
     private createHeaders(){

@@ -80,7 +80,7 @@ export function useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod
 export function wrapperUrlFetchApp(urlFetchApp: GoogleAppsScript.URL_Fetch.UrlFetchApp): GoogleAppsScript.URL_Fetch.UrlFetchApp {
     return {
         fetch: (url: string, options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {}) => {
-            const counter = JSON.parse(PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp') ?? '{count: 0, date: null}')
+            const counter = JSON.parse(PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp') ?? '{"count": 0, "date": null}')
             const nowDate = new Date().toLocaleDateString('en-US')
             if (counter.date === nowDate) {
                 counter.count++

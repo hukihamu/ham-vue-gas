@@ -17,7 +17,7 @@ class Config {
             // gas
             let config = {};
             config['debug'] = (_a = PropertiesService.getScriptProperties().getProperty('debug')) !== null && _a !== void 0 ? _a : undefined;
-            config['CountUrlFetchApp'] = (_b = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp')) !== null && _b !== void 0 ? _b : '{count: 0, date: null}';
+            config['CountUrlFetchApp'] = (_b = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp')) !== null && _b !== void 0 ? _b : '{"count": 0, "date": null}';
             for (const key of this.commonConfigKeys) {
                 if (key === '')
                     continue;
@@ -459,6 +459,8 @@ class NotionClient {
     }
     static createToken() {
         // TODO GAS Oauth2を利用する
+        //  https://qiita.com/Qnoir/items/98741f6b4266e6960b9d
+        //  https://developers.notion.com/reference/create-a-token
         return '';
     }
     createHeaders() {
@@ -655,7 +657,7 @@ function wrapperUrlFetchApp(urlFetchApp) {
     return {
         fetch: (url, options = {}) => {
             var _a;
-            const counter = JSON.parse((_a = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp')) !== null && _a !== void 0 ? _a : '{count: 0, date: null}');
+            const counter = JSON.parse((_a = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp')) !== null && _a !== void 0 ? _a : '{"count": 0, "date": null}');
             const nowDate = new Date().toLocaleDateString('en-US');
             if (counter.date === nowDate) {
                 counter.count++;
