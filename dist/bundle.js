@@ -581,7 +581,7 @@ function ssCache(spreadSheetApp, spreadsheetId, expirationInSeconds) {
     const sheet = tempSheet ? tempSheet : spreadsheet.insertSheet().setName('cache');
     return {
         get: (rowNumber) => {
-            const expiration = Number.parseInt(sheet.getRange(rowNumber, 2, 1, 1).getValue(), 10);
+            const expiration = Number.parseInt(sheet.getRange(rowNumber, 1, 1, 1).getValue(), 10);
             if (!expiration) {
                 consoleLog.debug(`row:${rowNumber}`, 'cacheが見つからない');
                 return null;
