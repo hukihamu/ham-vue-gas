@@ -499,16 +499,18 @@ class NotionClient {
             'Content-Type': 'application/json'
         };
     }
-    fetch(url, options) {
+    fetch(path, options) {
         return __awaiter(this, void 0, void 0, function* () {
-            let resp = this._urlFetchApp.fetch(this._apiBaseUrl + url, options);
+            const url = this._apiBaseUrl + path;
+            consoleLog.debug('request', url);
+            let resp = this._urlFetchApp.fetch(url, options);
             if (resp.getResponseCode() === 429) {
                 yield new Promise((resolve) => {
                     setTimeout(() => {
                         resolve();
                     }, 2000);
                 });
-                resp = this._urlFetchApp.fetch(this._apiBaseUrl + url, options);
+                resp = this._urlFetchApp.fetch(url, options);
             }
             if (resp.getResponseCode() === 200) {
                 return JSON.parse(resp.getContentText());

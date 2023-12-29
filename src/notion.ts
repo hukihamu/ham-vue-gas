@@ -1,3 +1,5 @@
+import {consoleLog} from '@/common'
+
 type DatabaseQueryParams = {
     // https://developers.notion.com/reference/post-database-query-filter
     filter?: any
@@ -39,15 +41,17 @@ export class NotionClient {
             'Content-Type': 'application/json'
         }
     }
-    private async fetch(url: string, options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions) {
-        let resp = this._urlFetchApp.fetch(this._apiBaseUrl + url, options)
+    private async fetch(path: string, options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions) {
+        const url = this._apiBaseUrl + path
+        consoleLog.debug('request', url)
+        let resp = this._urlFetchApp.fetch(url, options)
         if (resp.getResponseCode() === 429) {
             await new Promise<void>((resolve) => {
                 setTimeout(() => {
                     resolve()
                 },2000)
             })
-            resp = this._urlFetchApp.fetch(this._apiBaseUrl + url, options)
+            resp = this._urlFetchApp.fetch(url, options)
         }
         if (resp.getResponseCode() === 200) {
             return JSON.parse(resp.getContentText())
