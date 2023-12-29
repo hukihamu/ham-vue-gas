@@ -93,7 +93,7 @@ program.command('build')
         console.error('Exec error: ', error);
       }
     }
-    if (!vo) {
+    if (!go) {
       if (existsVueFile) {
         if (w) {
           const watchPath = path.join(v, '..')
@@ -106,7 +106,7 @@ program.command('build')
         }
       }
     }
-    if (!go) {
+    if (!vo) {
       if (w) {
         const watchPath = path.join(g, '..')
         console.info('watch' ,watchPath)
