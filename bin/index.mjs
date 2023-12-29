@@ -101,6 +101,7 @@ program.command('build')
           fs.watch(watchPath, {
             recursive: true
           }, () => {
+            if (!fs.existsSync(vueConfigPath)) fs.writeFileSync(vueConfigPath, vueWebpackConfig)
             exec(`npx webpack --config ${vueConfigPath}`, execResult)
           })
         } else {
@@ -115,6 +116,7 @@ program.command('build')
         fs.watch(watchPath, {
           recursive: true
         },() => {
+          if (!fs.existsSync(gasConfigPath)) fs.writeFileSync(gasConfigPath, gasWebpackConfig)
           exec(`npx webpack --config ${gasConfigPath}`, execResult)
         })
       } else {

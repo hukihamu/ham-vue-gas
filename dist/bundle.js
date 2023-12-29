@@ -504,7 +504,9 @@ class NotionClient {
     fetch(path, options) {
         return __awaiter(this, void 0, void 0, function* () {
             const url = this._apiBaseUrl + path;
-            consoleLog.debug('request', url, options);
+            consoleLog.debug('url:', url);
+            if (options.payload)
+                consoleLog.debug('body:', options.payload);
             let resp = this._urlFetchApp.fetch(url, options);
             if (resp.getResponseCode() === 429) {
                 yield new Promise((resolve) => {

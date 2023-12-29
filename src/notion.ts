@@ -43,7 +43,8 @@ export class NotionClient {
     }
     private async fetch(path: string, options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions) {
         const url = this._apiBaseUrl + path
-        consoleLog.debug('request', url, options)
+        consoleLog.debug('url:', url)
+        if (options.payload) consoleLog.debug('body:', options.payload)
         let resp = this._urlFetchApp.fetch(url, options)
         if (resp.getResponseCode() === 429) {
             await new Promise<void>((resolve) => {
