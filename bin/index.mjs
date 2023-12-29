@@ -98,7 +98,9 @@ program.command('build')
         if (w) {
           const watchPath = path.join(v, '..')
           console.info('watch' ,watchPath)
-          fs.watch(watchPath, () => {
+          fs.watch(watchPath, {
+            recursive: true
+          }, () => {
             exec(`npx webpack --config ${vueConfigPath}`, execResult)
           })
         } else {
@@ -110,7 +112,9 @@ program.command('build')
       if (w) {
         const watchPath = path.join(g, '..')
         console.info('watch' ,watchPath)
-        fs.watch(watchPath, () => {
+        fs.watch(watchPath, {
+          recursive: true
+        },() => {
           exec(`npx webpack --config ${gasConfigPath}`, execResult)
         })
       } else {
