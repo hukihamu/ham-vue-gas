@@ -360,6 +360,12 @@ type WrapperMethod<C extends BaseGasMethodInterface, K extends keyof C> = (args:
 declare function useGasMethod<C extends BaseGasMethodInterface>(gasMethod: GasMethodsTypeRequired<C>, initGlobal: (global: {
     [K in keyof C]: WrapperMethod<C, K>;
 }, wrapperMethod: <K extends keyof C>(name: K) => WrapperMethod<C, K>) => void): void;
+/**
+ * ScriptPropertiesのCountUrlFetchAppにUrlFetchAppを何回実行したかカウントする
+ * 無料アカウントなら20000回まで
+ * ※fetchのみラッパー済み
+ */
+declare function wrapperUrlFetchApp(urlFetchApp: GoogleAppsScript.URL_Fetch.UrlFetchApp): GoogleAppsScript.URL_Fetch.UrlFetchApp;
 
 type gas_GasMethodType<C extends BaseGasMethodInterface, K extends keyof C> = GasMethodType<C, K>;
 type gas_GasMethodsType<C extends BaseGasMethodInterface> = GasMethodsType<C>;
@@ -373,6 +379,7 @@ declare const gas_SSRepository: typeof SSRepository;
 declare const gas_initGas: typeof initGas;
 declare const gas_useGasMethod: typeof useGasMethod;
 declare const gas_useSpreadsheetDB: typeof useSpreadsheetDB;
+declare const gas_wrapperUrlFetchApp: typeof wrapperUrlFetchApp;
 declare namespace gas {
   export {
     gas_GasMethodType as GasMethodType,
@@ -385,6 +392,7 @@ declare namespace gas {
     gas_initGas as initGas,
     gas_useGasMethod as useGasMethod,
     gas_useSpreadsheetDB as useSpreadsheetDB,
+    gas_wrapperUrlFetchApp as wrapperUrlFetchApp,
   };
 }
 

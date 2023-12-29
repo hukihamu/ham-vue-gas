@@ -645,6 +645,31 @@ function useGasMethod(gasMethod, initGlobal) {
     }
     initGlobal(global, wrapperMethod);
 }
+/**
+ * ScriptPropertiesのCountUrlFetchAppにUrlFetchAppを何回実行したかカウントする
+ * 無料アカウントなら20000回まで
+ * ※fetchのみラッパー済み
+ */
+function wrapperUrlFetchApp(urlFetchApp) {
+    return {
+        fetch: (url, options = {}) => {
+            var _a;
+            const counter = JSON.parse((_a = PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp')) !== null && _a !== void 0 ? _a : '{count: 0, date: null}');
+            const nowDate = new Date().toLocaleDateString('en-US');
+            if (counter.date === nowDate) {
+                counter.count++;
+            }
+            else {
+                counter.count = 1;
+                counter.date = nowDate;
+            }
+            PropertiesService.getScriptProperties().setProperty('CountUrlFetchApp', JSON.stringify(counter));
+            return urlFetchApp.fetch(url, options);
+        },
+        fetchAll: urlFetchApp.fetchAll,
+        getRequest: urlFetchApp.getRequest
+    };
+}
 
 var gas = /*#__PURE__*/Object.freeze({
     __proto__: null,
@@ -652,7 +677,8 @@ var gas = /*#__PURE__*/Object.freeze({
     SSRepository: SSRepository,
     initGas: initGas,
     useGasMethod: useGasMethod,
-    useSpreadsheetDB: useSpreadsheetDB
+    useSpreadsheetDB: useSpreadsheetDB,
+    wrapperUrlFetchApp: wrapperUrlFetchApp
 });
 
 exports.hCommon = common;

@@ -70,3 +70,27 @@ export function useGasMethod<C extends hCommon.BaseGasMethodInterface>(gasMethod
 
     initGlobal(global as any, wrapperMethod)
 }
+
+/**
+ * ScriptPropertiesのCountUrlFetchAppにUrlFetchAppを何回実行したかカウントする
+ * 無料アカウントなら20000回まで
+ * ※fetchのみラッパー済み
+ */
+export function wrapperUrlFetchApp(urlFetchApp: GoogleAppsScript.URL_Fetch.UrlFetchApp): GoogleAppsScript.URL_Fetch.UrlFetchApp {
+    return {
+        fetch: (url: string, options: GoogleAppsScript.URL_Fetch.URLFetchRequestOptions = {}) => {
+            const counter = JSON.parse(PropertiesService.getScriptProperties().getProperty('CountUrlFetchApp') ?? '{count: 0, date: null}')
+            const nowDate = new Date().toLocaleDateString('en-US')
+            if (counter.date === nowDate) {
+                counter.count++
+            } else {
+                counter.count = 1
+                counter.date = nowDate
+            }
+            PropertiesService.getScriptProperties().setProperty('CountUrlFetchApp', JSON.stringify(counter))
+            return urlFetchApp.fetch(url, options)
+        },
+        fetchAll: urlFetchApp.fetchAll,
+        getRequest: urlFetchApp.getRequest
+    }
+}
