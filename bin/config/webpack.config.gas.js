@@ -30,7 +30,6 @@ module.exports = {
     extensions: ['.ts'],
   },
   plugins: [new GasWebpackPlugin()],
-  watch: '${w}'
 }
 
 ${s}

@@ -8,7 +8,7 @@ const HtmlInlineCssWebpackPlugin = require('html-inline-css-webpack-plugin').def
 const {CleanWebpackPlugin} = require('clean-webpack-plugin')
 const {VuetifyPlugin} = require('webpack-plugin-vuetify')
 module.exports = {
-  mode: '${d}', entry: {vue: '${e}'}, output: {filename: 'vue.js', path: '${o}'}, module: {
+  mode: '${d}', entry: {vue: '${v}'}, output: {filename: 'vue.js', path: '${o}'}, module: {
     rules: [{test: /\.ts$/, loader: 'ts-loader', options: {appendTsSuffixTo: [/\.vue$/]}},
       {test: /\.vue$/, loader: 'vue-loader'}, {test: /\.css$/, use: ['vue-style-loader', 'css-loader']}]
   }, resolve: {
@@ -28,6 +28,5 @@ module.exports = {
     cleanOnceBeforeBuildPatterns: ['!gas.js'],
     cleanAfterEveryBuildPatterns: ['vue.js.LICENSE.txt', 'gas.js.LICENSE.txt']
   })],
-  watch: '${w}'
 }
 ${s}

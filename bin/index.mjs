@@ -44,7 +44,7 @@ program.command('build')
     const h = path.join(rootPath, this.opts().html).replaceAll('\\', '\\\\')
     const t = path.join(rootPath, this.opts().tsconfig).replaceAll('\\', '\\\\')
     const g = path.join(rootPath, this.opts().gas).replaceAll('\\', '\\\\')
-    const e = path.join(rootPath, this.opts().vue).replaceAll('\\', '\\\\')
+    const v = path.join(rootPath, this.opts().vue).replaceAll('\\', '\\\\')
     const o = path.join(rootPath, this.opts().output).replaceAll('\\', '\\\\')
     const w = this.opts().watch
     const s = this.opts().sourcemap
@@ -57,7 +57,7 @@ program.command('build')
     if (!fs.existsSync(t)) throw `nou found tsconfig.json. path:${t}`
     if (!fs.existsSync(g)) throw `nou found gas main file. path:${g}`
     // vueはなくても動作させる
-    const existsVueFile = fs.existsSync(e)
+    const existsVueFile = fs.existsSync(v)
 
     // 毎回ファイルを作成してwebpackに読み込ませてみる
     const gasWebpackConfig = fs.readFileSync(path.join(__dirname, 'config/webpack.config.gas.js'), {encoding: 'utf8'})
@@ -66,16 +66,14 @@ program.command('build')
       .replace('${t}', t)
       .replace('${s}', s ? `module.exports.devtool = 'inline-source-map'` : '')
       .replace('${d}', d ? 'development' : 'production')
-      .replace("'${w}'", w ? 'true' : 'false')
     const vueWebpackConfig = fs.readFileSync(path.join(__dirname, 'config/webpack.config.vue.js'), {encoding: 'utf8'})
-      .replace('${e}', e)
+      .replace('${v}', v)
       .replace('${o}', o)
       .replace('${t}', t)
       .replace('${h}', h.replaceAll('\\', '\\\\'))
       .replace('${a}', a.replaceAll('\\', '\\\\'))
       .replace('${s}', s ? `module.exports.devtool = 'inline-source-map'` : '')
       .replace('${d}', d ? 'development' : 'production')
-      .replace("'${w}'", w ? 'true' : 'false')
     // ファイル作成
     const tempDirPath = path.join(__dirname, 'temp')
     if (!fs.existsSync(tempDirPath)) fs.mkdirSync(tempDirPath)
@@ -96,10 +94,28 @@ program.command('build')
       }
     }
     if (!vo) {
-      if (existsVueFile) exec(`npx webpack --config ${vueConfigPath}`, execResult)
+      if (existsVueFile) {
+        if (w) {
+          const watchPath = path.join(v, '..')
+          console.info('watch' ,watchPath)
+          fs.watch(watchPath, () => {
+            exec(`npx webpack --config ${vueConfigPath}`, execResult)
+          })
+        } else {
+          exec(`npx webpack --config ${vueConfigPath}`, execResult)
+        }
+      }
     }
     if (!go) {
-      exec(`npx webpack --config ${gasConfigPath}`, execResult)
+      if (w) {
+        const watchPath = path.join(g, '..')
+        console.info('watch' ,watchPath)
+        fs.watch(watchPath, () => {
+          exec(`npx webpack --config ${gasConfigPath}`, execResult)
+        })
+      } else {
+        exec(`npx webpack --config ${gasConfigPath}`, execResult)
+      }
     }
   })
 
