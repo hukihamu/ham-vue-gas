@@ -8,7 +8,7 @@ export function ssCache(spreadSheetApp: GoogleAppsScript.Spreadsheet.Spreadsheet
     return {
         get: (rowNumber: number) => {
             const expiration = Number.parseInt(sheet.getRange(rowNumber, 2, 1, 1).getValue(), 10)
-            if (expirationInSeconds && (Date.now() - expiration) /1000 > expirationInSeconds) {
+            if (!expiration || expirationInSeconds && (Date.now() - expiration) /1000 > expirationInSeconds) {
                 return null
             }
             const table = sheet.getRange(rowNumber, 2, 1, sheet.getLastColumn()).getValues()
