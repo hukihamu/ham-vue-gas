@@ -259,7 +259,6 @@ declare function useSpreadsheetDB(initGlobal: (global: {
 type DatabaseQueryParams = {
     filter?: any;
     sorts?: any[];
-    start_cursor?: string;
     page_size?: number;
 };
 type PageCreateParams = {
@@ -303,13 +302,6 @@ declare class NotionClient {
     };
     get databases(): {
         create(): void;
-        /**
-         * 特定のデータベースに対してクエリを実行します。
-         *
-         * @param {string} databaseId - The ID of the database to query.
-         * @param {DatabaseQueryParams} body - The parameters for the query.
-         * @returns {Promise<any>} - The response from the query.
-         */
         query: (databaseId: string, body?: DatabaseQueryParams) => Promise<any>;
         get(): void;
         update(): void;

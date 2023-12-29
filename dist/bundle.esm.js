@@ -533,7 +533,8 @@ class NotionClient {
                 return this.fetch('/pages', {
                     headers: this.createHeaders(),
                     method: 'post',
-                    payload: JSON.stringify(body)
+                    payload: JSON.stringify(body),
+                    muteHttpExceptions: true,
                 });
             }),
             get() { },
@@ -542,7 +543,8 @@ class NotionClient {
                 return this.fetch(`/pages/${pageId}`, {
                     headers: this.createHeaders(),
                     method: 'patch',
-                    payload: JSON.stringify(body)
+                    payload: JSON.stringify(body),
+                    muteHttpExceptions: true,
                 });
             }),
             archive() { },
@@ -552,19 +554,25 @@ class NotionClient {
         return {
             create() {
             },
-            /**
-             * 特定のデータベースに対してクエリを実行します。
-             *
-             * @param {string} databaseId - The ID of the database to query.
-             * @param {DatabaseQueryParams} body - The parameters for the query.
-             * @returns {Promise<any>} - The response from the query.
-             */
             query: (databaseId, body = {}) => __awaiter(this, void 0, void 0, function* () {
-                return this.fetch(`/databases/${databaseId}/query`, {
-                    headers: this.createHeaders(),
-                    method: 'post',
-                    payload: JSON.stringify(body)
-                });
+                let cursor = undefined;
+                let result = [];
+                while (true) {
+                    const payload = Object.assign(body, { start_cursor: cursor });
+                    const resp = yield this.fetch(`/databases/${databaseId}/query`, {
+                        headers: this.createHeaders(),
+                        method: 'post',
+                        payload: JSON.stringify(payload),
+                        muteHttpExceptions: true,
+                    });
+                    result = result.concat(resp.results);
+                    if (resp.has_more) {
+                        cursor = resp.next_cursor;
+                    }
+                    else {
+                        return result;
+                    }
+                }
             }),
             get() {
             },

@@ -5,7 +5,6 @@ type DatabaseQueryParams = {
     filter?: any
     // https://developers.notion.com/reference/post-database-query-sort
     sorts?: any[]
-    start_cursor?: string
     page_size?: number
 }
 type PageCreateParams = {
@@ -74,7 +73,8 @@ export class NotionClient {
                 return this.fetch('/pages', {
                     headers: this.createHeaders(),
                     method: 'post',
-                    payload: JSON.stringify(body)
+                    payload: JSON.stringify(body),
+                    muteHttpExceptions: true,
                 })
             },
             get(){},
@@ -83,7 +83,8 @@ export class NotionClient {
                 return this.fetch(`/pages/${pageId}`, {
                     headers: this.createHeaders(),
                     method: 'patch',
-                    payload: JSON.stringify(body)
+                    payload: JSON.stringify(body),
+                    muteHttpExceptions: true,
                 })
             },
             archive(){},
@@ -94,19 +95,24 @@ export class NotionClient {
         return {
             create() {
             },
-            /**
-             * 特定のデータベースに対してクエリを実行します。
-             *
-             * @param {string} databaseId - The ID of the database to query.
-             * @param {DatabaseQueryParams} body - The parameters for the query.
-             * @returns {Promise<any>} - The response from the query.
-             */
             query: async (databaseId: string, body: DatabaseQueryParams = {}): Promise<any> => {
-                return this.fetch(`/databases/${databaseId}/query`, {
-                    headers: this.createHeaders(),
-                    method: 'post',
-                    payload: JSON.stringify(body)
-                })
+                let cursor: string | undefined = undefined
+                let result: any[] = []
+                while (true) {
+                    const payload = Object.assign(body, {start_cursor: cursor})
+                    const resp = await this.fetch(`/databases/${databaseId}/query`, {
+                        headers: this.createHeaders(),
+                        method: 'post',
+                        payload: JSON.stringify(payload),
+                        muteHttpExceptions: true,
+                    })
+                    result = result.concat(resp.results)
+                    if (resp.has_more) {
+                        cursor = resp.next_cursor
+                    } else {
+                        return result
+                    }
+                }
             },
             get() {
             },
