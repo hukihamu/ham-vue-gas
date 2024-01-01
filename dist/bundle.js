@@ -510,8 +510,20 @@ class NotionClient {
                     muteHttpExceptions: true,
                 });
             }),
-            get() { },
-            getProperty() { },
+            get: (pageId) => __awaiter(this, void 0, void 0, function* () {
+                return this.fetch(`/pages/${pageId}`, {
+                    headers: this.createHeaders(),
+                    method: 'get',
+                    muteHttpExceptions: true,
+                });
+            }),
+            getProperty: (pageId, propertyId) => __awaiter(this, void 0, void 0, function* () {
+                return this.fetch(`/pages/${pageId}properties/${propertyId}`, {
+                    headers: this.createHeaders(),
+                    method: 'get',
+                    muteHttpExceptions: true,
+                });
+            }),
             updateProperty: (pageId, body) => __awaiter(this, void 0, void 0, function* () {
                 return this.fetch(`/pages/${pageId}`, {
                     headers: this.createHeaders(),

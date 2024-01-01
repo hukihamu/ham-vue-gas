@@ -294,8 +294,8 @@ declare class NotionClient {
     };
     get pages(): {
         create: (body: PageCreateParams) => Promise<any>;
-        get(): void;
-        getProperty(): void;
+        get: (pageId: string) => Promise<any>;
+        getProperty: (pageId: string, propertyId: string) => Promise<any>;
         updateProperty: (pageId: string, body: PageUpdatePropertiesParams) => Promise<any>;
         archive(): void;
     };

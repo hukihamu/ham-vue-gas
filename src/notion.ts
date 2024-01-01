@@ -79,8 +79,20 @@ export class NotionClient {
                     muteHttpExceptions: true,
                 })
             },
-            get(){},
-            getProperty(){},
+            get: async (pageId: string) => {
+                return this.fetch(`/pages/${pageId}`, {
+                    headers: this.createHeaders(),
+                    method: 'get',
+                    muteHttpExceptions: true,
+                })
+            },
+            getProperty: async (pageId: string, propertyId: string) => {
+                return this.fetch(`/pages/${pageId}properties/${propertyId}`, {
+                    headers: this.createHeaders(),
+                    method: 'get',
+                    muteHttpExceptions: true,
+                })
+            },
             updateProperty: async (pageId: string, body: PageUpdatePropertiesParams) => {
                 return this.fetch(`/pages/${pageId}`, {
                     headers: this.createHeaders(),
