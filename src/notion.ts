@@ -87,7 +87,7 @@ export class NotionClient {
                 })
             },
             getProperty: async (pageId: string, propertyId: string) => {
-                return this.fetch(`/pages/${pageId}properties/${propertyId}`, {
+                return this.fetch(`/pages/${pageId}/properties/${propertyId}`, {
                     headers: this.createHeaders(),
                     method: 'get',
                     muteHttpExceptions: true,

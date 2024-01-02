@@ -516,7 +516,7 @@ class NotionClient {
                 });
             }),
             getProperty: (pageId, propertyId) => __awaiter(this, void 0, void 0, function* () {
-                return this.fetch(`/pages/${pageId}properties/${propertyId}`, {
+                return this.fetch(`/pages/${pageId}/properties/${propertyId}`, {
                     headers: this.createHeaders(),
                     method: 'get',
                     muteHttpExceptions: true,
